@@ -48,11 +48,12 @@
   <div class="reading col" id="reading" aria-live="polite"></div>
 
   <div class="warn col" id="howdeck"><span class="k">How the deck works</span>
-    <p>The deck is a real, ordered deck of all 78 cards, each lying upright or reversed. <b>Shuffle</b> gathers any
-    cards on the table back in, then puts the whole deck into a new random order and turns each card upright or
-    reversed at random, using your browser&rsquo;s cryptographic random number generator. That order then
+    <p>The deck is a real, ordered deck of all 78 cards, each lying upright or reversed. <b>Shuffle</b> puts the
+    cards still in the deck into a new random order and turns each one upright or reversed at random, using your
+    browser&rsquo;s cryptographic random number generator. Cards you have already pulled stay where they are in
+    the spread, out of the deck, so you can shuffle between pulls. That order then
     <b>stays exactly as it is until the next shuffle</b>, even if you close the page and come back. <b>Pull</b>
-    deals the top card. <b>New reading</b> puts the three cards back under the deck without shuffling, so if you
+    deals the top card. <b>New reading</b> puts the pulled cards back under the deck without shuffling, so if you
     choose not to shuffle, your next reading comes off the same deck in the same order.</p>
     <p style="margin-top:8px">Every order of the deck is equally likely, and nothing the site knows about you
     changes the odds or the wording.</p></div>
@@ -155,8 +156,7 @@ function shuffle(){
   if (busy || locked()) return;
   busy = true;
   st = D.shuffle(st);                                  // the new order is fixed here, the moment you shuffle
-  [0, 1, 2].forEach(k => setSlot(k, null)); renderReading();
-  renderPile(); renderStatus();
+  renderPile(); renderStatus();                        // cards already pulled stay in their slots
   $('pile').classList.add('shuffling');
   setTimeout(() => { $('pile').classList.remove('shuffling'); busy = false; renderStatus(); }, reduced ? 0 : 1500);
 }
