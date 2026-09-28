@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moon tracker — tarot platform demo</title>
+<meta name="description" content="Live moon phase, sign, illumination and a month calendar computed from real astronomy.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Moon tracker — tarot platform demo">
+<meta property="og:description" content="Live moon phase, sign, illumination and a month calendar computed from real astronomy.">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/og.png">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tool &middot; the one people bookmark</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">The moon,<br><span class="prism">tracked</span></h1>
+  <div class="card pad" style="margin-top:24px;display:flex;gap:26px;align-items:center;flex-wrap:wrap">
+    <div id="bigmoon"></div>
+    <div style="flex:1;min-width:230px">
+      <div class="big" id="pname" style="font-size:34px"></div>
+      <p class="note" id="psub" style="font-size:13.5px;margin-top:6px"></p>
+      <div class="bar"><i id="pbar"></i></div>
+    </div>
+    <div style="min-width:190px">
+      <div class="kv"><span>Next new moon</span><span id="nnew"></span></div>
+      <div class="kv"><span>Next full moon</span><span id="nfull"></span></div>
+      <div class="kv"><span>Sun in</span><span id="ssign"></span></div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:22px;align-items:start">
+    <div class="card pad">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+        <h2 style="font-size:19px" id="calmonth"></h2>
+        <div style="display:flex;gap:6px">
+          <button class="btn" id="prevm" style="padding:6px 12px;font-size:12px">&larr;</button>
+          <button class="btn" id="nextm" style="padding:6px 12px;font-size:12px">&rarr;</button>
+        </div>
+      </div>
+      <div class="cal" id="cal"></div>
+    </div>
+    <div>
+      <div class="card pad">
+        <h2 style="font-size:19px">What this phase is for</h2>
+        <div class="ph" style="margin-top:12px"><span class="k">Placeholder &mdash; your writing goes here</span>
+          <p id="phasework"></p></div>
+        <p class="note" style="margin-top:12px">8 phases &times; 12 signs is 96 short pieces, plus one longer
+          write-up per phase. Much of it is what you already say on camera.</p>
+      </div>
+      <div class="adslot" style="margin-top:16px">Advertisement<b>Free tier only</b></div>
+      <div class="warn"><span class="k">Method</span><p>Phase angle is the Moon&rsquo;s ecliptic longitude minus
+        the Sun&rsquo;s, from a truncated Meeus series accurate to about 0.3&deg;. Ample for phase, sign and
+        calendar-day boundaries. A production build swaps this for a full ephemeris and adds void-of-course
+        windows, which need aspect calculation this demo does not carry.</p></div>
+    </div>
+  </div>
+</div>
+<script src="js/astro.js"></script><script src="js/cards.js"></script>
+<script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('moon.html');
+const now = new Date(), jd = TD.toJD(now), ang = TD.phaseAngle(jd);
+document.getElementById('bigmoon').innerHTML = TD.moonSVG(ang, 132);
+document.getElementById('pname').textContent = TD.phaseName(jd) + ' in ' + TD.moonSign(jd);
+document.getElementById('psub').textContent =
+  (TD.illumination(jd)*100).toFixed(0) + '% illuminated · ' + ang.toFixed(1) + '° from the sun';
+document.getElementById('pbar').style.width = (TD.illumination(jd)*100).toFixed(0) + '%';
+const fd = j => TD.fromJD(j).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+document.getElementById('nnew').textContent  = fd(TD.nextNewMoon(jd));
+document.getElementById('nfull').textContent = fd(TD.nextFullMoon(jd));
+document.getElementById('ssign').textContent = TD.sunSign(jd);
+const WORK = {
+ 'New Moon':'Set it down in writing. New moon work is for the thing you have not told anyone yet.',
+ 'Waxing Crescent':'First small action. Not the plan, the first actual move.',
+ 'First Quarter':'The friction shows up here. Push anyway.',
+ 'Waxing Gibbous':'Refine. This is the editing phase, not the starting one.',
+ 'Full Moon':'See it plainly. Full moons are for looking, and for release work.',
+ 'Waning Gibbous':'Share what you learned. Gratitude work sits here.',
+ 'Last Quarter':'Cut something. Cord cutting, clearing, the honest audit.',
+ 'Waning Crescent':'Rest. Nothing is owed. Protection and quiet.'};
+document.getElementById('phasework').textContent =
+  'Your writing for ' + TD.phaseName(jd).toLowerCase() + ' in ' + TD.moonSign(jd) + ' would sit here. Sample: '
+  + WORK[TD.phaseName(jd)];
+let off = 0;
+function cal(){
+  const base = new Date(now.getFullYear(), now.getMonth() + off, 1);
+  document.getElementById('calmonth').textContent =
+    base.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const days = new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+  const lead = base.getDay();
+  let h = ['S','M','T','W','T','F','S'].map(d=>`<div class="dow">${d}</div>`).join('');
+  for (let i=0;i<lead;i++) h += '<div class="day blank"></div>';
+  for (let d=1;d<=days;d++){
+    const dt = new Date(base.getFullYear(), base.getMonth(), d, 12);
+    const j = TD.toJD(dt), a = TD.phaseAngle(j);
+    const today = dt.toDateString() === now.toDateString();
+    h += `<div class="day${today?' today':''}">${TD.moonSVG(a,24)}<span class="n">${d}</span></div>`;
+  }
+  document.getElementById('cal').innerHTML = h;
+}
+document.getElementById('prevm').onclick = () => { off--; cal(); };
+document.getElementById('nextm').onclick = () => { off++; cal(); };
+cal();
+</script></body></html>

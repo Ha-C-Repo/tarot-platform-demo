@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compatibility — tarot platform demo</title>
+<meta name="description" content="Two birth dates in, an honest breakdown out, with the score weighting published.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Compatibility — tarot platform demo">
+<meta property="og:description" content="Two birth dates in, an honest breakdown out, with the score weighting published.">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/og.png">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tool &middot; the shareable one</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Compatibility</h1>
+  <p class="lede">Two birth dates. No birth time needed, so nobody has to dig out a certificate.</p>
+  <div class="grid g2" style="margin-top:24px;align-items:start">
+    <div class="card pad">
+      <div class="grid g2">
+        <div><label class="f" for="p1n">Name</label><input id="p1n" value="You"></div>
+        <div><label class="f" for="p1d">Birth date</label><input id="p1d" type="date" value="1992-07-11"></div>
+      </div>
+      <div class="grid g2" style="margin-top:14px">
+        <div><label class="f" for="p2n">Name</label><input id="p2n" value="Them"></div>
+        <div><label class="f" for="p2d">Birth date</label><input id="p2d" type="date" value="1989-11-03"></div>
+      </div>
+      <button class="btn primary wide" id="cgo" style="margin-top:16px">Compare</button>
+      <div class="warn"><span class="k">The score is a heuristic, and here is the weighting</span>
+        <p>Sun-sign element relationship 40, Chinese animal triad 25, numerology life-path resonance 20,
+        modality mix 15. Summed and normalised to 100. It is a rule of thumb with the rules published,
+        not a measurement. A full synastry grid needs both birth times and a real ephemeris &mdash; that is
+        the production version, not this one.</p></div>
+    </div>
+    <div id="cmout"></div>
+  </div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/astro.js"></script><script src="js/cards.js"></script>
+<script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('compatibility.html');
+const TRIAD = {Rat:0,Dragon:0,Monkey:0, Ox:1,Snake:1,Rooster:1, Tiger:2,Horse:2,Dog:2, Rabbit:3,Goat:3,Pig:3};
+function person(name, iso){
+  const jd = TD.toJD(new Date(iso + 'T12:00:00Z'));
+  const si = TD.signIndex(TD.sunLongitude(jd));
+  return { name, iso, sign: TD.SIGNS[si], glyph: TD.SIGN_GLYPH[si],
+           element: TD.elementOf(si), modality: TD.modalityOf(si),
+           animal: TD.chinese(iso).popular.animal,
+           life: TD.numerology(name, iso).lifePath };
+}
+function go(){
+  const a = person(document.getElementById('p1n').value, document.getElementById('p1d').value);
+  const b = person(document.getElementById('p2n').value, document.getElementById('p2d').value);
+  const sameEl = a.element === b.element;
+  const compatEl = (a.element==='Fire'&&b.element==='Air')||(a.element==='Air'&&b.element==='Fire')||
+                   (a.element==='Earth'&&b.element==='Water')||(a.element==='Water'&&b.element==='Earth');
+  const elScore = sameEl ? 34 : compatEl ? 40 : 16;
+  const anScore = TRIAD[a.animal] === TRIAD[b.animal] ? 25 : 11;
+  const diff = Math.abs(a.life - b.life);
+  const lifeScore = diff === 0 ? 20 : diff <= 2 ? 15 : diff <= 4 ? 10 : 6;
+  const modScore = a.modality === b.modality ? 8 : 15;
+  const total = elScore + anScore + lifeScore + modScore;
+  const card = p => `<div class="res"><h3>${p.name}</h3>
+      <div class="big" style="font-size:30px">${p.glyph} ${p.sign}</div>
+      <div class="kv"><span>Element / modality</span><span>${p.element} · ${p.modality}</span></div>
+      <div class="kv"><span>Chinese animal</span><span>${p.animal}</span></div>
+      <div class="kv"><span>Life path</span><span>${p.life}</span></div></div>`;
+  document.getElementById('cmout').innerHTML = `
+    <div class="res" style="text-align:center">
+      <h3>Overall</h3><div class="big prism" style="font-size:60px">${total}</div>
+      <div class="bar" style="max-width:280px;margin:10px auto 0"><i style="width:${total}%"></i></div>
+      <p class="note" style="margin-top:10px">Heuristic score. Weighting published on the left.</p></div>
+    ${card(a)}${card(b)}
+    <div class="res">
+      <div class="kv"><span>Element relationship (max 40)</span><span>${elScore}</span></div>
+      <div class="kv"><span>Animal triad (max 25)</span><span>${anScore}</span></div>
+      <div class="kv"><span>Life path resonance (max 20)</span><span>${lifeScore}</span></div>
+      <div class="kv"><span>Modality mix (max 15)</span><span>${modScore}</span></div>
+    </div>
+    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
+      <p>A short line for each pairing, around 300 of them. Short lines, not paragraphs &mdash; this is the
+      corpus a reader can finish in a couple of sittings.</p></div>`;
+}
+document.getElementById('cgo').onclick = go;
+['p1n','p1d','p2n','p2d'].forEach(id=>document.getElementById(id).addEventListener('change',go));
+go();
+</script></body></html>
