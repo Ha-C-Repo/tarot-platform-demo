@@ -16,7 +16,7 @@ const STEPS = [
   { page: 'index.html', sel: '#reels', title: 'The reader’s own video goes here',
     body: 'Reels, live readings and longer videos are designed empty slots in this demo. On a live site they carry the reader’s own footage from TikTok, Facebook or Vimeo.' },
   { page: 'pull.html', sel: '#deckzone', title: 'A real deck, shuffled for real',
-    body: 'Shuffle puts all 78 cards in a new random order, each upright or reversed. That order stays until the next shuffle, so choosing not to shuffle is a real choice. Pull deals from the top.' },
+    body: 'Shuffle puts the cards in the deck in a new random order, each upright or reversed. That order stays until the next shuffle, so choosing not to shuffle is a real choice. Pull deals from the top, and pulled cards keep their place if you shuffle again.' },
   { page: 'pull.html', sel: '#howdeck', title: 'Meanings for both orientations',
     body: 'Every card carries its traditional upright and reversed meaning, from Waite’s 1911 book, and the spread is read as a whole. On a live site the reader’s own writing replaces it.' },
   { page: 'moon.html', sel: '#calcard', title: 'The page people bookmark',

@@ -3,9 +3,9 @@
 
    How it behaves, and it is stated on the page:
    - The deck has a real order, all 78 cards, each upright or reversed.
-   - Shuffle gathers any cards on the table back in, then puts the whole deck in a new random
-     order (uniform Fisher-Yates, crypto.getRandomValues) and turns each card upright or
-     reversed at random, 50/50, independently.
+   - Shuffle puts the cards still in the deck in a new random order (uniform Fisher-Yates,
+     crypto.getRandomValues) and turns each of them upright or reversed at random, 50/50,
+     independently. Cards already pulled stay on the table, in their positions, out of the deck.
    - That order then STAYS until the next shuffle, including across visits (it is kept in this
      browser's localStorage). Pull takes the top card. Not shuffling means the next reading
      comes off the same deck, in the same order.
@@ -50,9 +50,10 @@ function state(){
   if (!s) { s = { deck: shuffleCards(fresh()), table: [], shuffledAt: Date.now(), shuffles: 1, readingDay: null }; write(s); }
   return s;
 }
+/* Mixes only the cards still in the deck. Cards on the table keep their place in the spread. */
 function shuffle(s){
-  s.deck = shuffleCards(s.deck.concat(s.table));
-  s.table = []; s.shuffledAt = Date.now(); s.shuffles = (s.shuffles || 0) + 1;
+  s.deck = shuffleCards(s.deck);
+  s.shuffledAt = Date.now(); s.shuffles = (s.shuffles || 0) + 1;
   write(s); return s;
 }
 function pull(s){
