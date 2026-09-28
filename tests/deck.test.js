@@ -51,6 +51,24 @@ module.exports = [
     D.shuffle(s3);
     assert(JSON.stringify(D.state().deck) !== order, 'shuffle changes the order');
   }],
+  ['Shuffling mid-reading mixes only the deck; pulled cards keep their place in the spread', () => {
+    Object.keys(store).forEach(k => delete store[k]);
+    const s = D.state();
+    const first = D.pull(s);
+    const onTable = JSON.stringify(s.table), rest = s.deck.map(c => c.i).sort((a, b) => a - b).join();
+    D.shuffle(s);
+    const s2 = D.state();                                    // read back from storage
+    assert(JSON.stringify(s2.table) === onTable, 'the pulled card must stay on the table, orientation included');
+    assert(s2.deck.length === 77, 'the deck keeps the other 77 cards');
+    assert(!s2.deck.some(c => c.i === first.i), 'the pulled card must not go back into the deck');
+    assert(s2.deck.map(c => c.i).sort((a, b) => a - b).join() === rest, 'the same 77 cards, in a new order');
+    const top = s2.deck[0], second = D.pull(s2);
+    assert(second === top && s2.table.length === 2 && JSON.stringify(s2.table.slice(0, 1)) === onTable,
+      'the next pull comes off the newly shuffled deck into the next position');
+    D.shuffle(s2);
+    const s3 = D.state();
+    assert(s3.table.length === 2 && s3.deck.length === 76, 'a second shuffle mid-reading also leaves the table alone');
+  }],
   ['Spread analysis: Waite recurrence and the suit/majors conventions', () => {
     const e = (id, reversed) => ({ card: TD.DECK.find(c => c.id === id), reversed });
     const r1 = D.analyse([e('wands-14', false), e('cups-14', false), e('swords-03', false)]);
