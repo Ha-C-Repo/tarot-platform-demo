@@ -1,18 +1,21 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Numerology — tarot platform demo</title>
 <meta name="description" content="Life path, expression, soul urge, personality and personal year. Pythagorean, method stated.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/numerology.html">
 <meta property="og:title" content="Numerology — tarot platform demo">
 <meta property="og:description" content="Life path, expression, soul urge, personality and personal year. Pythagorean, method stated.">
-<meta property="og:image" content="assets/og.png">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="assets/og.png">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
   <div class="eyebrow">Free tool</div>
@@ -27,7 +30,10 @@
         Life Path by <b>reduce-components-first</b>: month, day and year each reduced, then summed, then reduced.
         Master numbers 11, 22 and 33 are preserved at every stage rather than reduced through.
         The competing whole-date method disagrees on some dates; this one is the choice and it is stated
-        rather than hidden.</p></div>
+        rather than hidden.</p>
+        <p style="margin-top:8px"><b>Why no birth time or place:</b> Pythagorean numerology works from the letters
+        of the name and the calendar date only. A time or a place would not change any number on this page, so
+        it does not ask for one. The chart tools that do need them, compatibility and Chinese Four Pillars, ask.</p></div>
     </div>
     <div id="nout"></div>
   </div>
@@ -35,7 +41,7 @@
 </div>
 <script src="js/astro.js"></script><script src="js/cards.js"></script>
 <script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('numerology.html');
 function go(){

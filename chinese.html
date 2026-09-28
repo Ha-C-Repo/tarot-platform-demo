@@ -1,69 +1,130 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Chinese astrology — tarot platform demo</title>
 <meta name="description" content="Animal and element from the real lunisolar calendar, showing both the Lunar New Year and Lichun boundaries.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/chinese.html">
 <meta property="og:title" content="Chinese astrology — tarot platform demo">
 <meta property="og:description" content="Animal and element from the real lunisolar calendar, showing both the Lunar New Year and Lichun boundaries.">
-<meta property="og:image" content="assets/og.png">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="assets/og.png">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
   <div class="eyebrow">Free tool</div>
   <h1 style="font-size:clamp(34px,6vw,52px)">Chinese<br><span class="prism">astrology</span></h1>
-  <p class="lede">Computed from the real lunisolar calendar, so it is right for the six or seven weeks
-    each year when a lookup table is wrong.</p>
+  <p class="lede">Computed from the real lunisolar calendar and the exact solar terms, so it is right for the six
+    or seven weeks each year when a lookup table is wrong, and right to the hour for the Four Pillars.</p>
   <div class="grid g2" style="margin-top:26px;align-items:start">
     <div class="card pad">
       <div class="row"><label class="f" for="cd">Birth date</label><input id="cd" type="date" value="1990-01-30"></div>
+      <div class="row2" style="margin-top:13px">
+        <div><label class="f" for="ct">Birth time</label><input id="ct" type="time" value="08:30"></div>
+        <div><label class="f" for="cp">Birth place</label><input id="cp" placeholder="Start typing a city"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="cu"> I don&rsquo;t know the birth time</label>
       <p class="note" style="margin-top:10px">Try 30 January 1990, or any date in early February &mdash;
-        that is where the two systems part company.</p>
-      <div class="warn"><span class="k">Why the full date, not the year</span>
+        that is where the two systems part company. Or 4 February 2024 either side of 16:27 in Beijing.</p>
+      <div class="warn" id="boundary"><span class="k">Why the full date, and the time</span>
         <p>The zodiac year does not begin on 1 January. The popular zodiac rolls over at
         <b>Lunar New Year</b> (late January to mid February). BaZi and Four Pillars roll over at
-        <b>Lichun</b>, the start of spring, around 3&ndash;5 February. Every January birthday belongs to the
-        previous animal year, and where the two boundaries differ, both answers are shown rather than
-        one picked silently.</p></div>
+        <b>Lichun</b>, the start of spring, around 3&ndash;5 February, at an exact moment. Every January birthday
+        belongs to the previous animal year, and where the two boundaries differ, both answers are shown rather than
+        one picked silently. On Lichun day itself, and for the hour pillar, only the birth time can decide.</p></div>
+      <div class="warn"><span class="k">Method</span>
+        <p>New moons, the December solstice and the solar terms come from Astronomy Engine. Lunar New Year follows
+        the calendar rules (month 11 holds the solstice; a leap month is the first with no principal term), in China
+        time. Year pillar turns at Lichun, month pillar at each of the twelve <i>jie</i> terms, day pillar at local
+        midnight, hour pillar every two hours from 23:00. From 23:00 to midnight the hour stem follows the next day
+        (the common &ldquo;late Rat hour&rdquo; rule). Birth time is taken in local <b>standard</b> time: if the
+        clocks were on daylight saving, that hour is removed first. No correction to true solar time.
+        Checked against an independent calendar library for every Lunar New Year 1901&ndash;2099 and 580 sample births.</p></div>
     </div>
     <div id="cout"></div>
   </div>
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
-<script src="js/astro.js"></script><script src="js/cards.js"></script>
-<script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script src="js/vendor/astronomy.browser.min.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/places.js"></script>
+<script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('chinese.html');
+const $ = id => document.getElementById(id);
 const fmt = d => d.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+const fmtAt = (ms, tz) => new Date(ms).toLocaleString(undefined, { timeZone: tz, day: 'numeric', month: 'short',
+  year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+let place = null;
+const picker = TD.places.picker($('cp'), r => { place = r; go(); }, 'Beijing');
+
+function pillarBox(label, p, sub){
+  if (!p) return `<div class="res" style="margin:0;text-align:center;opacity:.6"><h3>${label}</h3>
+    <div class="big" style="font-size:30px">&mdash;</div><p class="note">${sub || 'Needs a birth time'}</p></div>`;
+  return `<div class="res" style="margin:0;text-align:center"><h3>${label}</h3>
+    <div class="big" style="font-size:34px;letter-spacing:.05em">${p.zh}</div>
+    <p class="note" style="font-size:12px">${p.stem} ${p.branch}<br>${p.polarity} ${p.element} &middot; ${p.animal}</p>
+    ${sub ? `<p class="note" style="color:var(--a5);margin-top:4px">${sub}</p>` : ''}</div>`;
+}
 function go(){
-  const c = TD.chinese(document.getElementById('cd').value);
-  const box = (t,p,lab) => `<div class="res"><h3>${t}</h3>
+  const iso = $('cd').value; if (!iso) return;
+  const [y, mo, d] = iso.split('-').map(Number);
+  const known = !$('cu').checked;
+  $('ct').disabled = !known;
+  const tz = place ? place.tz : 'Asia/Shanghai';
+  let h = 12, mi = 0;
+  if (known && $('ct').value) [h, mi] = $('ct').value.split(':').map(Number);
+  const t = TD.localToUTC(y, mo, d, known ? h : 12, known ? mi : 0, tz);
+  const span = known ? null : { s: TD.localToUTC(y, mo, d, 0, 0, tz).utc, e: TD.localToUTC(y, mo, d, 23, 59, tz).utc };
+  const c = TD.chinese(iso, known ? t.utc : undefined);
+  const b = TD.bazi({ y, mo, d, h, mi, timeKnown: known, bornUtc: t.utc, tz,
+                      dayStartUtc: span && span.s, dayEndUtc: span && span.e });
+  const box = (ttl,p,lab) => `<div class="res"><h3>${ttl}</h3>
       <div class="big">${p.emoji} ${p.element} ${p.animal}</div>
       <p class="note" style="font-size:13px">${TD.ANIMAL_NOTE[p.animal]}</p>
       <div class="kv" style="margin-top:10px"><span>Year pillar</span><span>${p.stem} · ${p.polarity} ${p.element}</span></div>
       <div class="kv"><span>Boundary used</span><span>${lab}</span></div></div>`;
-  document.getElementById('cout').innerHTML =
-    (c.agree
+  const baziAnimal = b.year;       // exact-instant year pillar
+  const agree = c.popular.animal === baziAnimal.animal && c.popular.element === baziAnimal.element;
+  const notes = [];
+  if (b.open.includes('year')) notes.push('Born on Lichun day with no birth time: the year pillar could be either side of the boundary, so the exact moment decides it.');
+  if (b.open.includes('month')) notes.push('A solar term falls on this birth date: without a time the month pillar could be either month.');
+  if (known && t.status === 'ambiguous') notes.push('This clock time happened twice that night, when the clocks went back. The first occurrence is used.');
+  if (known && t.status === 'gap') notes.push('This clock time did not exist that night: the clocks went forward past it. It is read on the offset in force just before.');
+  if (known && b.dstMin) notes.push(`Clocks were on daylight saving (+${b.dstMin} min) at this birth, so the day and hour pillars use standard time: ${String(b.stdWall.h).padStart(2,'0')}:${String(b.stdWall.mi).padStart(2,'0')}.`);
+  if (y < 1970) notes.push('Before 1970 the time-zone records for some places are approximate.');
+  $('cout').innerHTML =
+    (agree
       ? box('Your sign', c.popular, 'Both agree')
-      : box('Popular zodiac', c.popular, 'Lunar New Year') + box('BaZi / Four Pillars', c.bazi, 'Lichun') +
-        `<div class="warn"><span class="k">The two disagree for this date</span>
-         <p>Born between Lichun and Lunar New Year, so you are ${c.bazi.animal} by the Four Pillars
+      : box('Popular zodiac', c.popular, 'Lunar New Year') + box('BaZi / Four Pillars', baziAnimal, 'Lichun, exact') +
+        `<div class="warn"><span class="k">The two disagree for this birth</span>
+         <p>Born between Lichun and Lunar New Year, so you are ${baziAnimal.animal} by the Four Pillars
          reckoning and ${c.popular.animal} by the popular one. Both are correct within their own system.
          Most sites show one and never mention the other.</p></div>`) +
+    `<div class="res"><h3>Four Pillars</h3>
+       <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px">
+         ${pillarBox('Hour', b.hour, known ? '' : 'Needs a birth time')}${pillarBox('Day', b.day)}
+         ${pillarBox('Month', b.month, b.open.includes('month') ? 'Uncertain' : '')}${pillarBox('Year', b.year, b.open.includes('year') ? 'Uncertain' : '')}
+       </div>
+       ${notes.length ? `<ul style="margin:12px 0 0 18px;font-size:12.5px;color:var(--muted);display:grid;gap:6px">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
+     </div>` +
     `<div class="res">
+       <div class="kv"><span>Birth moment used</span><span>${known ? fmtAt(t.utc, tz) : 'Date only'}</span></div>
+       <div class="kv"><span>Lichun that year</span><span>${fmtAt(b.lichun.getTime(), 'Asia/Shanghai')}</span></div>
        <div class="kv"><span>Lunar New Year that year</span><span>${fmt(c.cny)}</span></div>
-       <div class="kv"><span>Lichun that year</span><span>${fmt(c.lichun)}</span></div>
        <div class="kv"><span>Next Lunar New Year</span><span>${fmt(c.nextCny)}</span></div>
      </div>
      <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-       <p>60 animal-and-element combinations plus 144 short compatibility lines. A modest corpus, and
-       one of the quicker ones to write.</p></div>`;
+       <p>60 animal-and-element combinations plus 144 short compatibility lines, and a line for each pillar if the
+       reader works with Four Pillars. A modest corpus, and one of the quicker ones to write.</p></div>`;
 }
-document.getElementById('cd').addEventListener('change', go); go();
+['cd', 'ct'].forEach(id => $(id).addEventListener('change', go));
+$('cu').addEventListener('change', go);
+go();
 </script></body></html>

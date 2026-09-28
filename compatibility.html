@@ -1,49 +1,257 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Compatibility — tarot platform demo</title>
-<meta name="description" content="Two birth dates in, an honest breakdown out, with the score weighting published.">
+<meta name="description" content="Two birth charts compared: rising signs, houses and a real grid of planetary aspects, with the score weighting published.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/compatibility.html">
 <meta property="og:title" content="Compatibility — tarot platform demo">
-<meta property="og:description" content="Two birth dates in, an honest breakdown out, with the score weighting published.">
-<meta property="og:image" content="assets/og.png">
+<meta property="og:description" content="Two birth charts compared: rising signs, houses and a real grid of planetary aspects, with the score weighting published.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="assets/og.png">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
   <div class="eyebrow">Free tool &middot; the shareable one</div>
   <h1 style="font-size:clamp(34px,6vw,52px)">Compatibility</h1>
-  <p class="lede">Two birth dates. No birth time needed, so nobody has to dig out a certificate.</p>
-  <div class="grid g2" style="margin-top:24px;align-items:start">
-    <div class="card pad">
-      <div class="grid g2">
-        <div><label class="f" for="p1n">Name</label><input id="p1n" value="You"></div>
-        <div><label class="f" for="p1d">Birth date</label><input id="p1d" type="date" value="1992-07-11"></div>
-      </div>
-      <div class="grid g2" style="margin-top:14px">
-        <div><label class="f" for="p2n">Name</label><input id="p2n" value="Them"></div>
-        <div><label class="f" for="p2d">Birth date</label><input id="p2d" type="date" value="1989-11-03"></div>
-      </div>
-      <button class="btn primary wide" id="cgo" style="margin-top:16px">Compare</button>
-      <div class="warn"><span class="k">The score is a heuristic, and here is the weighting</span>
-        <p>Sun-sign element relationship 40, Chinese animal triad 25, numerology life-path resonance 20,
-        modality mix 15. Summed and normalised to 100. It is a rule of thumb with the rules published,
-        not a measurement. A full synastry grid needs both birth times and a real ephemeris &mdash; that is
-        the production version, not this one.</p></div>
-    </div>
-    <div id="cmout"></div>
+  <p class="lede">Two people, two birth charts. Birth date, time and place give each person&rsquo;s rising sign and
+    houses, and a planet-by-planet comparison of the two charts.</p>
+  <div class="tabs" role="tablist" aria-label="Compatibility mode">
+    <button role="tab" id="tabfull" aria-selected="true" aria-controls="full">Full chart comparison</button>
+    <button role="tab" id="tabquick" aria-selected="false" aria-controls="quick">Quick: two birth dates only</button>
   </div>
+  <p class="modenote" id="modenote"></p>
+
+  <section id="full" role="tabpanel" aria-labelledby="tabfull">
+    <div class="grid g2" style="margin-top:18px;align-items:start">
+      <div class="card pad" id="fullform">
+        <fieldset style="border:0;padding:0;margin:0 0 18px">
+          <legend class="eyebrow" style="margin-bottom:10px">Person A</legend>
+          <div class="row2">
+            <div><label class="f" for="an">Name</label><input id="an" value="You"></div>
+            <div><label class="f" for="ad">Birth date</label><input id="ad" type="date" value="1992-07-11"></div>
+          </div>
+          <div class="row2" style="margin-top:12px">
+            <div><label class="f" for="at">Birth time</label><input id="at" type="time" value="14:20"></div>
+            <div><label class="f" for="ap">Birth place</label><input id="ap" placeholder="Start typing a city"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="au"> Birth time unknown</label>
+        </fieldset>
+        <fieldset style="border:0;padding:0;margin:0 0 18px">
+          <legend class="eyebrow" style="margin-bottom:10px">Person B</legend>
+          <div class="row2">
+            <div><label class="f" for="bn">Name</label><input id="bn" value="Them"></div>
+            <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1989-11-03"></div>
+          </div>
+          <div class="row2" style="margin-top:12px">
+            <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="06:45"></div>
+            <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+        </fieldset>
+        <div class="row"><label class="f" for="hsys">House system</label>
+          <select id="hsys"><option value="whole">Whole Sign (default)</option><option value="equal">Equal, from the Ascendant</option></select></div>
+        <button class="btn primary wide" id="fgo" style="margin-top:16px">Compare the charts</button>
+        <div class="warn" id="weighting"><span class="k">The score is a heuristic, and here is the weighting</span>
+          <p id="weighttext"></p></div>
+        <div class="warn"><span class="k">Method</span>
+          <p>Planet positions from Astronomy Engine: apparent positions on the tropical zodiac, checked against a
+          published professional chart to within a quarter of an arcminute. Birth time is turned into world time
+          with your browser&rsquo;s own time-zone history, which knows about daylight saving back through the
+          20th century. Before 1970 some places&rsquo; records are approximate, and older births may have been
+          recorded in local mean time. <span id="hsysnote"></span> Placidus houses are not offered yet: they fail
+          near the poles and are a planned addition.</p></div>
+      </div>
+      <div id="fout"></div>
+    </div>
+    <div id="fdetail"></div>
+  </section>
+
+  <section id="quick" role="tabpanel" aria-labelledby="tabquick" hidden>
+    <div class="grid g2" style="margin-top:18px;align-items:start">
+      <div class="card pad">
+        <div class="grid g2">
+          <div><label class="f" for="p1n">Name</label><input id="p1n" value="You"></div>
+          <div><label class="f" for="p1d">Birth date</label><input id="p1d" type="date" value="1992-07-11"></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div><label class="f" for="p2n">Name</label><input id="p2n" value="Them"></div>
+          <div><label class="f" for="p2d">Birth date</label><input id="p2d" type="date" value="1989-11-03"></div>
+        </div>
+        <button class="btn primary wide" id="cgo" style="margin-top:16px">Compare</button>
+        <div class="warn"><span class="k">The score is a heuristic, and here is the weighting</span>
+          <p>Sun-sign element relationship 40, Chinese animal triad 25, numerology life-path resonance 20,
+          modality mix 15. Summed and normalised to 100. It is a rule of thumb with the rules published,
+          not a measurement. No birth time means no rising sign, no houses and no aspects: for those, use the
+          full chart comparison.</p></div>
+      </div>
+      <div id="cmout"></div>
+    </div>
+  </section>
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
-<script src="js/astro.js"></script><script src="js/cards.js"></script>
-<script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script src="js/vendor/astronomy.browser.min.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/places.js"></script>
+<script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('compatibility.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* "You" and "Them" read better as "your" and "their" than "You's" and "Them's". */
+const poss = (n, lower) => { const m = { you: 'Your', them: 'Their' }[String(n).trim().toLowerCase()];
+  const out = m || n + '\u2019s'; return m && lower ? out.toLowerCase() : out; };
+
+/* ---------- mode switch ---------- */
+const NOTES = {
+  full: 'You are looking at the <b>full chart comparison</b>: both birth times and places, rising signs, houses and a real aspect grid. No birth time for someone? Tick &ldquo;time unknown&rdquo; and the parts that need it are left out and marked, never guessed.',
+  quick: 'You are looking at the <b>quick version</b>: two birth dates only, so no rising sign, no houses and no aspects. It is a published rule of thumb on sun sign, Chinese animal and life path, and labelled as one.'
+};
+function mode(m){
+  $('tabfull').setAttribute('aria-selected', m === 'full'); $('tabquick').setAttribute('aria-selected', m === 'quick');
+  $('full').hidden = m !== 'full'; $('quick').hidden = m !== 'quick';
+  $('modenote').innerHTML = NOTES[m];
+  if (location.hash !== '#' + m && !(m === 'full' && !location.hash)) history.replaceState(null, '', '#' + m);
+}
+$('tabfull').onclick = () => mode('full'); $('tabquick').onclick = () => mode('quick');
+mode(location.hash === '#quick' ? 'quick' : 'full');
+
+/* ---------- published weighting, generated from the constants the score actually uses ---------- */
+(function(){
+  const av = TD.ASPECT_VALUE, pw = TD.PLANET_WEIGHT, orb = k => TD.ASPECTS.find(a => a.key === k).orb;
+  const sg = v => (v > 0 ? '+' : '\u2212') + Math.abs(v);
+  $('weighttext').innerHTML = `Score = 50 + 50 &times; (harmony &minus; tension) &divide; (harmony + tension + 2), rounded.
+    Every aspect between one person&rsquo;s planet and the other&rsquo;s adds points: aspect value &times; the two planet
+    weights &times; closeness. <b>Aspect values:</b> trine ${sg(av.trine)}, sextile ${sg(av.sextile)}, conjunction ${sg(av.conjunction)},
+    opposition ${sg(av.opposition)}, square ${sg(av.square)}. <b>Planet weights:</b> Sun, Moon and Venus ${pw.Sun}; Mars ${pw.Mars};
+    Mercury ${pw.Mercury}; Jupiter and Saturn ${pw.Jupiter}; Uranus, Neptune and Pluto ${pw.Uranus}.
+    Sun&ndash;Moon, Moon&ndash;Moon, Venus&ndash;Mars, Moon&ndash;Venus and Sun&ndash;Venus contacts count ${TD.PAIR_BONUS}&times;.
+    <b>Closeness:</b> 1 when exact, falling to 0 at the edge of the orb. <b>Orbs:</b> ${orb('conjunction')}&deg; for conjunction,
+    square, trine and opposition, ${orb('sextile')}&deg; for sextile, ${TD.LUMINARY_EXTRA}&deg; more when the Sun or Moon is involved.
+    A Moon with no birth time behind it is shown but not scored. It is a rule of thumb with the rules published,
+    not a measurement.`;
+})();
+
+/* ---------- full mode ---------- */
+const places = {};
+['a', 'b'].forEach(k => {
+  places[k] = TD.places.picker($(k + 'p'), () => fgo(), k === 'a' ? 'Denver' : 'Chicago');
+  $(k + 'u').addEventListener('change', () => { $(k + 't').disabled = $(k + 'u').checked; fgo(); });
+  [k + 'd', k + 't', k + 'n'].forEach(id => $(id).addEventListener('change', fgo));
+});
+$('hsys').addEventListener('change', fgo);
+$('fgo').onclick = fgo;
+
+function readPerson(k){
+  const iso = $(k + 'd').value, pl = places[k].get();
+  if (!iso || !pl) return null;
+  const [y, mo, d] = iso.split('-').map(Number);
+  const known = !$(k + 'u').checked && !!$(k + 't').value;
+  const [h, mi] = known ? $(k + 't').value.split(':').map(Number) : [12, 0];
+  return { name: $(k + 'n').value || (k === 'a' ? 'Person A' : 'Person B'), place: pl,
+           input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: $('hsys').value } };
+}
+const signOf = lon => TD.SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+const G = k => (TD.BODIES.find(b => b.key === k) || {}).glyph || '';
+function timeLine(p, c){
+  const t = c.tzInfo, off = TD.fmtOffset(t.offsetMin);
+  const local = `${String(p.input.h).padStart(2,'0')}:${String(p.input.mi).padStart(2,'0')}`;
+  let s = c.timeKnown ? `${local} local, ${off} &rarr; ${c.utc.toISOString().slice(11, 16)} UTC on ${c.utc.toISOString().slice(0, 10)}.`
+                      : 'Birth time unknown: planets at local noon, no rising sign, no houses.';
+  const flags = [];
+  if (c.timeKnown && t.status === 'ambiguous') flags.push('This clock time happened twice that night (clocks went back); the first occurrence is used.');
+  if (c.timeKnown && t.status === 'gap') flags.push('This clock time was skipped that night (clocks went forward); it is read on the earlier offset.');
+  if (p.input.y < 1970) flags.push('Pre-1970 time-zone records can be approximate for some places.');
+  return `<p class="note" style="margin-top:6px">${s} ${esc(TD.places.label(p.place))}, ${TD.places.fmtCoord(p.place)}.</p>` +
+    flags.map(f => `<p class="note" style="color:var(--a5)">${f}</p>`).join('');
+}
+function bigThree(p, c){
+  const moon = c.planets.find(x => x.key === 'Moon'), sun = c.planets[0];
+  const moonTxt = moon.signUncertain ? `${signOf(moon.range[0])} or ${signOf(moon.range[1])}` : signOf(moon.lon);
+  return `<div class="res"><h3>${esc(p.name)}</h3>
+    <div class="kv"><span>Sun</span><span>${signOf(sun.lon)}</span></div>
+    <div class="kv"><span>Moon</span><span>${moonTxt}${moon.signUncertain ? ' <span class="pill warn">needs a time</span>' : ''}</span></div>
+    <div class="kv"><span>Rising</span><span>${c.angles ? signOf(c.angles.asc) + ' ' + TD.fmtLon(c.angles.asc).split(' ')[0] : '<span class="pill warn">needs a birth time</span>'}</span></div>
+    ${timeLine(p, c)}</div>`;
+}
+function chartTable(p, c){
+  const rows = [];
+  if (c.angles) {
+    rows.push(`<tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(c.angles.asc)}</td><td>1</td><td></td></tr>`);
+    rows.push(`<tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(c.angles.mc)}</td><td>${TD.houseOf(c.angles.mc, c.angles.asc, c.system)}</td><td></td></tr>`);
+  }
+  c.planets.forEach(pl => {
+    let pos = TD.fmtLon(pl.lon);
+    if (!c.timeKnown && pl.key === 'Moon') pos = `${TD.fmtLon(pl.range[0])} to ${TD.fmtLon(pl.range[1])}`;
+    rows.push(`<tr${!c.timeKnown && pl.key === 'Moon' ? ' class="dim"' : ''}><td class="g">${pl.glyph}</td><td>${pl.key}</td><td>${pos}</td>
+      <td>${pl.house || '&mdash;'}</td><td>${pl.retro ? 'R' : ''}</td></tr>`);
+  });
+  rows.push(`<tr class="dim"><td class="g">&#9738;</td><td>North node (mean)</td><td>${TD.fmtLon(TD.meanNode(c.utc))}</td><td>${c.angles ? TD.houseOf(TD.meanNode(c.utc), c.angles.asc, c.system) : '&mdash;'}</td><td></td></tr>`);
+  return `<div class="res"><h3>${esc(poss(p.name))} chart</h3>
+    <p class="note">${c.timeKnown ? TD.HOUSE_SYSTEMS[c.system] + ' houses.' : 'No birth time: positions at local noon. The Moon moves about 13&deg; a day, so its full range for the day is shown. Houses and the Ascendant need a time and are left out.'}</p>
+    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th><th>Rx</th></tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div></div>`;
+}
+function gridHTML(A, B, s, pa, pb){
+  const head = `<tr><th class="corner">${esc(pa.name.slice(0, 6))} &darr;<br>${esc(pb.name.slice(0, 6))} &rarr;</th>${B.planets.map(p => `<th title="${esc(pb.name)}: ${p.key}">${p.glyph}</th>`).join('')}</tr>`;
+  const rows = A.planets.map((a, i) => `<tr><th title="${esc(pa.name)}: ${a.key}">${a.glyph}</th>${s.grid[i].map((c, j) => {
+    if (!c) return '<td></td>';
+    const cls = c.uncertain ? 'unc' : c.points > 0.0001 ? 'pos' : c.points < -0.0001 ? 'neg' : 'neu';
+    const o = Math.floor(c.orb), om = Math.round((c.orb - o) * 60);
+    return `<td class="${cls}" title="${esc(poss(pa.name))} ${a.key} ${c.type} ${esc(poss(pb.name, true))} ${B.planets[j].key}, orb ${o}\u00b0${String(om).padStart(2,'0')}\u2032${c.uncertain ? ' (no birth time: not scored)' : ''}">${c.glyph}<small>${o}\u00b0</small></td>`;
+  }).join('')}</tr>`).join('');
+  return `<div class="res"><h3>Synastry grid</h3>
+    <p class="note">Every planet in ${esc(poss(pa.name, true))} chart against every planet in ${esc(poss(pb.name, true))}: ten by ten.
+    Each cell shows the aspect and its orb in degrees.</p>
+    <div class="scrollx"><table class="sgrid">${head}${rows}</table></div>
+    <div class="legend"><span>&#9651; trine</span><span>&#9913; sextile</span><span>&#9740; conjunction</span><span>&#9633; square</span><span>&#9741; opposition</span>
+      <span style="color:var(--a4)">green: adds to the score</span><span style="color:#FF6B81">red: subtracts</span><span><i>faded: no birth time, not scored</i></span></div></div>`;
+}
+function contactsHTML(s, pa, pb){
+  const top = s.contacts.slice(0, 8);
+  if (!top.length) return '';
+  return `<div class="res"><h3>The strongest contacts</h3>
+    <div class="scrollx"><table class="ctab"><tbody>${top.map(c => `<tr><td>${esc(poss(pa.name))} ${G(c.a)} ${c.a}</td><td>${c.glyph} ${c.type}</td>
+      <td>${esc(poss(pb.name, true))} ${G(c.b)} ${c.b}</td><td>orb ${c.orb.toFixed(1)}&deg;</td>
+      <td style="color:${c.points > 0 ? 'var(--a4)' : '#FF6B81'}">${c.points > 0 ? '+' : '\u2212'}${Math.abs(c.points).toFixed(2)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
+      <p>A short line for each planet pair and aspect: &ldquo;your Venus trine their Mars&rdquo; and so on. Around 300 lines,
+      short ones, not paragraphs. That writing, not the arithmetic, is what makes this the reader&rsquo;s tool.</p></div></div>`;
+}
+function compositeHTML(A, B, pa, pb){
+  const cp = TD.composite(A, B);
+  const rows = cp.planets.map(p => `<tr><td class="g">${p.glyph}</td><td>${p.key}</td><td>${TD.fmtLon(p.lon)}</td><td>${p.house || '&mdash;'}</td></tr>`).join('');
+  const ang = cp.asc != null ? `<tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(cp.asc)}</td><td>1</td></tr><tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(cp.mc)}</td><td>${TD.houseOf(cp.mc, cp.asc, 'whole')}</td></tr>` : '';
+  return `<div class="res"><h3>Composite chart</h3>
+    <p class="note">The relationship as a chart of its own: the midpoint of each pair of planets, always taken the short way
+    round the zodiac.${cp.asc == null ? ' Composite Ascendant and houses need both birth times.' : ' Whole Sign houses from the composite Ascendant.'}
+    ${!A.timeKnown || !B.timeKnown ? ' The composite Moon is approximate without both birth times.' : ''}</p>
+    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th></tr></thead><tbody>${ang}${rows}</tbody></table></div></div>`;
+}
+function fgo(){
+  $('hsysnote').textContent = $('hsys').value === 'equal'
+    ? 'Houses: Equal, twelve 30-degree houses starting at the exact Ascendant.'
+    : 'Houses: Whole Sign, the rising sign is the whole first house, the next sign the second, and so on.';
+  const pa = readPerson('a'), pb = readPerson('b');
+  if (!pa || !pb) { $('fout').innerHTML = '<div class="res"><p class="note">Pick a birth place for both people from the list to compare the charts.</p></div>'; $('fdetail').innerHTML = ''; return; }
+  const A = TD.chart(pa.input), B = TD.chart(pb.input), s = TD.synastry(A, B);
+  $('fout').innerHTML = `<div class="res" style="text-align:center">
+      <h3>Overall</h3><div class="big prism" style="font-size:60px">${s.score}</div>
+      <div class="bar" style="max-width:280px;margin:10px auto 0"><i style="width:${s.score}%"></i></div>
+      <p class="note" style="margin-top:10px">Harmony ${s.harmony.toFixed(2)} &middot; tension ${s.tension.toFixed(2)} &middot;
+        ${s.contacts.length} scored contacts. Heuristic score, weighting published on the left.</p></div>
+    ${bigThree(pa, A)}${bigThree(pb, B)}`;
+  $('fdetail').innerHTML = `<div class="grid g2" style="margin-top:6px;align-items:start">${chartTable(pa, A)}${chartTable(pb, B)}</div>
+    ${gridHTML(A, B, s, pa, pb)}<div class="grid g2" style="align-items:start">${contactsHTML(s, pa, pb)}${compositeHTML(A, B, pa, pb)}</div>`;
+}
+
+/* ---------- quick mode: unchanged from the first demo ---------- */
 const TRIAD = {Rat:0,Dragon:0,Monkey:0, Ox:1,Snake:1,Rooster:1, Tiger:2,Horse:2,Dog:2, Rabbit:3,Goat:3,Pig:3};
 function person(name, iso){
   const jd = TD.toJD(new Date(iso + 'T12:00:00Z'));
@@ -54,8 +262,8 @@ function person(name, iso){
            life: TD.numerology(name, iso).lifePath };
 }
 function go(){
-  const a = person(document.getElementById('p1n').value, document.getElementById('p1d').value);
-  const b = person(document.getElementById('p2n').value, document.getElementById('p2d').value);
+  const a = person($('p1n').value, $('p1d').value);
+  const b = person($('p2n').value, $('p2d').value);
   const sameEl = a.element === b.element;
   const compatEl = (a.element==='Fire'&&b.element==='Air')||(a.element==='Air'&&b.element==='Fire')||
                    (a.element==='Earth'&&b.element==='Water')||(a.element==='Water'&&b.element==='Earth');
@@ -65,12 +273,12 @@ function go(){
   const lifeScore = diff === 0 ? 20 : diff <= 2 ? 15 : diff <= 4 ? 10 : 6;
   const modScore = a.modality === b.modality ? 8 : 15;
   const total = elScore + anScore + lifeScore + modScore;
-  const card = p => `<div class="res"><h3>${p.name}</h3>
-      <div class="big" style="font-size:30px">${p.glyph} ${p.sign}</div>
+  const card = p => `<div class="res"><h3>${esc(p.name)}</h3>
+      <div class="big" style="font-size:30px">${p.glyph}&#xFE0E; ${p.sign}</div>
       <div class="kv"><span>Element / modality</span><span>${p.element} · ${p.modality}</span></div>
       <div class="kv"><span>Chinese animal</span><span>${p.animal}</span></div>
       <div class="kv"><span>Life path</span><span>${p.life}</span></div></div>`;
-  document.getElementById('cmout').innerHTML = `
+  $('cmout').innerHTML = `
     <div class="res" style="text-align:center">
       <h3>Overall</h3><div class="big prism" style="font-size:60px">${total}</div>
       <div class="bar" style="max-width:280px;margin:10px auto 0"><i style="width:${total}%"></i></div>
@@ -86,7 +294,7 @@ function go(){
       <p>A short line for each pairing, around 300 of them. Short lines, not paragraphs &mdash; this is the
       corpus a reader can finish in a couple of sittings.</p></div>`;
 }
-document.getElementById('cgo').onclick = go;
-['p1n','p1d','p2n','p2d'].forEach(id=>document.getElementById(id).addEventListener('change',go));
+$('cgo').onclick = go;
+['p1n','p1d','p2n','p2d'].forEach(id=>$(id).addEventListener('change',go));
 go();
 </script></body></html>

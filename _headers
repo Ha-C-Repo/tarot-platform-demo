@@ -1,3 +1,7 @@
+# INACTIVE ON GITHUB PAGES. This file is Cloudflare Pages syntax. GitHub Pages cannot set response
+# headers at all, so on the current host none of this is applied. The Content-Security-Policy that
+# matters is repeated as a <meta http-equiv> tag in every page's <head>, and the noindex rule as a
+# <meta name="robots"> tag. Kept here for the planned move of production sites to Cloudflare Pages.
 /*
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff

@@ -1,18 +1,21 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Maya calendar — tarot platform demo</title>
 <meta name="description" content="Tzolk'in, Haab' and Long Count on the traditional Goodman-Martinez-Thompson correlation.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/maya.html">
 <meta property="og:title" content="Maya calendar — tarot platform demo">
 <meta property="og:description" content="Tzolk'in, Haab' and Long Count on the traditional Goodman-Martinez-Thompson correlation.">
-<meta property="og:image" content="assets/og.png">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="assets/og.png">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/og.png">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
   <div class="eyebrow">Free tool</div>
@@ -26,7 +29,10 @@
         constant 584283</b>. Verified against 0.0.0.0.0 = 4 Ahau 8 Cumku and 13.0.0.0.0 = 4 Ahau 3 Kankin.</p>
         <p style="margin-top:8px">This is <b>not Dreamspell</b>. That system was created in 1987&ndash;90,
         treats 29 February as a day outside the count, and drifts from the traditional count. No galactic
-        signatures, no wavespells, no 13 Moon calendar here.</p></div>
+        signatures, no wavespells, no 13 Moon calendar here.</p>
+        <p style="margin-top:8px"><b>Why no birth time:</b> all three counts advance one whole day at a time, so
+        the time of day does not change the result. The only case where it could is a birth close to midnight,
+        and daykeeping traditions differ on the hour the day turns, so the calendar date you enter is used as it is.</p></div>
     </div>
     <div id="mout"></div>
   </div>
@@ -34,7 +40,7 @@
 </div>
 <script src="js/astro.js"></script><script src="js/cards.js"></script>
 <script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('maya.html');
 const el = document.getElementById('md');
