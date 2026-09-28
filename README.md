@@ -74,7 +74,7 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
 | Keeping it out of search | `noindex,nofollow` meta on every page. `robots.txt` is kept, but on a project site it is not at the domain root, so crawlers never read it; the meta tag does the work. |
 | `og:image` | Absolute URL, plus `og:url` per page. |
 | `404.html` | Absolute paths with the `/tarot-platform-demo/` prefix, so it renders at any missing depth. |
-| Size | About 15 MB, well under the 1 GB Pages limit. |
+| Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), well under the 1 GB limit. |
 
 This build takes no money. Production client sites that take bookings or subscriptions belong on a host
 that allows commerce (Cloudflare Pages), not here.
