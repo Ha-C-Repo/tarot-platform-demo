@@ -69,6 +69,40 @@ module.exports = [
     const s3 = D.state();
     assert(s3.table.length === 2 && s3.deck.length === 76, 'a second shuffle mid-reading also leaves the table alone');
   }],
+  ['Significator: taken out of the deck, the rest keep their order; it goes back under the deck', () => {
+    Object.keys(store).forEach(k => delete store[k]);
+    const s = D.state();
+    const before = s.deck.map(c => c.i);
+    const pick = before[40];                                 // a card from the middle of the deck
+    assert(D.setSpread(s, 'celtic'), 'spread change allowed with an empty table');
+    assert(D.setSig(s, pick), 'significator set');
+    const s2 = D.state();                                    // read back from storage
+    assert(s2.sig && s2.sig.i === pick && s2.sig.r === false, 'significator stored, upright');
+    assert(s2.deck.length === 77 && !s2.deck.some(c => c.i === pick), 'significator is out of the deck');
+    assert(s2.deck.map(c => c.i).join() === before.filter(i => i !== pick).join(), 'the other 77 keep their order');
+    D.pull(s2);
+    assert(!D.setSig(s2, before[0]) && !D.setSpread(s2, 'ppf'), 'no changes with cards on the table');
+    D.shuffle(s2);
+    assert(D.state().sig.i === pick && D.state().deck.length === 76, 'shuffling leaves the significator out');
+    D.gather(s2);
+    const s3 = D.state();
+    assert(s3.sig.i === pick && s3.deck.length === 77 && s3.table.length === 0, 'new reading keeps the significator for the next question');
+    D.setSig(s3, null);
+    const s4 = D.state();
+    assert(!s4.sig && s4.deck.length === 78 && s4.deck[77].i === pick, 'returned significator goes under the deck');
+  }],
+  ['Spreads: every spread has its positions; Celtic Cross names are Waite\'s; yes or no follows orientation', () => {
+    const x = load(['js/spreads.js']).TD;
+    const S = x.SPREADS;
+    assert(S.length === 8 && S.every(s => s.pos.length === s.n && s.n >= 1), 'positions match card counts');
+    const cc = x.spreadById('celtic');
+    const waiteNames = ['That covers him', 'What crosses him', 'What crowns him', 'What is beneath him', 'What is behind him',
+      'What is before him', 'Himself', 'His house', 'His hopes or fears', 'What will come'];
+    assert(cc.n === 10 && cc.significator && cc.pos.map(p => p.name).join('|') === waiteNames.join('|'), 'Waite\'s ten positions, in order');
+    assert(x.spreadById('nope').id === 'ppf', 'unknown spread falls back to past, present, future');
+    assert(x.yesNo({ reversed: false }) === 'yes' && x.yesNo({ reversed: true }) === 'no', 'upright yes, reversed no');
+    return S.map(s => `${s.id} ${s.n}`).join(', ');
+  }],
   ['Spread analysis: Waite recurrence and the suit/majors conventions', () => {
     const e = (id, reversed) => ({ card: TD.DECK.find(c => c.id === id), reversed });
     const r1 = D.analyse([e('wands-14', false), e('cups-14', false), e('swords-03', false)]);

@@ -70,5 +70,21 @@ module.exports = [
     });
     assert(worst < 60, `worst ${worst.toFixed(0)} min`);
     return `worst ${worst.toFixed(0)} min`;
+  }],
+  ['Tarot birth cards, Greer method: published worked examples, 19, 22 and a total above 22', () => {
+    const cases = [
+      ['1969-04-07', '18,9', 'BiddyTarot: 7+4+1969 = 1980, 18 The Moon, 9 The Hermit'],
+      ['1975-04-13', '21,3', 'Angelorum: 13+4+1975 = 1992, 21 The World, 3 The Empress'],
+      ['1967-07-07', '19,10,1', '1981: The Sun, Wheel of Fortune, The Magician'],
+      ['1980-06-07', '22,4', '1993: The Fool with The Emperor'],
+      ['1969-09-19', '8', '1997: 26 is above 22, reduces to 8, Strength'],
+    ];
+    cases.forEach(([iso, want, why]) => {
+      const b = TD.birthCards(iso);
+      assert(b.nums.join(',') === want, `${iso}: got ${b.nums.join(',')}, want ${want} (${why})`);
+    });
+    const f = TD.birthCards('1980-06-07');
+    assert(f.ids[0] === 'major-00' && f.ids[1] === 'major-04', '22 maps to The Fool card');
+    return `${cases.length} dates`;
   }]
 ];
