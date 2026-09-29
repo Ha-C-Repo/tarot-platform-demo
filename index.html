@@ -65,22 +65,40 @@
   </div>
 </div>
 
+<div class="wrap sect tight">
+  <div class="card pad" id="collective">
+    <div class="collective">
+      <div id="colcard"></div>
+      <div>
+        <div class="eyebrow">Today&rsquo;s card for the collective</div>
+        <h2 style="font-size:28px" id="colname">&nbsp;</h2>
+        <p class="note" id="colmeta" style="font-size:12.5px;margin-top:6px"></p>
+        <div id="colmsg" style="margin-top:12px"></div>
+        <p class="note" style="margin-top:12px">Chosen by hand by <b data-brand-name></b>, the same card for everyone
+          today. For a card of your own, <a href="pull.html" style="text-decoration:underline">shuffle and pull</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="wrap sect">
   <div class="eyebrow">The free tools</div>
   <h2 style="font-size:30px">Everything here runs on real maths</h2>
   <p class="lede">No sign-up to try them. Each one shows its method, because a calculator that
     will not tell you how it got the answer is not worth much.</p>
   <div class="grid g3" style="margin-top:26px">
-    <a class="card pad" href="pull.html"><h3 style="font-size:17px">Daily card pull</h3>
-      <p class="note" style="margin-top:8px">Shuffle a real 78-card deck, then pull three: past, present, future.
-        Upright or reversed, each with its traditional meaning. Nothing about you changes what comes up.</p></a>
+    <a class="card pad" href="pull.html"><h3 style="font-size:17px">Card pull</h3>
+      <p class="note" style="margin-top:8px">Shuffle a real 78-card deck and choose a spread: one card, yes or no,
+        past-present-future, love, the full moon, the zodiac houses or the Celtic Cross. Upright or reversed, each
+        with its traditional meaning. Nothing about you changes what comes up.</p></a>
     <a class="card pad" href="moon.html"><h3 style="font-size:17px">Moon tracker</h3>
       <p class="note" style="margin-top:8px">Phase, sign, illumination, the month ahead, and the next new and full.</p></a>
     <a class="card pad" href="compatibility.html"><h3 style="font-size:17px">Compatibility</h3>
       <p class="note" style="margin-top:8px">Two birth charts compared: rising signs, houses and real planetary
         aspects, with the weighting published. A dates-only quick version too.</p></a>
     <a class="card pad" href="numerology.html"><h3 style="font-size:17px">Numerology</h3>
-      <p class="note" style="margin-top:8px">Life path, expression, soul urge, personal year. Pythagorean, method stated.</p></a>
+      <p class="note" style="margin-top:8px">Life path, expression, soul urge, personal year, and your tarot birth cards.
+        Pythagorean, method stated.</p></a>
     <a class="card pad" href="chinese.html"><h3 style="font-size:17px">Chinese astrology</h3>
       <p class="note" style="margin-top:8px">Animal, element and the Four Pillars, computed from the real lunisolar
         calendar and the exact solar terms &mdash; not a year lookup table.</p></a>
@@ -146,6 +164,7 @@
 
 <script src="js/astro.js"></script>
 <script src="js/cards.js"></script>
+<script src="js/data/collective.js"></script>
 <script src="js/moonviz.js"></script>
 <script src="js/tour.js"></script>
 <script src="js/site.js"></script>
@@ -159,4 +178,20 @@ document.getElementById('skysub').textContent=
   `${(pct*100).toFixed(0)}% lit · sun in ${A.sunSign(jd)} · next full moon ${A.fromJD(A.nextFullMoon(jd)).toDateString()}`;
 document.getElementById('mdisc').innerHTML=moonSVG(ang,64);
 document.getElementById('tourgo').onclick=()=>TD.tour.start();
+/* Today's card for the collective: the reader's hand-picked card, from js/data/collective.js */
+(function(){
+  const C = TD.COLLECTIVE, card = C && TD.DECK.find(c => c.id === C.card);
+  if (!card) { document.getElementById('collective').style.display = 'none'; return; }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const rev = !!C.reversed;
+  document.getElementById('colcard').innerHTML = TD.faceHTML({ card, reversed: rev }, { caption: false });
+  document.getElementById('colname').textContent = card.name + (rev ? ', reversed' : '');
+  const when = C.posted ? new Date(C.posted + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) + ' · ' : '';
+  document.getElementById('colmeta').textContent = when + (rev ? card.rev : card.up);
+  document.getElementById('colmsg').innerHTML = C.message
+    ? `<p style="font-size:15px;line-height:1.6;color:var(--text)">${esc(C.message)}</p>`
+    : `<div class="ph"><span class="k">Placeholder &mdash; your writing goes here</span>
+        <p>Each morning the reader picks one card for everyone and writes a few lines about it: what it asks of the
+        day, and who might need it. Posting a new one takes a minute: a card name and a message in one small file.</p></div>`;
+})();
 </script></body></html>

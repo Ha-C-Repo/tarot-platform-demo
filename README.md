@@ -29,7 +29,11 @@ this code; the checks are committed in `tests/` (see Tests below).
 
 | Tool | What it computes | Verified against |
 |---|---|---|
-| Card pull | A persistent 78-card deck. **Shuffle** = uniform Fisher-Yates with `crypto.getRandomValues`, each card independently upright or reversed. The order **stays until the next shuffle**, across reloads. **Pull** deals the top card. Shuffling mid-reading mixes only the cards still in the deck; pulled cards keep their place in the spread. **New reading** returns them to the bottom unshuffled. | 60,000-shuffle chi-square on top and third card, reversal rate; persistence semantics, including a shuffle mid-reading |
+| Card pull | A persistent 78-card deck. **Shuffle** = uniform Fisher-Yates with `crypto.getRandomValues`, each card independently upright or reversed. The order **stays until the next shuffle**, across reloads. **Pull** deals the top card into the next position. Shuffling mid-reading mixes only the cards still in the deck; pulled cards keep their place in the spread. **New reading** returns them to the bottom unshuffled. | 60,000-shuffle chi-square on top and third card, reversal rate; persistence semantics, including a shuffle mid-reading |
+| Spreads | Eight: past-present-future, one card, yes or no, situation-obstacle-advice, love (5), full moon (4, shows the next full moon), zodiac houses (12, laid round the wheel like a birth chart), Celtic Cross (10). Changing spread is allowed only between readings. `pull.html?spread=fullmoon` deep-links; the moon page does. | Every spread deals from the same deck; positions match card counts |
+| Celtic Cross | Waite's own method: position names, position texts and the Significator rule verbatim from *Pictorial Key* Part III §7. The Significator (any court card or Major Arcana card) is taken out of the deck, the rest keep their order, and it stays out between readings until another is chosen. | Transcribed from archive.sacred-texts.com; Significator removal and return tested |
+| Yes or no | One card: upright answers yes, reversed answers no, stated on the page as the method. The reader's own per-card answers are a placeholder. | Rule tested |
+| Tarot birth cards | Mary K. Greer's method (*Tarot for Your Self*, 1984): month + day + year, add the digits, again while above 22 = Personality card; its digits = Soul card. 22 = The Fool with The Emperor; 19 = The Sun, Wheel of Fortune, The Magician. On the numerology page with the working shown. | Published worked examples (7 Apr 1969, 13 Apr 1975), plus 19, 22 and a total above 22 |
 | Card meanings | Upright and reversed meaning for all 78 cards, Waite's additional meanings, his table of recurring ranks, and spread-pattern notes (suit, Major Arcana, court cards, reversals). | Transcribed verbatim from A.E. Waite, *The Pictorial Key to the Tarot* (1911), public domain |
 | Moon tracker | Phase angle, illumination, moon sign, next new and full, month calendar, drawn moon with maria and craters | Almanac full moon 3 Jan 2026; every 2026 new/full moon vs Astronomy Engine (worst 3 min) |
 | Compatibility, full | Both charts from date, time and place: ten bodies, mean node, Ascendant, MC, houses (Whole Sign default, Equal option), 10×10 synastry grid, composite by midpoints, published heuristic score | Astrodienst chart of a Rodden-AA birth: all ten bodies within 13″, ASC and MC within 1″ |
@@ -49,6 +53,9 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
   the same for everyone, and credited on the page. Moon, compatibility, numerology, Chinese and Maya
   interpretations are marked **"Placeholder — your writing goes here"**. On a live site the reader's own
   writing replaces all of it: that is what makes it theirs.
+- **Card of the day for the collective.** A home-page slot for the one card the reader picks by hand each
+  morning, the same for everyone. The card, its orientation, the date and the message live in
+  `js/data/collective.js`; with no message it shows the placeholder box.
 - **Video and streams.** Reels row and live-reading panel on the home page, the monthly recorded
   reading in the Vault: designed empty states, labelled. No third-party embed script loads.
 - **Payments and bookings.** Every pay or book button opens a "that button is switched off" notice.
@@ -87,7 +94,8 @@ node tests/run.js
 
 Plain Node, no dependencies. `tests/chart.test.js` (ephemeris, angles, time zones, houses at -34° and
 +70°, time-unknown mode, aspects, midpoints), `tests/calendars.test.js` (numerology, Maya, Chinese New Year,
-Four Pillars, moon phases), `tests/deck.test.js` (uniformity, persistence, spread analysis).
+Four Pillars, moon phases, tarot birth cards), `tests/deck.test.js` (uniformity, persistence, Significator,
+spreads, spread analysis).
 Reference data: `tests/fixtures/lunar-javascript-reference.json`.
 
 ## Files
@@ -101,12 +109,14 @@ js/tour.js            the guided tour
 js/astro.js           Meeus sun/moon: phases, moon sign, calendar (unchanged from the first demo)
 js/chart.js           charts: planets, time zones, angles, houses, aspects, synastry, composite
 js/places.js          birth-place search over js/data/cities.js
-js/deck.js            the persistent deck, spread analysis, card back
+js/deck.js            the persistent deck, Significator, spread analysis, card back
+js/spreads.js         the eight spreads; Celtic Cross positions in Waite's words
 js/cards.js           78 cards, keywords, card faces
 js/chinese.js         zodiac by both boundaries, Lunar New Year, Four Pillars
 js/numerology.js  js/maya.js  js/moonviz.js
 js/data/meanings.js   Waite's meanings, recurrence table, spread notes
 js/data/cities.js     generated by tools/build-cities.py from GeoNames
+js/data/collective.js today's card for the collective: the reader edits this by hand
 js/vendor/            Astronomy Engine and its licence
 tools/build-cities.py regenerates cities.js from a GeoNames download
 tests/                the checks above

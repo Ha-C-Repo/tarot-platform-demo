@@ -3,14 +3,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Daily card pull — tarot platform demo</title>
-<meta name="description" content="A genuinely random three-card draw from all 78 cards, with the method published on the page.">
+<meta name="description" content="A genuinely random draw from all 78 cards: one card, yes or no, love, the Celtic Cross and more, with the method published on the page.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/pull.html">
 <meta property="og:title" content="Daily card pull — tarot platform demo">
-<meta property="og:description" content="A genuinely random three-card draw from all 78 cards, with the method published on the page.">
+<meta property="og:description" content="A genuinely random draw from all 78 cards: one card, yes or no, love, the Celtic Cross and more, with the method published on the page.">
 <meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1376">
@@ -20,9 +20,23 @@
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
   <div class="eyebrow"><span class="freeonly">Free &middot; one reading a day</span><span class="subonly">Members &middot; as many readings as you like</span></div>
-  <h1 style="font-size:clamp(34px,6vw,54px)">Shuffle,<br><span class="prism">then pull three</span></h1>
-  <p class="lede" id="drawmeta">Hold your question in mind. Shuffle as many times as feels right, or not at all,
-    then pull three cards: past, present and future.</p>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Shuffle,<br><span class="prism">then pull</span></h1>
+  <p class="lede" id="drawmeta">Choose a spread and hold your question in mind. Shuffle as many times as feels right,
+    or not at all, then pull the cards one at a time.</p>
+
+  <div class="spreadbar" id="spreadbar">
+    <div class="spreadpick" id="spreadpick" role="group" aria-label="Spread"></div>
+    <p id="spreadblurb" aria-live="polite"></p>
+    <div class="sigrow hide" id="sigrow">
+      <label class="f" for="sigsel">Significator</label>
+      <select id="sigsel"></select>
+      <p class="note">&ldquo;The Diviner first selects a card to represent the person or, matter about which inquiry is
+        made. This card is called the Significator.&rdquo; Waite matched court cards to age and colouring; most readers
+        now choose the court card that feels most like the person, or a Major Arcana card for the matter itself (his
+        example is Justice for a lawsuit). It comes out of the deck and stays out until you choose another.</p>
+    </div>
+    <p class="note hide" id="spreadlock" style="margin-top:8px">Cards are on the table. Use <b>New reading</b> to change the spread.</p>
+  </div>
 
   <div class="table">
     <div class="deckzone" id="deckzone">
@@ -34,12 +48,8 @@
       </div>
       <p class="note" id="deckstat" aria-live="polite" style="text-align:center;margin-top:6px"></p>
     </div>
-    <div>
-      <div class="slots" id="slots">
-        <div class="slot"><div class="poslab">Past</div><div class="slotcard" id="s0"><div class="empty">First card</div></div><div class="meta" id="m0"></div></div>
-        <div class="slot"><div class="poslab">Present</div><div class="slotcard" id="s1"><div class="empty">Second card</div></div><div class="meta" id="m1"></div></div>
-        <div class="slot"><div class="poslab">Future</div><div class="slotcard" id="s2"><div class="empty">Third card</div></div><div class="meta" id="m2"></div></div>
-      </div>
+    <div class="slotwrap">
+      <div class="slots" id="slots"></div>
       <div id="lock" class="lockmsg hide">That is today&rsquo;s free reading. Free visitors get one a day, and the
         cards above stay until tomorrow. Subscribers shuffle and pull as often as they like: switch the view to
         <b>Subscriber</b> in <b>Customise</b>, or use <b>Reset demo data</b> there to see the once-a-day lock again.</div>
@@ -54,25 +64,28 @@
     browser&rsquo;s cryptographic random number generator. Cards you have already pulled stay where they are in
     the spread, out of the deck, so you can shuffle between pulls. That order then
     <b>stays exactly as it is until the next shuffle</b>, even if you close the page and come back. <b>Pull</b>
-    deals the top card. <b>New reading</b> puts the pulled cards back under the deck without shuffling, so if you
-    choose not to shuffle, your next reading comes off the same deck in the same order.</p>
+    deals the top card into the next position of the spread you chose. <b>New reading</b> puts the pulled cards
+    back under the deck without shuffling, so if you choose not to shuffle, your next reading comes off the same
+    deck in the same order. For the Celtic Cross, the Significator you choose is taken out of the deck first, as
+    Waite describes, and the rest keep their order.</p>
     <p style="margin-top:8px">Every order of the deck is equally likely, and nothing the site knows about you
-    changes the odds or the wording.</p></div>
+    changes the odds or the wording. The spread you choose changes where the cards land, never which cards come.</p></div>
 
   <div class="card pad col" style="margin-top:18px">
     <div class="ph"><span class="k">Placeholder &mdash; your writing goes here</span>
       <p>The meanings above are the traditional ones, from A.E. Waite&rsquo;s <i>The Pictorial Key to the Tarot</i>
       (1911), which is in the public domain, with a short line of modern keywords for each card. On a live site
-      each card carries the reader&rsquo;s own interpretation, upright and reversed: 156 short pieces, written once.</p></div>
+      each card carries the reader&rsquo;s own interpretation, upright and reversed: 156 short pieces, written once.
+      The spreads work the same way: the reader can rename any position and write what it means to them.</p></div>
   </div>
   <div class="adslot col" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
 <script src="js/astro.js"></script><script src="js/cards.js"></script>
-<script src="js/data/meanings.js"></script><script src="js/deck.js"></script>
+<script src="js/data/meanings.js"></script><script src="js/deck.js"></script><script src="js/spreads.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('pull.html');
-const D = TD.deck, POS = ['Past', 'Present', 'Future'];
+const D = TD.deck;
 const FREEKEY = 'tarotdemo.freeday';
 const today = () => new Date().toDateString();
 let st = D.state(), busy = false;
@@ -80,7 +93,62 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const freeUsed = () => { try { return localStorage.getItem(FREEKEY) === today(); } catch (e) { return false; } };
 const locked = () => !TD.isSubscriber() && freeUsed();
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* A link such as pull.html?spread=fullmoon opens that spread, unless a reading is already on the table. */
+(function(){
+  let want = null; try { want = new URLSearchParams(location.search).get('spread'); } catch (e) {}
+  if (want && TD.SPREADS.some(s => s.id === want) && !st.table.length && st.spread !== want) chooseSpread(want, true);
+})();
+function SP(){ return TD.spreadById(st.spread); }
+function chooseSpread(id, quiet){
+  if (st.table.length) return;
+  const next = TD.spreadById(id);
+  if (!next.significator && st.sig) D.setSig(st, null);          // the Significator goes back under the deck
+  D.setSpread(st, next.id);
+  if (!quiet) renderAll();
+}
+
+/* ---------- the spread picker ---------- */
+function renderPicker(){
+  const cur = SP(), n = st.table.length, lk = locked();
+  $('spreadpick').innerHTML = TD.SPREADS.map(s =>
+    `<button type="button" data-sp="${s.id}" aria-pressed="${s.id === cur.id}"${n || busy || lk ? ' disabled' : ''}>${esc(s.name)}</button>`).join('');
+  $('spreadpick').querySelectorAll('button').forEach(b => b.onclick = () => chooseSpread(b.dataset.sp));
+  let blurb = esc(cur.blurb);
+  if (cur.moon) blurb += ' ' + moonLine();
+  if (cur.yesno) blurb += ' <b>' + cur.rule.replace(/’/g, '&rsquo;') + '</b>';
+  $('spreadblurb').innerHTML = blurb;
+  $('spreadlock').classList.toggle('hide', !n || lk);
+  $('sigrow').classList.toggle('hide', !cur.significator);
+  if (cur.significator) renderSigSelect();
+}
+function moonLine(){
+  const jd = TD.toJD(new Date()), ill = TD.illumination(jd);
+  const fd = j => TD.fromJD(j).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  const near = ill > .97 ? 'The moon is full or nearly full right now.' : `Next full moon: <b>${fd(TD.nextFullMoon(jd))}</b>.`;
+  return `${near} <a href="moon.html" style="text-decoration:underline">Open the moon calendar</a>.`;
+}
+let sigBuilt = false;
+function renderSigSelect(){
+  const sel = $('sigsel');
+  sel.disabled = !!st.table.length || busy || locked();
+  if (sigBuilt) { sel.value = st.sig ? String(st.sig.i) : ''; return; }
+  sigBuilt = true;
+  const courts = TD.DECK.map((c, i) => [c, i]).filter(([c]) => /^(Page|Knight|Queen|King) of/.test(c.name));
+  const majors = TD.DECK.map((c, i) => [c, i]).filter(([c]) => c.arcana === 'major');
+  const opt = ([c, i]) => `<option value="${i}"${st.sig && st.sig.i === i ? ' selected' : ''}>${esc(c.name)}</option>`;
+  $('sigsel').innerHTML = `<option value=""${st.sig ? '' : ' selected'}>Choose a Significator</option>
+    <optgroup label="A person: the court cards">${courts.map(opt).join('')}</optgroup>
+    <optgroup label="A matter: the Major Arcana">${majors.map(opt).join('')}</optgroup>`;
+}
+$('sigsel').onchange = e => {
+  if (st.table.length) return;
+  D.setSig(st, e.target.value === '' ? null : +e.target.value);
+  renderAll();
+};
+
+/* ---------- the deck ---------- */
 function renderPile(){
   const n = st.deck.length, show = Math.min(4, n);
   $('pile').innerHTML = Array.from({length: show}, () => `<div class="cb">${TD.cardBackSVG()}</div>`).join('') +
@@ -93,38 +161,88 @@ function ago(ms){
   const h = Math.round(m / 60); if (h < 36) return h + ' hour' + (h === 1 ? '' : 's') + ' ago';
   return Math.round(h / 24) + ' days ago';
 }
+function needSig(){ return SP().significator && !st.sig; }
 function renderStatus(){
-  const n = st.table.length;
+  const n = st.table.length, N = SP().n, lk = locked();
   $('deckstat').textContent = `Last shuffled ${ago(st.shuffledAt)}. ` +
-    (n === 3 ? 'Reading complete.' : n ? `${n} of 3 cards pulled.` : 'Ready to pull.');
-  const lk = locked();
-  $('bpull').disabled = busy || n >= 3 || !st.deck.length || lk;
+    (n >= N ? 'Reading complete.' : needSig() ? 'Choose a Significator to begin.' : n ? `${n} of ${N} cards pulled.` : 'Ready to pull.');
+  $('bpull').disabled = busy || n >= N || !st.deck.length || lk || needSig();
   $('bshuffle').disabled = busy || lk;
   $('bgather').disabled = busy || !n || lk;
   $('lock').classList.toggle('hide', !lk);
+  renderPicker();
+}
+
+/* ---------- the spread on the table ---------- */
+function wheelPos(k){                                   // house k+1: first house just below the left horizon, then anticlockwise
+  const th = (195 + 30 * k) * Math.PI / 180, r = 40;
+  return `left:${(50 + r * Math.cos(th)).toFixed(2)}%;top:${(50 - r * Math.sin(th)).toFixed(2)}%`;
+}
+function renderSlots(){
+  const sp = SP(), small = sp.layout === 'celtic' || sp.layout === 'wheel';
+  const el = $('slots');
+  el.className = 'slots l-' + sp.layout + (sp.layout === 'row' ? ' n' + sp.n : '');
+  el.style.setProperty('--n', sp.n);
+  let html = sp.pos.map((p, k) => {
+    const style = sp.layout === 'wheel' ? ` style="${wheelPos(k)}"` : '';
+    return `<div class="slot" data-k="${k}"${style} title="${esc((k + 1) + '. ' + p.name)}">
+      ${small ? `<span class="num">${k + 1}</span>` : `<div class="poslab">${esc(p.name)}</div>`}
+      <div class="slotcard" id="s${k}"><div class="empty">Card ${k + 1}</div></div>
+      ${small ? '' : `<div class="meta" id="m${k}"></div>`}</div>`;
+  }).join('');
+  if (sp.layout === 'wheel') html = `<div class="hub">The twelve houses</div>` + html;
+  if (sp.significator) html += `<div class="sigcard" id="sigcard"></div>`;
+  el.innerHTML = html;
+  if (sp.significator) renderSig();
+}
+function renderSig(){
+  const box = $('sigcard'); if (!box) return;
+  box.innerHTML = st.sig ? TD.faceHTML(D.entry(st.sig), { caption: false }) : '<div class="empty">Significator</div>';
+  box.title = st.sig ? 'Significator: ' + TD.DECK[st.sig.i].name : 'Significator';
 }
 function faceFor(c){ return TD.faceHTML(D.entry(c), { caption: false }); }
 function setSlot(k, c, faceUp){
-  const slot = $('s' + k);
-  if (!c) { slot.innerHTML = `<div class="empty">${['First', 'Second', 'Third'][k]} card</div>`; $('m' + k).innerHTML = ''; return; }
+  const slot = $('s' + k); if (!slot) return;
+  if (!c) { slot.innerHTML = `<div class="empty">Card ${k + 1}</div>`; if ($('m' + k)) $('m' + k).innerHTML = ''; return; }
   slot.innerHTML = `<div class="flip${faceUp ? ' up' : ''}"><div class="back">${TD.cardBackSVG()}</div><div class="face">${faceFor(c)}</div></div>`;
   if (faceUp) meta(k, c);
 }
 function meta(k, c){
-  const e = D.entry(c);
-  $('m' + k).innerHTML = `<b>${esc(e.card.name)}</b><span class="revtag">${e.reversed ? 'Reversed' : 'Upright'}</span>`;
+  const e = D.entry(c), m = $('m' + k);
+  if (m) m.innerHTML = `<b>${esc(e.card.name)}</b><span class="revtag">${e.reversed ? 'Reversed' : 'Upright'}</span>`;
+  const slot = $('s' + k); if (slot) slot.parentNode.title = `${k + 1}. ${SP().pos[k].name}: ${e.card.name}${e.reversed ? ', reversed' : ''}`;
 }
+
+/* ---------- the reading ---------- */
 function meaningHTML(k, c){
+  const sp = SP(), p = sp.pos[k];
   const e = D.entry(c), m = TD.MEANINGS[e.card.id] || ['', '', '', ''];
   let main = e.reversed ? m[1] : m[0], add = e.reversed ? m[3] : m[2], note = '';
   if (e.reversed && !m[1]) { main = m[3]; add = ''; note = ' Waite gives no reversed meaning on this card&rsquo;s own page; this is from his additional list.'; }
-  return `<div class="rc"><h3><span class="pill">${POS[k]}</span>${esc(e.card.name)}
+  const posNote = sp.waite ? `<p class="pnote waitepos">&ldquo;${esc(p.note)}&rdquo;</p>` : `<p class="pnote">${esc(p.note)}</p>`;
+  return `<div class="rc"><h3><span class="pill">${sp.n > 1 ? (k + 1) + '. ' : ''}${esc(p.name)}</span>${esc(e.card.name)}
       <span class="pill ${e.reversed ? 'warn' : 'ok'}">${e.reversed ? 'Reversed' : 'Upright'}</span></h3>
-    <p class="note" style="margin-top:6px">${esc(TD.POSITION_NOTES[POS[k]])}</p>
+    ${posNote}
     <p class="kw"><b>Keywords:</b> ${esc(e.reversed ? e.card.rev : e.card.up)}</p>
     <p class="waite">&ldquo;${esc(main)}&rdquo;</p>
     ${add ? `<p class="add"><b>Waite&rsquo;s additional meaning:</b> ${esc(add)}</p>` : ''}
     ${note ? `<p class="add">${note}</p>` : ''}</div>`;
+}
+function yesNoHTML(c){
+  const e = D.entry(c), a = TD.yesNo(e);
+  return `<div class="yn ${a}"><div class="ans">${a === 'yes' ? 'Yes' : 'No'}</div>
+    <p>${esc(e.card.name)}, ${e.reversed ? 'reversed' : 'upright'}. Upright answers yes, reversed answers no; the card&rsquo;s
+    meaning below says more than the word does.</p></div>
+    <div class="ph" style="margin-top:10px"><span class="k">Placeholder &mdash; your writing goes here</span>
+      <p>On a live site the reader decides the answer for each card, including &ldquo;not yet&rdquo; and &ldquo;ask again&rdquo;,
+      and writes a line on why.</p></div>`;
+}
+function sigHTML(){
+  if (!st.sig) return '';
+  const c = TD.DECK[st.sig.i];
+  return `<div class="rc"><h3><span class="pill">Significator</span>${esc(c.name)}</h3>
+    <p class="pnote waitepos">&ldquo;${esc(SP().waite.significator)}&rdquo;</p>
+    <p class="kw"><b>Keywords:</b> ${esc(c.up)}</p></div>`;
 }
 function spreadHTML(){
   const es = st.table.map(D.entry), a = D.analyse(es);
@@ -136,23 +254,33 @@ function spreadHTML(){
     items.push(`<li><b>${r.count} ${r.rank}${r.rank === 'Six' ? 'es' : 's'} in the spread.</b> Waite&rsquo;s table of recurring cards: ${txt}.</li>`);
   });
   if (!items.length) items.push('<li>No suit, rank or orientation dominates. Each card is read on its own, in its position.</li>');
-  return `<div class="rc"><h3>The three together</h3>
+  return `<div class="rc"><h3>${es.length === 3 ? 'The three together' : 'The spread as a whole'}</h3>
     <ul style="margin:10px 0 0 18px;font-size:13px;color:var(--muted);display:grid;gap:8px">${items.join('')}</ul>
     <p class="src">Recurring ranks: Waite, <i>The Pictorial Key to the Tarot</i>, Part III &sect;5. Suit, Major Arcana
     and reversal patterns: the conventions most commonly taught today, summarised in our own words.</p></div>`;
 }
 function renderReading(){
-  const t = st.table;
+  const t = st.table, sp = SP();
   if (!t.length) { $('reading').innerHTML = ''; return; }
-  $('reading').innerHTML = `<div class="eyebrow" style="margin-top:6px">Your reading</div>` +
-    t.map((c, k) => meaningHTML(k, c)).join('') + (t.length === 3 ? spreadHTML() : '') +
+  const done = t.length === sp.n;
+  $('reading').innerHTML = `<div class="eyebrow" style="margin-top:6px">Your reading &middot; ${esc(sp.name)}</div>` +
+    (sp.yesno ? yesNoHTML(t[0]) : '') + (sp.significator ? sigHTML() : '') +
+    t.map((c, k) => meaningHTML(k, c)).join('') + (done && sp.n >= 3 ? spreadHTML() : '') +
     `<p class="src">Traditional meanings: A.E. Waite, <i>The Pictorial Key to the Tarot</i> (1911), Part III, public domain,
      via <a href="${TD.MEANINGS_SOURCE.url}" rel="noopener" style="text-decoration:underline">the sacred-texts archive</a>.
-     Generic and the same for everyone: the card and its orientation decide the text, nothing else.</p>`;
+     ${sp.waite ? `Celtic Cross positions in Waite&rsquo;s own words: ${esc(sp.waite.cite)},
+     <a href="${sp.waite.url}" rel="noopener" style="text-decoration:underline">archive copy</a>. Laid out with the
+     Significator facing right, as most diagrams draw it today; Waite lets the Significator&rsquo;s gaze decide which side
+     is behind and which is before.` : ''}
+     Generic and the same for everyone: the card, its orientation and its position decide the text, nothing else.</p>`;
 }
-function renderAll(){ renderPile(); [0, 1, 2].forEach(k => setSlot(k, st.table[k], true)); renderReading(); renderStatus(); }
+function renderAll(){
+  renderSlots(); renderPile();
+  st.table.forEach((c, k) => setSlot(k, c, true));
+  renderReading(); renderStatus();
+}
 
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- the three buttons ---------- */
 function shuffle(){
   if (busy || locked()) return;
   busy = true;
@@ -162,39 +290,42 @@ function shuffle(){
   setTimeout(() => { $('pile').classList.remove('shuffling'); busy = false; renderStatus(); }, reduced ? 0 : 1500);
 }
 function pull(){
-  if (busy || locked() || st.table.length >= 3) return;
+  const sp = SP();
+  if (busy || locked() || st.table.length >= sp.n || needSig()) return;
   busy = true;
   const k = st.table.length, c = D.pull(st);
   renderPile(); renderStatus();
-  const from = $('pile').getBoundingClientRect(), slot = $('s' + k), to = slot.getBoundingClientRect();
-  const done = () => {
+  const slot = $('s' + k), done = () => {
     setSlot(k, c, false);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       slot.querySelector('.flip').classList.add('up');
       setTimeout(() => {
         meta(k, c); renderReading(); busy = false;
-        if (st.table.length === 3 && !TD.isSubscriber()) { try { localStorage.setItem(FREEKEY, today()); } catch (e) {} }
+        if (st.table.length === sp.n && !TD.isSubscriber()) { try { localStorage.setItem(FREEKEY, today()); } catch (e) {} }
         renderStatus();
-        if (st.table.length === 3) $('reading').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        if (st.table.length === sp.n) $('reading').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
       }, reduced ? 0 : 650);
     }));
   };
   if (reduced) return done();
+  /* Fly a card back from the pile to the slot's centre, at the slot's own (unrotated) size. */
+  const from = $('pile').getBoundingClientRect(), to = slot.getBoundingClientRect();
+  const w = slot.offsetWidth, h = slot.offsetHeight, turn = sp.layout === 'celtic' && k === 1 ? 90 : 0;
   const fly = document.createElement('div');
   fly.className = 'flying'; fly.innerHTML = TD.cardBackSVG();
   Object.assign(fly.style, { left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px' });
   document.body.appendChild(fly);
   requestAnimationFrame(() => {
-    const sx = to.width / from.width, sy = to.height / from.height;
-    fly.style.transformOrigin = '0 0';
-    fly.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${sx}, ${sy})`;
+    const dx = (to.left + to.width / 2) - (from.left + from.width / 2), dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+    fly.style.transformOrigin = '50% 50%';
+    fly.style.transform = `translate(${dx}px, ${dy}px) rotate(${turn}deg) scale(${w / from.width}, ${h / from.height})`;
   });
   setTimeout(() => { fly.remove(); done(); }, 620);
 }
 function gather(){
   if (busy || locked() || !st.table.length) return;
   st = D.gather(st);
-  [0, 1, 2].forEach(k => setSlot(k, null)); renderReading(); renderPile(); renderStatus();
+  renderAll();
 }
 $('bshuffle').onclick = shuffle; $('bpull').onclick = pull; $('bgather').onclick = gather;
 document.addEventListener('tierchange', renderStatus);

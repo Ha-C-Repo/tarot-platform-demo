@@ -34,7 +34,12 @@
         rather than hidden.</p>
         <p style="margin-top:8px"><b>Why no birth time or place:</b> Pythagorean numerology works from the letters
         of the name and the calendar date only. A time or a place would not change any number on this page, so
-        it does not ask for one. The chart tools that do need them, compatibility and Chinese Four Pillars, ask.</p></div>
+        it does not ask for one. The chart tools that do need them, compatibility and Chinese Four Pillars, ask.</p>
+        <p style="margin-top:8px"><b>Tarot birth cards:</b> Mary K. Greer&rsquo;s method, from <i>Tarot for Your Self</i>
+        (1984). Month, day and year are added as whole numbers, then the digits of the total are added; above 22, the
+        digits are added again. That is the Personality card, and adding its digits gives the Soul card. 22 is
+        The Fool, paired with The Emperor; 19 gives three cards, The Sun, Wheel of Fortune and The Magician.
+        Strength is 8 and Justice 11, as in the 1909 deck.</p></div>
     </div>
     <div id="nout"></div>
   </div>
@@ -61,9 +66,28 @@ function go(){
       <div class="kv"><span>Birthday</span><span>${n.birthday}</span></div>
       <div class="kv"><span>Personal year (${n.calendarYear})</span><span>${n.personalYear} &mdash; ${M[n.personalYear]||''}</span></div>
     </div>
+    ${birthHTML()}
     <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-      <p>Around 65 short pieces cover every number in every position. Written once, they serve this tool
+      <p>Around 65 short pieces cover every number in every position, and 22 more, one per Major Arcana card,
+      cover every tarot birth card. Written once, they serve this tool
       forever. These one-line notes are a stand-in.</p></div>`;
+}
+function birthHTML(){
+  const iso = document.getElementById('nd').value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+  const b = TD.birthCards(iso);
+  const role = b.nums.length === 2 ? ['Personality', 'Soul'] : b.nums.map(() => 'Personality and soul');
+  const cards = b.ids.map((id, k) => {
+    const card = TD.DECK.find(c => c.id === id);
+    return `<div class="bc">${TD.faceHTML({ card, reversed: false }, { caption: false })}<b>${card.name}</b><span>${role[k]}</span></div>`;
+  }).join('');
+  const chain = b.steps.slice(1).map((n, i) => `${String(b.steps[i]).split('').join('+')} = ${n}`).join(' &rarr; ');
+  const tail = b.nums.length > 1 ? ` &rarr; ${b.nums.slice(1).map((n, i) => `${String(b.nums[i]).split('').join('+')} = ${n}`).join(' &rarr; ')}` : '';
+  const same = b.nums.length === 1 ? ' A single digit, so your Personality and Soul card are the same card.' :
+               b.nums.length === 3 ? ' 19 is the one total that gives three cards.' : '';
+  return `<div class="res"><h3>Tarot birth cards</h3>
+    <div class="bcards">${cards}</div>
+    <p class="note" style="margin-top:12px">Month ${b.month} + day ${b.day} + year ${b.year} = ${b.sum} &rarr; ${chain}${tail}.${same}</p></div>`;
 }
 document.getElementById('ngo').onclick = go;
 document.getElementById('nn').addEventListener('input', go);
