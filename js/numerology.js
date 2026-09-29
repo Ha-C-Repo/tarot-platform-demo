@@ -36,6 +36,22 @@ NS.numerology = function(name, iso){
     birthday: reduce(digits(d)), personalYear: py, calendarYear: now.getFullYear()
   };
 };
+/* Tarot birth cards, Mary K. Greer's method (Tarot for Your Self, 1984).
+   Month + day + year as whole numbers, then add the digits; while the total is above 22, add its
+   digits again. That number is the Personality card. Adding its digits gives the Soul card.
+   22 is The Fool (numbered 0 on the card) and reduces to 4, The Emperor. 19 gives three cards,
+   19, 10 and 1: The Sun, Wheel of Fortune and The Magician. Numbering follows the 1909 deck
+   (Strength 8, Justice 11), the same as the card images on this site. */
+NS.birthCards = function(iso){
+  const [y, m, d] = iso.split('-').map(Number);
+  const sum = m + d + y, steps = [sum];
+  let n = digits(sum); steps.push(n);
+  while (n > 22) { n = digits(n); steps.push(n); }
+  const nums = [n];
+  for (let k = n; k > 9; ) { k = digits(k); nums.push(k); }
+  return { month: m, day: d, year: y, sum, steps, personality: n, soul: nums[nums.length - 1], nums,
+           ids: nums.map(k => 'major-' + String(k === 22 ? 0 : k).padStart(2, '0')) };
+};
 NS.numMeaning = {
   1:'beginnings, self-direction, doing it first',
   2:'partnership, patience, the quiet half of things',

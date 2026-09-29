@@ -9,6 +9,9 @@
    - That order then STAYS until the next shuffle, including across visits (it is kept in this
      browser's localStorage). Pull takes the top card. Not shuffling means the next reading
      comes off the same deck, in the same order.
+   - A Significator (Celtic Cross only) is taken out of the deck, the way Waite describes, and
+     sits apart from the dealt cards. Taking it out leaves the rest of the deck in its order.
+     Choosing another, or leaving the Celtic Cross, puts it back under the deck.
    - Nothing about the visitor changes the odds. Every order of the deck is equally likely. */
 window.TD = window.TD || {};
 (function(NS){
@@ -37,7 +40,8 @@ function fresh(){ return Array.from({length: N}, (_, i) => ({ i, r: false })); }
 function read(){
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (s && Array.isArray(s.deck) && Array.isArray(s.table) && s.deck.length + s.table.length === N) return s;
+    if (s && Array.isArray(s.deck) && Array.isArray(s.table) &&
+        s.deck.length + s.table.length + (s.sig ? 1 : 0) === N) return s;
   } catch (e) {}
   return null;
 }
@@ -47,7 +51,9 @@ function write(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (
    changes when the visitor shuffles or pulls. */
 function state(){
   let s = read();
-  if (!s) { s = { deck: shuffleCards(fresh()), table: [], shuffledAt: Date.now(), shuffles: 1, readingDay: null }; write(s); }
+  if (!s) { s = { deck: shuffleCards(fresh()), table: [], sig: null, spread: 'ppf', shuffledAt: Date.now(), shuffles: 1 }; write(s); }
+  if (s.sig === undefined) s.sig = null;
+  if (!s.spread) s.spread = 'ppf';
   return s;
 }
 /* Mixes only the cards still in the deck. Cards on the table keep their place in the spread. */
@@ -60,8 +66,29 @@ function pull(s){
   if (!s.deck.length) return null;
   const c = s.deck.shift(); s.table.push(c); write(s); return c;
 }
-/* Put the cards on the table back under the deck, in the order they were drawn, unshuffled. */
+/* Put the cards on the table back under the deck, in the order they were drawn, unshuffled.
+   A Significator stays out: a second question about the same person uses the same card. */
 function gather(s){ s.deck = s.deck.concat(s.table); s.table = []; write(s); return s; }
+
+/* Only between readings: the spread and the Significator cannot change with cards on the table. */
+function returnSig(s){ if (s.sig) { s.deck.push({ i: s.sig.i, r: false }); s.sig = null; } }
+function setSpread(s, id){
+  if (s.table.length) return false;
+  s.spread = id;
+  write(s); return true;
+}
+function setSig(s, cardIndex){
+  if (s.table.length) return false;
+  if (s.sig && s.sig.i === cardIndex) return true;
+  returnSig(s);
+  if (cardIndex != null) {
+    const k = s.deck.findIndex(c => c.i === cardIndex);
+    if (k < 0) return false;
+    s.deck.splice(k, 1);
+    s.sig = { i: cardIndex, r: false };                 // the Significator is laid face up, upright
+  }
+  write(s); return true;
+}
 function entry(c){ return { card: NS.DECK[c.i], reversed: !!c.r }; }
 
 /* ---------- reading the spread as a whole ---------- */
@@ -124,7 +151,7 @@ function backSVG(){
   </svg>`;
 }
 
-NS.deck = { state, shuffle, pull, gather, entry, analyse, shuffleCards, fresh, rankOf, KEY, N };
+NS.deck = { state, shuffle, pull, gather, setSpread, setSig, entry, analyse, shuffleCards, fresh, rankOf, KEY, N };
 NS.draw = draw;
 NS.cardBackSVG = backSVG;
 })(window.TD);
