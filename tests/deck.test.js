@@ -121,11 +121,11 @@ module.exports = [
     x.SPREADS.forEach(sp => x.spreadPairs(sp).forEach(([i, j]) => assert(i < sp.n && j < sp.n && i !== j, `${sp.id}: bad pair ${i},${j}`)));
     return `${x.DECK.length} cards x ${keys.length} sections, ${n} pairs`;
   }],
-  ['Love and work pair readings: both cover every Major+Major pair and every Major with a Cups, Wands or Swords card (the rest fall back to the general reading)', () => {
+  ['Love and work pair readings: both cover every pair that includes a Major Arcana card (the rest fall back to the general reading)', () => {
     const x = load(['js/cards.js', 'js/spreads.js', 'js/data/combos-love.js', 'js/data/combos-work.js']).TD;
     const words = s => (String(s).match(/\S+/g) || []).length;
     const idx = re => x.DECK.map((c, i) => i).filter(i => re.test(x.DECK[i].id));
-    const majors = idx(/^major-/), minors = idx(/^(cups|wands|swords)-/);
+    const majors = idx(/^major-/), minors = idx(/^(cups|wands|swords|pentacles)-/);
     const pairs = [];
     majors.forEach((i, a) => majors.slice(a + 1).forEach(j => pairs.push([i, j])));
     majors.forEach(i => minors.forEach(j => pairs.push([i, j])));
@@ -135,7 +135,7 @@ module.exports = [
       assert(words(x.COMBOS_WORK[k]) >= 30, `${k}: missing work reading`);
     });
     const n = pairs.length;
-    assert(n === 231 + 3 * 308, `expected 1,155 pairs, got ${n}`);
+    assert(n === 231 + 4 * 308, `expected 1,463 pairs, got ${n}`);
     [x.COMBOS_LOVE, x.COMBOS_WORK].forEach(t => {
       assert(Object.keys(t).length === n, 'no stray love/work pair readings');
       assert(!/—/.test(Object.values(t).join(' ')), 'em dash in love/work text');
