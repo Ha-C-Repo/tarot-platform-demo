@@ -36,6 +36,8 @@ this code; the checks are committed in `tests/` (see Tests below).
 | Tarot birth cards | Mary K. Greer's method (*Tarot for Your Self*, 1984): month + day + year, add the digits, again while above 22 = Personality card; its digits = Soul card. 22 = The Fool with The Emperor; 19 = The Sun, Wheel of Fortune, The Magician. On the numerology page with the working shown. | Published worked examples (7 Apr 1969, 13 Apr 1975), plus 19, 22 and a total above 22 |
 | Card meanings | Upright and reversed meaning for all 78 cards, Waite's additional meanings, his table of recurring ranks, and spread-pattern notes (suit, Major Arcana, court cards, reversals). Shown under "More about this card". | Transcribed verbatim from A.E. Waite, *The Pictorial Key to the Tarot* (1911), public domain |
 | Interpretations | Every card: a plain-English reading upright and reversed, in love (both ways), for work and money (both ways), and what is in the picture. Every one of the 3,003 pairs of cards: what the two say together. For every pair that includes a Major Arcana card (1,463) and every pair of two cards from the same suit (364) there are also love and work-and-money versions of the pair reading; pairs of two minor cards from different suits show the general pair reading under Love or Work, labelled "General reading", for now. A **Reading about** switch (General, Love, Work and money) picks which text leads; the Love spread starts on Love. Pair readings load only when a reading needs them. | Sample text, see below. Coverage tested: 78 × 7 sections, all 3,003 pairs, love and work for all 1,827 pairs with a Major Arcana card or two cards of one suit |
+| Card correspondences | Every card's element, astrology and number, shown under each card in a reading. The Golden Dawn attributions (Book T, c. 1888; the same tables in Crowley's *777*, 1909), the system the 1909 deck was made in: Majors to the twelve signs, seven planets and three elements (Fool Air, Hanged Man Water, Judgement Fire, with the modern Uranus, Neptune, Pluto noted); pips Two to Ten to the 36 decans, planets in Chaldean order from Mars at 0° Aries; Kings, Queens and Knights to 30° spans from 20° of one sign to 20° of the next (Golden Dawn Knight = King here, Prince = Knight here, Princess = Page, the usual Rider-Waite-Smith mapping); Aces and Pages carry no sign. Numbers as printed on the 1909 cards (Strength 8, Justice 11); courts carry none. | All 78 checked against the published Golden Dawn table, typed into the test independently of the code; court spans tile the zodiac |
+| Reading it through | Once a spread of two or more cards is complete, it is read as a whole by fixed rules: each card's keywords in its position's role (past, obstacle, advice, you, them and so on; Celtic Cross positions mapped to Waite's), the leading and missing elements, Golden Dawn elemental dignities between the positions the spread pairs up (Fire against Water, Air against Earth), rising or falling numbers and reversals turning from past to future, signs and planets that repeat, repeated numbers read as angel numbers (two 3s = 33, three = 333), and the spread's total reduced to a Major Arcana card (while above 22 add the digits; 22 = The Fool; 11 and 22 flagged as master numbers; courts left out). | Worked examples tested (3+3+3 = 9, The Hermit; 19+21+10 = 50, 5, The Hierophant; 20+2 = 22, The Fool); every spread composed 200 times at random with no gaps |
 | Moon tracker | Phase angle, illumination, moon sign, next new and full, month calendar, drawn moon with maria and craters | Almanac full moon 3 Jan 2026; every 2026 new/full moon vs Astronomy Engine (worst 3 min) |
 | Compatibility, full | Both charts from date, time and place: ten bodies, mean node, Ascendant, MC, houses (Whole Sign default, Equal option), 10×10 synastry grid, composite by midpoints, published heuristic score | Astrodienst chart of a Rodden-AA birth: all ten bodies within 13″, ASC and MC within 1″ |
 | Compatibility, quick | Two dates only: sun element, Chinese triad, life path, modality. Weighting published. | Heuristic, and labelled as one |
@@ -50,7 +52,8 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
 
 ## What is placeholder, on purpose
 
-- **Interpretations.** The card and pair readings (`js/data/interpretations.js`, `js/data/combos.js`, `js/data/combos-love.js`, `js/data/combos-work.js`) are
+- **Interpretations.** The card and pair readings (`js/data/correspondences.js  Golden Dawn element, astrology and number for every card (attached to TD.DECK)
+js/data/interpretations.js`, `js/data/combos.js`, `js/data/combos-love.js`, `js/data/combos-work.js`) are
   sample text drafted with AI assistance for this demo, against the traditional Rider-Waite-Smith meanings
   with Waite's 1911 text as the reference, under one style guide, and machine-checked for coverage, length,
   repeated openings and sensitive wording. They are not copied from any site or book. They are generic:
@@ -99,7 +102,7 @@ node tests/run.js
 
 Plain Node, no dependencies. `tests/chart.test.js` (ephemeris, angles, time zones, houses at -34° and
 +70°, time-unknown mode, aspects, midpoints), `tests/calendars.test.js` (numerology, Maya, Chinese New Year,
-Four Pillars, moon phases, tarot birth cards), `tests/deck.test.js` (uniformity, persistence, Significator,
+Four Pillars, moon phases, tarot birth cards), `tests/reading.test.js` (correspondences against the Golden Dawn table, numbers, dignities, angel numbers, the spread's total, reading it through), `tests/deck.test.js` (uniformity, persistence, Significator,
 spreads, spread analysis).
 Reference data: `tests/fixtures/lunar-javascript-reference.json`.
 
@@ -115,6 +118,7 @@ js/astro.js           Meeus sun/moon: phases, moon sign, calendar (unchanged fro
 js/chart.js           charts: planets, time zones, angles, houses, aspects, synastry, composite
 js/places.js          birth-place search over js/data/cities.js
 js/deck.js            the persistent deck, Significator, spread analysis, card back
+js/reading.js         reading it through: positions, elements, dignities, movement, repeated numbers, the spread's total
 js/spreads.js         the eight spreads; Celtic Cross positions in Waite's words
 js/cards.js           78 cards, keywords, card faces
 js/chinese.js         zodiac by both boundaries, Lunar New Year, Four Pillars

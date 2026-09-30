@@ -83,9 +83,9 @@
   </div>
   <div class="adslot col" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
-<script src="js/astro.js"></script><script src="js/cards.js"></script>
+<script src="js/astro.js"></script><script src="js/cards.js"></script><script src="js/data/correspondences.js"></script>
 <script src="js/data/meanings.js"></script><script src="js/data/interpretations.js"></script>
-<script src="js/deck.js"></script><script src="js/spreads.js"></script>
+<script src="js/deck.js"></script><script src="js/spreads.js"></script><script src="js/reading.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('pull.html');
@@ -267,6 +267,7 @@ function meaningHTML(k, c){
     ${f !== 'general' ? `<p class="flab">${label[f]}</p>` : ''}
     <p class="interp">${esc(text[f] || text.general || '')}</p>
     <p class="kw"><b>Keywords:</b> ${esc(rv ? e.card.rev : e.card.up)}</p>
+    ${astroHTML(e.card)}
     <details class="more"><summary>More about this card</summary>
       ${others}
       ${R.picture ? `<h4>What&rsquo;s in the picture</h4><p>${esc(R.picture)}</p>` : ''}
@@ -274,6 +275,39 @@ function meaningHTML(k, c){
       ${wAdd ? `<p class="add"><b>His additional meaning:</b> ${esc(wAdd)}</p>` : ''}
       ${wNote ? `<p class="add">${wNote}</p>` : ''}
     </details></div>`;
+}
+function astroHTML(c){
+  const a = c.astro; if (!a) return '';
+  const bits = [esc(a.label), c.number != null ? 'Number ' + c.number : ''].filter(Boolean).join(' &middot; ');
+  return `<p class="astro">${bits.replace(/ · /g, ' &middot; ')}${a.note ? ' ' + esc(a.note) : ''}</p>`;
+}
+const and = xs => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1];
+const COUNT = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+/* Reading it through: the spread read as a whole, position by position, then as a set (js/reading.js). */
+function throughHTML(){
+  const sp = SP(), R = TD.reading.compose(sp, st.table.map(D.entry));
+  const walk = R.walk.map(w => `<li><b>${esc(w.lead)}:</b> ${esc(w.kw)} <span>(${esc(w.card)})</span></li>`).join('');
+  const thread = R.thread.map(t => `<li><b>${esc(t.why)}.</b> ${esc(t.t)}</li>`).join('');
+  const nums = R.angel.map(a => `<li><b>${a.pattern}.</b> ${COUNT[a.count] || a.count} cards carry the number ${a.n}
+    (${esc(and(a.cards))}): ${esc(a.meaning)}.</li>`);
+  const T = R.total;
+  if (T) {
+    const red = T.steps.length > 1 ? `, reduced to ${T.steps.slice(1).join(', then ')}` : '';
+    const master = T.master.includes(11) ? ' 11 is a master number: a sharper call to act on what you already know.'
+                 : T.master.includes(22) ? ' 22 is a master number: large plans made practical.' : '';
+    const courts = T.nums.length < st.table.length ? ' Court cards carry no number and are left out.' : '';
+    nums.push(`<li><b>The whole spread: ${esc(T.card.name)}.</b> The card numbers add up to ${T.nums.join(' + ')} = ${T.sum}${red}${T.n === 22 ? ' (22 is The Fool)' : ''}.
+      Read ${esc(T.card.name)} as the theme under the whole reading: ${esc(T.card.up)}.${master}${courts}</li>`);
+  }
+  return `<div class="rc through"><h3>Reading it through</h3>
+    <h4>Position by position</h4><ul>${walk}</ul>
+    ${thread ? `<h4>What the cards say together</h4><ul>${thread}</ul>` : ''}
+    ${nums.length ? `<h4>Numbers</h4><ul>${nums.join('')}</ul>
+      ${R.angel.length ? '<p class="pnote">Many readers treat a number that repeats in a spread the way people treat 111 or 333 on a clock: as a message worth noticing.</p>' : ''}` : ''}
+    <p class="src">Built by a fixed set of rules from the cards, their positions and their traditional
+    correspondences: the same for everyone who draws the same cards in the same places. Astrology and elements:
+    the Golden Dawn attributions (Book T, c. 1888), the system the 1909 deck was made in. Elemental dignities:
+    the Golden Dawn rule that opposite elements weaken each other.</p></div>`;
 }
 function pairsHTML(){
   const sp = SP(), t = st.table, f = FOCUS();
@@ -331,7 +365,7 @@ function renderReading(){
   const fl = { general: '', love: ' &middot; about love', work: ' &middot; about work and money' }[FOCUS()];
   $('reading').innerHTML = `<div class="eyebrow" style="margin-top:6px">Your reading &middot; ${esc(sp.name)}${fl}</div>` +
     (sp.yesno ? yesNoHTML(t[0]) : '') + (sp.significator ? sigHTML() : '') +
-    t.map((c, k) => meaningHTML(k, c)).join('') + pairsHTML() + (done && sp.n >= 3 ? spreadHTML() : '') +
+    t.map((c, k) => meaningHTML(k, c)).join('') + (done && sp.n >= 2 ? throughHTML() : '') + pairsHTML() + (done && sp.n >= 3 ? spreadHTML() : '') +
     `<p class="src">Interpretations and pair readings: sample text written for this demo, the same for everyone who
      draws the same cards. Traditional meanings under &ldquo;More about this card&rdquo;: A.E. Waite, <i>The Pictorial Key
      to the Tarot</i> (1911), Part III, public domain,
