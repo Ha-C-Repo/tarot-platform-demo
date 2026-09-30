@@ -124,8 +124,13 @@ document.querySelectorAll('#focusseg [data-f]').forEach(b => b.onclick = () => {
 });
 
 /* Pair readings are big, so they load only when a reading first needs them. Love and work versions
-   are separate files; until one exists, the general pair reading is shown. */
-const COMBO_SRC = { general: ['COMBOS', 'js/data/combos.js'] };
+   are separate files and so far cover the Major Arcana pairs; any other pair shows the general
+   reading, labelled as such. */
+const COMBO_SRC = {
+  general: ['COMBOS', 'js/data/combos.js'],
+  love: ['COMBOS_LOVE', 'js/data/combos-love.js'],
+  work: ['COMBOS_WORK', 'js/data/combos-work.js'],
+};
 const comboLoading = {};
 function comboTable(f){
   const src = COMBO_SRC[f] ? f : 'general', [name, file] = COMBO_SRC[src];
@@ -274,14 +279,18 @@ function pairsHTML(){
   const sp = SP(), t = st.table, f = FOCUS();
   const list = TD.spreadPairs(sp).filter(([i, j]) => t[i] && t[j]);
   if (!list.length) return '';
+  const key = ([i, j]) => TD.pairKey(t[i].i, t[j].i);
   const table = comboTable(f);
+  // A love or work reading falls back to the general one for pairs it does not cover yet.
+  const general = f === 'general' ? table : table && list.some(p => !table[key(p)]) ? comboTable('general') : {};
   const head = `<div class="eyebrow" style="margin-top:22px">Cards together${f === 'love' ? ' &middot; love' : f === 'work' ? ' &middot; work and money' : ''}</div>`;
-  if (!table) return head + '<div class="rc"><p class="note">Loading the pair readings&hellip;</p></div>';
+  if (!table || !general) return head + '<div class="rc"><p class="note">Loading the pair readings&hellip;</p></div>';
   return head + list.map(([i, j, lab]) => {
-    const A = TD.DECK[t[i].i], B = TD.DECK[t[j].i], txt = table[TD.pairKey(t[i].i, t[j].i)];
+    const A = TD.DECK[t[i].i], B = TD.DECK[t[j].i], own = table[key([i, j])], txt = own || general[key([i, j])];
     if (!txt) return '';
+    const note = [lab && esc(lab), !own && f !== 'general' ? 'General reading' : ''].filter(Boolean).join(' &middot; ');
     return `<div class="rc pair"><h3><span class="pill">${i + 1} + ${j + 1}</span>${esc(A.name)} + ${esc(B.name)}</h3>
-      ${lab ? `<p class="pnote">${esc(lab)}</p>` : ''}<p class="interp">${esc(txt)}</p></div>`;
+      ${note ? `<p class="pnote">${note}</p>` : ''}<p class="interp">${esc(txt)}</p></div>`;
   }).join('');
 }
 function yesNoHTML(c){
