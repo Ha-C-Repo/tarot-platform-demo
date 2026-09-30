@@ -103,6 +103,24 @@ module.exports = [
     assert(x.yesNo({ reversed: false }) === 'yes' && x.yesNo({ reversed: true }) === 'no', 'upright yes, reversed no');
     return S.map(s => `${s.id} ${s.n}`).join(', ');
   }],
+  ['Interpretations: every card has all seven sections; every one of the 3,003 pairs has a reading', () => {
+    const x = load(['js/cards.js', 'js/spreads.js', 'js/data/interpretations.js', 'js/data/combos.js']).TD;
+    const keys = ['up', 'rev', 'loveUp', 'loveRev', 'workUp', 'workRev', 'picture'];
+    const words = s => (String(s).match(/\S+/g) || []).length;
+    x.DECK.forEach(c => {
+      const r = x.READINGS[c.id]; assert(r, `${c.id}: no interpretation`);
+      keys.forEach(k => assert(words(r[k]) >= 30, `${c.id}.${k}: missing or too short`));
+      assert(!/—/.test(Object.values(r).join(' ')), `${c.id}: em dash in text`);
+    });
+    let n = 0;
+    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++) {
+      const k = x.pairKey(i, j); assert(k === x.pairKey(j, i), 'pair key must not depend on order');
+      assert(words(x.COMBOS[k]) >= 30, `${k}: missing pair reading`); n++;
+    }
+    assert(Object.keys(x.COMBOS).length === n, 'no stray pair readings');
+    x.SPREADS.forEach(sp => x.spreadPairs(sp).forEach(([i, j]) => assert(i < sp.n && j < sp.n && i !== j, `${sp.id}: bad pair ${i},${j}`)));
+    return `${x.DECK.length} cards x ${keys.length} sections, ${n} pairs`;
+  }],
   ['Spread analysis: Waite recurrence and the suit/majors conventions', () => {
     const e = (id, reversed) => ({ card: TD.DECK.find(c => c.id === id), reversed });
     const r1 = D.analyse([e('wands-14', false), e('cups-14', false), e('swords-03', false)]);

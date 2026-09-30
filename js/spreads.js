@@ -57,7 +57,8 @@ NS.SPREADS = [
           P('Obstacle', 'What is in the way.'),
           P('Advice', 'What to try next.')] },
 
-  { id: 'love', name: 'Love', n: 5, layout: 'love',
+  { id: 'love', name: 'Love', n: 5, layout: 'love', focus: 'love',
+    pairs: [[0, 2, 'You and them'], [0, 1, 'You and the connection'], [1, 3, 'The connection and what stands between'], [1, 4, 'The connection and where it can go']],
     blurb: 'Five cards for a relationship: one that is new, one that is going on, or one that has ended. It reads the situation. It does not change anyone’s mind.',
     pos: [P('You', 'Where you stand in this: what you bring and what you want.'),
           P('The connection', 'What is between you right now.'),
@@ -66,6 +67,7 @@ NS.SPREADS = [
           P('Where it can go', 'The direction it is taking. A direction, not a sentence.')] },
 
   { id: 'fullmoon', name: 'Full moon', n: 4, layout: 'row',
+    pairs: [[0, 1, 'What came to fullness, and what to release'], [1, 2, 'What to release, and what to give thanks for'], [2, 3, 'What to give thanks for, and what to carry forward']],
     blurb: 'Four cards for the full moon: what has come to a head, and what to let go of before it wanes.',
     moon: true,
     pos: [P('What has come to fullness', 'What this cycle has brought into the light.'),
@@ -74,10 +76,12 @@ NS.SPREADS = [
           P('What to carry forward', 'What to take into the next new moon.')] },
 
   { id: 'zodiac', name: 'Zodiac houses', n: 12, layout: 'wheel',
+    pairs: [[0, 6, '1st and 7th houses: you and your partners'], [1, 7, '2nd and 8th houses: your money and shared money'], [2, 8, '3rd and 9th houses: near and far, learning and belief'], [3, 9, '4th and 10th houses: home and career'], [4, 10, '5th and 11th houses: what you love and who you run with'], [5, 11, '6th and 12th houses: daily habits and what runs underneath']],
     blurb: 'Twelve cards, one for each house, laid round the wheel the way a birth chart runs: starting on the left and going anticlockwise. Each house carries its natural sign.',
     pos: HOUSES.map(([sign, note], i) => P(`${ORD[i]} house · ${sign}`, note)) },
 
   { id: 'celtic', name: 'Celtic Cross', n: 10, layout: 'celtic', significator: true, waite: WAITE,
+    pairs: [[0, 1, 'The heart of the matter: what covers and what crosses'], [2, 3, 'Above and below: the aim and the foundation'], [4, 5, 'Behind and before: what is passing and what is coming'], [6, 7, 'Yourself and your surroundings'], [8, 9, 'Hopes or fears, and what will come']],
     blurb: 'Waite’s own ten-card method from 1911, which he calls the most suitable for a definite question. Choose a Significator first: it comes out of the deck and sits under the first card.',
     pos: [
       P('That covers him', 'This covers him. This card gives the influence which is affecting the person or matter of inquiry generally, the atmosphere of it in which the other currents work.'),
@@ -93,5 +97,16 @@ NS.SPREADS = [
     ] }
 ];
 NS.spreadById = id => NS.SPREADS.find(s => s.id === id) || NS.SPREADS[0];
+/* Which pairs of positions get a "cards together" reading. A spread can name its own meaningful
+   pairs; otherwise every pair when there are two or three cards, and neighbours when there are more. */
+NS.spreadPairs = sp => {
+  if (sp.pairs) return sp.pairs;
+  const out = [];
+  if (sp.n <= 3) { for (let i = 0; i < sp.n; i++) for (let j = i + 1; j < sp.n; j++) out.push([i, j, '']); }
+  else for (let i = 0; i + 1 < sp.n; i++) out.push([i, i + 1, '']);
+  return out;
+};
+/* Key into the pair readings: the two card ids in deck order, joined with "|". */
+NS.pairKey = (a, b) => (a < b ? `${NS.DECK[a].id}|${NS.DECK[b].id}` : `${NS.DECK[b].id}|${NS.DECK[a].id}`);
 NS.yesNo = entry => (entry.reversed ? 'no' : 'yes');
 })(window.TD);

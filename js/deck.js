@@ -54,8 +54,12 @@ function state(){
   if (!s) { s = { deck: shuffleCards(fresh()), table: [], sig: null, spread: 'ppf', shuffledAt: Date.now(), shuffles: 1 }; write(s); }
   if (s.sig === undefined) s.sig = null;
   if (!s.spread) s.spread = 'ppf';
+  if (!s.focus) s.focus = 'general';
   return s;
 }
+/* What the reading is about: general, love, or work and money. It changes the words, never the cards,
+   so it can change at any time, even mid-reading. */
+function setFocus(s, f){ s.focus = ['general', 'love', 'work'].includes(f) ? f : 'general'; write(s); return s; }
 /* Mixes only the cards still in the deck. Cards on the table keep their place in the spread. */
 function shuffle(s){
   s.deck = shuffleCards(s.deck);
@@ -151,7 +155,7 @@ function backSVG(){
   </svg>`;
 }
 
-NS.deck = { state, shuffle, pull, gather, setSpread, setSig, entry, analyse, shuffleCards, fresh, rankOf, KEY, N };
+NS.deck = { state, shuffle, pull, gather, setSpread, setSig, setFocus, entry, analyse, shuffleCards, fresh, rankOf, KEY, N };
 NS.draw = draw;
 NS.cardBackSVG = backSVG;
 })(window.TD);

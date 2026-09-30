@@ -25,6 +25,9 @@
     or not at all, then pull the cards one at a time.</p>
 
   <div class="spreadbar" id="spreadbar">
+    <div class="focusrow"><span class="f" id="focuslab">Reading about</span>
+      <div class="seg" id="focusseg" role="group" aria-labelledby="focuslab">
+        <button type="button" data-f="general">General</button><button type="button" data-f="love">Love</button><button type="button" data-f="work">Work and money</button></div></div>
     <div class="spreadpick" id="spreadpick" role="group" aria-label="Spread"></div>
     <p id="spreadblurb" aria-live="polite"></p>
     <div class="sigrow hide" id="sigrow">
@@ -73,15 +76,16 @@
 
   <div class="card pad col" style="margin-top:18px">
     <div class="ph"><span class="k">Placeholder &mdash; your writing goes here</span>
-      <p>The meanings above are the traditional ones, from A.E. Waite&rsquo;s <i>The Pictorial Key to the Tarot</i>
-      (1911), which is in the public domain, with a short line of modern keywords for each card. On a live site
-      each card carries the reader&rsquo;s own interpretation, upright and reversed: 156 short pieces, written once.
-      The spreads work the same way: the reader can rename any position and write what it means to them.</p></div>
+      <p>Every card here has a sample reading written for this demo: upright and reversed, in love, for work and
+      money, and what is in the picture, with Waite&rsquo;s 1911 meaning kept underneath. Every pair of cards has its
+      own reading too. On a live site the reader edits these or replaces them with their own words, card by card,
+      and can rename any spread position and write what it means to them.</p></div>
   </div>
   <div class="adslot col" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
 <script src="js/astro.js"></script><script src="js/cards.js"></script>
-<script src="js/data/meanings.js"></script><script src="js/deck.js"></script><script src="js/spreads.js"></script>
+<script src="js/data/meanings.js"></script><script src="js/data/interpretations.js"></script>
+<script src="js/deck.js"></script><script src="js/spreads.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('pull.html');
@@ -106,7 +110,34 @@ function chooseSpread(id, quiet){
   const next = TD.spreadById(id);
   if (!next.significator && st.sig) D.setSig(st, null);          // the Significator goes back under the deck
   D.setSpread(st, next.id);
+  if (next.focus) D.setFocus(st, next.focus);                    // the Love spread reads for love
   if (!quiet) renderAll();
+}
+
+/* ---------- what the reading is about ---------- */
+function FOCUS(){ return st.focus || 'general'; }
+function renderFocus(){
+  document.querySelectorAll('#focusseg [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === FOCUS()));
+}
+document.querySelectorAll('#focusseg [data-f]').forEach(b => b.onclick = () => {
+  D.setFocus(st, b.dataset.f); renderFocus(); renderReading();
+});
+
+/* Pair readings are big, so they load only when a reading first needs them. Love and work versions
+   are separate files; until one exists, the general pair reading is shown. */
+const COMBO_SRC = { general: ['COMBOS', 'js/data/combos.js'] };
+const comboLoading = {};
+function comboTable(f){
+  const src = COMBO_SRC[f] ? f : 'general', [name, file] = COMBO_SRC[src];
+  if (TD[name]) return TD[name];
+  if (!comboLoading[src]) {
+    comboLoading[src] = true;
+    const el = document.createElement('script'); el.src = file;
+    el.onload = () => renderReading();
+    el.onerror = () => { comboLoading[src] = 'failed'; renderReading(); };
+    document.head.appendChild(el);
+  }
+  return comboLoading[src] === 'failed' ? {} : null;
 }
 
 /* ---------- the spread picker ---------- */
@@ -215,18 +246,43 @@ function meta(k, c){
 
 /* ---------- the reading ---------- */
 function meaningHTML(k, c){
-  const sp = SP(), p = sp.pos[k];
-  const e = D.entry(c), m = TD.MEANINGS[e.card.id] || ['', '', '', ''];
-  let main = e.reversed ? m[1] : m[0], add = e.reversed ? m[3] : m[2], note = '';
-  if (e.reversed && !m[1]) { main = m[3]; add = ''; note = ' Waite gives no reversed meaning on this card&rsquo;s own page; this is from his additional list.'; }
+  const sp = SP(), p = sp.pos[k], f = FOCUS();
+  const e = D.entry(c), m = TD.MEANINGS[e.card.id] || ['', '', '', ''], R = TD.READINGS[e.card.id] || {};
+  const rv = e.reversed;
+  const text = { general: rv ? R.rev : R.up, love: rv ? R.loveRev : R.loveUp, work: rv ? R.workRev : R.workUp };
+  const label = { general: 'The card in general', love: 'In love', work: 'Work and money' };
+  let wMain = rv ? m[1] : m[0], wAdd = rv ? m[3] : m[2], wNote = '';
+  if (rv && !m[1]) { wMain = m[3]; wAdd = ''; wNote = ' Waite gives no reversed meaning on this card&rsquo;s own page; this is from his additional list.'; }
   const posNote = sp.waite ? `<p class="pnote waitepos">&ldquo;${esc(p.note)}&rdquo;</p>` : `<p class="pnote">${esc(p.note)}</p>`;
+  const others = ['general', 'love', 'work'].filter(x => x !== f && text[x])
+    .map(x => `<h4>${label[x]}${rv ? ', reversed' : ''}</h4><p>${esc(text[x])}</p>`).join('');
   return `<div class="rc"><h3><span class="pill">${sp.n > 1 ? (k + 1) + '. ' : ''}${esc(p.name)}</span>${esc(e.card.name)}
-      <span class="pill ${e.reversed ? 'warn' : 'ok'}">${e.reversed ? 'Reversed' : 'Upright'}</span></h3>
+      <span class="pill ${rv ? 'warn' : 'ok'}">${rv ? 'Reversed' : 'Upright'}</span></h3>
     ${posNote}
-    <p class="kw"><b>Keywords:</b> ${esc(e.reversed ? e.card.rev : e.card.up)}</p>
-    <p class="waite">&ldquo;${esc(main)}&rdquo;</p>
-    ${add ? `<p class="add"><b>Waite&rsquo;s additional meaning:</b> ${esc(add)}</p>` : ''}
-    ${note ? `<p class="add">${note}</p>` : ''}</div>`;
+    ${f !== 'general' ? `<p class="flab">${label[f]}</p>` : ''}
+    <p class="interp">${esc(text[f] || text.general || '')}</p>
+    <p class="kw"><b>Keywords:</b> ${esc(rv ? e.card.rev : e.card.up)}</p>
+    <details class="more"><summary>More about this card</summary>
+      ${others}
+      ${R.picture ? `<h4>What&rsquo;s in the picture</h4><p>${esc(R.picture)}</p>` : ''}
+      <h4>Waite&rsquo;s traditional meaning, 1911</h4><p class="waite">&ldquo;${esc(wMain)}&rdquo;</p>
+      ${wAdd ? `<p class="add"><b>His additional meaning:</b> ${esc(wAdd)}</p>` : ''}
+      ${wNote ? `<p class="add">${wNote}</p>` : ''}
+    </details></div>`;
+}
+function pairsHTML(){
+  const sp = SP(), t = st.table, f = FOCUS();
+  const list = TD.spreadPairs(sp).filter(([i, j]) => t[i] && t[j]);
+  if (!list.length) return '';
+  const table = comboTable(f);
+  const head = `<div class="eyebrow" style="margin-top:22px">Cards together${f === 'love' ? ' &middot; love' : f === 'work' ? ' &middot; work and money' : ''}</div>`;
+  if (!table) return head + '<div class="rc"><p class="note">Loading the pair readings&hellip;</p></div>';
+  return head + list.map(([i, j, lab]) => {
+    const A = TD.DECK[t[i].i], B = TD.DECK[t[j].i], txt = table[TD.pairKey(t[i].i, t[j].i)];
+    if (!txt) return '';
+    return `<div class="rc pair"><h3><span class="pill">${i + 1} + ${j + 1}</span>${esc(A.name)} + ${esc(B.name)}</h3>
+      ${lab ? `<p class="pnote">${esc(lab)}</p>` : ''}<p class="interp">${esc(txt)}</p></div>`;
+  }).join('');
 }
 function yesNoHTML(c){
   const e = D.entry(c), a = TD.yesNo(e);
@@ -263,10 +319,13 @@ function renderReading(){
   const t = st.table, sp = SP();
   if (!t.length) { $('reading').innerHTML = ''; return; }
   const done = t.length === sp.n;
-  $('reading').innerHTML = `<div class="eyebrow" style="margin-top:6px">Your reading &middot; ${esc(sp.name)}</div>` +
+  const fl = { general: '', love: ' &middot; about love', work: ' &middot; about work and money' }[FOCUS()];
+  $('reading').innerHTML = `<div class="eyebrow" style="margin-top:6px">Your reading &middot; ${esc(sp.name)}${fl}</div>` +
     (sp.yesno ? yesNoHTML(t[0]) : '') + (sp.significator ? sigHTML() : '') +
-    t.map((c, k) => meaningHTML(k, c)).join('') + (done && sp.n >= 3 ? spreadHTML() : '') +
-    `<p class="src">Traditional meanings: A.E. Waite, <i>The Pictorial Key to the Tarot</i> (1911), Part III, public domain,
+    t.map((c, k) => meaningHTML(k, c)).join('') + pairsHTML() + (done && sp.n >= 3 ? spreadHTML() : '') +
+    `<p class="src">Interpretations and pair readings: sample text written for this demo, the same for everyone who
+     draws the same cards. Traditional meanings under &ldquo;More about this card&rdquo;: A.E. Waite, <i>The Pictorial Key
+     to the Tarot</i> (1911), Part III, public domain,
      via <a href="${TD.MEANINGS_SOURCE.url}" rel="noopener" style="text-decoration:underline">the sacred-texts archive</a>.
      ${sp.waite ? `Celtic Cross positions in Waite&rsquo;s own words: ${esc(sp.waite.cite)},
      <a href="${sp.waite.url}" rel="noopener" style="text-decoration:underline">archive copy</a>. Laid out with the
@@ -275,7 +334,7 @@ function renderReading(){
      Generic and the same for everyone: the card, its orientation and its position decide the text, nothing else.</p>`;
 }
 function renderAll(){
-  renderSlots(); renderPile();
+  renderFocus(); renderSlots(); renderPile();
   st.table.forEach((c, k) => setSlot(k, c, true));
   renderReading(); renderStatus();
 }
