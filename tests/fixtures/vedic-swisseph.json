@@ -1,0 +1,161 @@
+{
+ "source": "Swiss Ephemeris 2.10.03 (sweph npm package, Moshier ephemeris), SE_SIDM_LAHIRI, swe_calc_ut with SEFLG_SIDEREAL and swe_houses_ex sidereal Ascendant; computed 2026-10-01; used only to produce these numbers, not shipped",
+ "cases": [
+  {
+   "name": "Delhi",
+   "lat": 28.6139,
+   "lon": 77.209,
+   "tz": "Asia/Kolkata",
+   "local": [
+    1984,
+    3,
+    5,
+    6,
+    40
+   ],
+   "utc": "1984-03-05T01:10:00.000Z",
+   "ayanamsa": 23.63174,
+   "grahas": {
+    "Sun": 321.02414,
+    "Moon": 345.83728,
+    "Mars": 209.51061,
+    "Mercury": 317.74207,
+    "Jupiter": 254.83296,
+    "Venus": 294.67619,
+    "Saturn": 202.6754,
+    "Rahu": 47.50522
+   },
+   "lagna": 318.92928
+  },
+  {
+   "name": "Chennai",
+   "lat": 13.0827,
+   "lon": 80.2707,
+   "tz": "Asia/Kolkata",
+   "local": [
+    1962,
+    11,
+    20,
+    23,
+    15
+   ],
+   "utc": "1962-11-20T17:45:00.000Z",
+   "ayanamsa": 23.334316,
+   "grahas": {
+    "Sun": 214.59123,
+    "Moon": 142.73573,
+    "Mars": 114.60649,
+    "Mercury": 211.92444,
+    "Jupiter": 310.31747,
+    "Venus": 202.1321,
+    "Saturn": 282.87332,
+    "Rahu": 99.53469
+   },
+   "lagna": 113.74293
+  },
+  {
+   "name": "London",
+   "lat": 51.5074,
+   "lon": -0.1278,
+   "tz": "Europe/London",
+   "local": [
+    1990,
+    1,
+    15,
+    8,
+    30
+   ],
+   "utc": "1990-01-15T08:30:00.000Z",
+   "ayanamsa": 23.721456,
+   "grahas": {
+    "Sun": 271.2083,
+    "Moon": 141.95474,
+    "Mars": 236.08382,
+    "Mercury": 257.7296,
+    "Jupiter": 69.66166,
+    "Venus": 277.05065,
+    "Saturn": 263.57587,
+    "Rahu": 293.98011
+   },
+   "lagna": 279.55959
+  },
+  {
+   "name": "Denver",
+   "lat": 39.7392,
+   "lon": -104.9903,
+   "tz": "America/Denver",
+   "local": [
+    1992,
+    7,
+    11,
+    14,
+    20
+   ],
+   "utc": "1992-07-11T20:20:00.000Z",
+   "ayanamsa": 23.757694,
+   "grahas": {
+    "Sun": 85.99561,
+    "Moon": 232.96741,
+    "Mars": 25.87788,
+    "Mercury": 111.11967,
+    "Jupiter": 137.7171,
+    "Venus": 93.74333,
+    "Saturn": 293.24972,
+    "Rahu": 245.83723
+   },
+   "lagna": 188.12084
+  },
+  {
+   "name": "Sydney",
+   "lat": -33.8688,
+   "lon": 151.2093,
+   "tz": "Australia/Sydney",
+   "local": [
+    1974,
+    3,
+    3,
+    4,
+    45
+   ],
+   "utc": "1974-03-02T18:45:00.000Z",
+   "ayanamsa": 23.501264,
+   "grahas": {
+    "Sun": 318.31037,
+    "Moon": 61.64251,
+    "Mars": 38.36015,
+    "Mercury": 306.46777,
+    "Jupiter": 305.15879,
+    "Venus": 277.66413,
+    "Saturn": 64.28999,
+    "Rahu": 241.20527
+   },
+   "lagna": 305.14725
+  },
+  {
+   "name": "Mumbai",
+   "lat": 19.076,
+   "lon": 72.8777,
+   "tz": "Asia/Kolkata",
+   "local": [
+    2005,
+    8,
+    30,
+    17,
+    5
+   ],
+   "utc": "2005-08-30T11:35:00.000Z",
+   "ayanamsa": 23.935207,
+   "grahas": {
+    "Sun": 133.25724,
+    "Moon": 86.34318,
+    "Mars": 22.6024,
+    "Mercury": 116.97076,
+    "Jupiter": 174.28735,
+    "Venus": 171.82908,
+    "Saturn": 101.71832,
+    "Rahu": 351.60087
+   },
+   "lagna": 282.34841
+  }
+ ]
+}

@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Astrocartography map — tarot platform demo</title>
+<meta name="description" content="Astrocartography: a world map of where each planet was rising, setting, overhead or below at your birth, and which planet lines run near any city.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/astromap.html">
+<meta property="og:title" content="Astrocartography map — tarot platform demo">
+<meta property="og:description" content="Your planet lines on a world map, and the lines that run near any city.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.map{display:block;width:100%;min-width:760px;height:auto;cursor:crosshair}
+.map .land{fill:var(--line);fill-opacity:.55;stroke:var(--muted);stroke-opacity:.35;stroke-width:.25}
+.map .grat{stroke:var(--line);stroke-width:.2;fill:none}
+.map .ln{fill:none;stroke-width:1.1;vector-effect:non-scaling-stroke}
+.map .ln.IC{stroke-dasharray:2 3}.map .ln.DSC{stroke-dasharray:7 4}
+.map text{font-size:3.6px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chips label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer}
+.chips input{margin:0}
+.near td{vertical-align:top}.near details summary{cursor:pointer}
+.near details p{white-space:normal;margin-top:6px;font-size:13px;line-height:1.55;font-weight:400}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend svg{vertical-align:middle;margin-right:4px}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tool &middot; the one people pay for elsewhere</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Astrocartography</h1>
+  <p class="lede">Where on Earth each planet was rising, setting, overhead or below at the moment you were born, drawn as
+    lines on a world map, and which lines run near any place you pick.</p>
+
+  <div class="card pad" style="margin-top:18px">
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <div class="row2">
+          <div><label class="f" for="nm">Name</label><input id="nm" value="You"></div>
+          <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+          <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+        </div>
+      </div>
+      <div>
+        <div class="row"><label class="f" for="cp">Check a place</label><input id="cp" placeholder="Start typing a city, or tap the map"></div>
+        <button class="btn primary wide" id="go" style="margin-top:16px">Draw the map</button>
+        <p class="note" style="margin-top:10px">Astrocartography needs a birth time: the lines move about 15&deg; of longitude for every hour.
+          Shares your details with the other chart pages, in this browser only.</p>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div id="out"></div>
+  <div class="warn"><span class="k">Method</span>
+    <p>For your birth moment, each planet&rsquo;s apparent right ascension and declination from Astronomy Engine. MC line: the
+    longitudes where the planet was on the meridian, overhead; IC: the opposite meridian. ASC and DSC lines: the places where it was
+    exactly on the eastern or western horizon (geocentric, no refraction, the usual astrocartography convention); they curve
+    and meet the MC and IC lines in the far north or south. Checked against Astronomy Engine&rsquo;s own horizon calculation:
+    on every ASC or DSC point the planet&rsquo;s altitude is zero. &ldquo;Near&rdquo;: within 1,000 km; within 300 km is marked
+    strong, the distance most astrocartographers treat as the main influence. Map: Natural Earth (public domain).
+    Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/acg.js"></script><script src="js/data/world.js"></script><script src="js/places.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('astromap.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const A = TD.acg, KEY = 'tarotdemo.natal';
+const COLOR = { Sun: '#FFC53D', Moon: '#D9DEE8', Mercury: '#22D3EE', Venus: '#FF7AB6', Mars: '#FF4D4D', Jupiter: '#B07CFF',
+  Saturn: '#C8B27E', Uranus: '#34D399', Neptune: '#60A5FA', Pluto: '#F97316' };
+const LINE_NAME = { ASC: 'rising (ASC)', DSC: 'setting (DSC)', MC: 'overhead (MC)', IC: 'below (IC)' };
+const poss = n => /^you$/i.test(String(n).trim()) ? 'Your' : n + '’s';
+
+/* ---------- planets shown: all by default, remembered in this browser ---------- */
+let shown = TD.BODIES.map(b => b.key);
+try { const s = JSON.parse(localStorage.getItem('tarotdemo.acgShown') || 'null'); if (Array.isArray(s)) shown = s; } catch (e) {}
+$('chips').innerHTML = TD.BODIES.map(b => `<label style="color:${COLOR[b.key]}"><input type="checkbox" value="${b.key}"${shown.includes(b.key) ? ' checked' : ''}> ${b.glyph} ${b.key}</label>`).join('');
+$('chips').addEventListener('change', () => {
+  shown = [...$('chips').querySelectorAll('input:checked')].map(i => i.value);
+  try { localStorage.setItem('tarotdemo.acgShown', JSON.stringify(shown)); } catch (e) {}
+  render();
+});
+
+/* ---------- the form, shared with the other chart pages ---------- */
+let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+if (saved) { $('nm').value = saved.nm || 'You'; $('bd').value = saved.bd || $('bd').value; $('bt').value = saved.bt || '14:20'; }
+let spot = null;                                             // the place being checked: {lat, lon, label}
+const birth = TD.places.picker($('bp'), () => go(), saved && saved.place || 'Denver');
+const check = TD.places.picker($('cp'), r => { spot = { lat: r.lat, lon: r.lon, label: TD.places.label(r) }; render(); }, saved && (saved.acgPlace || saved.now || saved.place) || 'Denver');
+['nm', 'bd', 'bt'].forEach(id => $(id).addEventListener('change', go));
+$('go').onclick = go;
+function read(){
+  const iso = $('bd').value, pl = birth.get();
+  if (!iso || !pl || !$('bt').value) return null;
+  const [y, mo, d] = iso.split('-').map(Number), [h, mi] = $('bt').value.split(':').map(Number);
+  try { const cur = JSON.parse(localStorage.getItem(KEY) || 'null') || {};
+    localStorage.setItem(KEY, JSON.stringify(Object.assign(cur, { nm: $('nm').value, bd: iso, bt: $('bt').value, bu: false, place: pl.name }))); } catch (e) {}
+  return { name: $('nm').value || 'You', place: pl, input: { y, mo, d, h, mi, timeKnown: true, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: 'whole' } };
+}
+
+/* ---------- texts ---------- */
+let textState = null;
+function texts(){
+  if (TD.VEDIC_TEXT || textState) return;
+  textState = 'loading';
+  const el = document.createElement('script'); el.src = 'js/data/vedic-text.js';
+  const keep = () => { const y = scrollY; render(); if (Math.abs(scrollY - y) > 1) scrollTo({ top: y, behavior: 'instant' }); };
+  el.onload = keep; el.onerror = () => { textState = 'failed'; keep(); };
+  document.head.appendChild(el);
+}
+const para = k => { const t = (TD.VEDIC_TEXT || {})[k]; return t ? `<p class="interp">${esc(t)}</p>` : (textState === 'failed' ? '' : '<p class="note">Loading&hellip;</p>'); };
+
+/* ---------- map: equirectangular, x = longitude, y = minus latitude ---------- */
+const TOP = 80, BOT = -60;
+let land = null;
+function landPath(){
+  if (land) return land;
+  land = TD.WORLD.map(r => { let d = ''; for (let i = 0; i < r.length; i += 2) d += (i ? 'L' : 'M') + r[i] / 10 + ' ' + (-r[i + 1] / 10); return d + 'Z'; }).join('');
+  return land;
+}
+function mapSVG(L, p){
+  let grat = '';
+  for (let lo = -150; lo <= 150; lo += 30) grat += `M${lo} ${-TOP}V${-BOT}`;
+  for (let la = -60; la <= 60; la += 30) grat += `M-180 ${-la}H180`;
+  const labels = [];
+  const lines = L.lines.filter(l => shown.includes(l.body)).map(l => {
+    const d = l.segs.map(s => s.map(([lo, la], i) => (i ? 'L' : 'M') + lo.toFixed(2) + ' ' + (-la).toFixed(2)).join('')).join('');
+    // A label where the line meets the top edge (MC/IC) or near the bottom (ASC/DSC), clear of the map edge.
+    const top = l.line === 'MC' || l.line === 'IC';
+    const pts = l.segs.flat().filter(([, la]) => la <= TOP - 6 && la >= BOT + 4);
+    const at = top ? pts.reduce((a, b) => (b[1] > a[1] ? b : a), pts[0]) : pts.reduce((a, b) => (Math.abs(b[1] - (BOT + 12)) < Math.abs(a[1] - (BOT + 12)) ? b : a), pts[0]);
+    if (at) labels.push({ top, x: Math.max(-176, Math.min(168, at[0] + 1)), y: -at[1] + (top ? 1 : 0), fill: COLOR[l.body], text: l.glyph + l.line });
+    return `<path class="ln ${l.line}" stroke="${COLOR[l.body]}" d="${d}"/>`;
+  }).join('');
+  // Labels close together step onto the next row (down from the top edge, up from the bottom) so none overlap.
+  const lastX = { true: [], false: [] };
+  const labs = labels.sort((a, b) => a.x - b.x).map(b => {
+    const rows = lastX[b.top]; let k = 0;
+    while (k < 6 && rows[k] != null && b.x - rows[k] < 13) k++;
+    rows[k] = b.x;
+    return `<text x="${b.x.toFixed(1)}" y="${(b.y + (b.top ? 4.6 : -4.6) * k).toFixed(1)}" fill="${b.fill}">${b.text}</text>`;
+  }).join('');
+  const dot = (lo, la, fill, r) => `<circle cx="${lo}" cy="${-la}" r="${r}" fill="${fill}" stroke="var(--ink)" stroke-width=".4"/>`;
+  return `<svg class="map" id="map" viewBox="-180 ${-TOP} 360 ${TOP - BOT}" role="img" aria-label="${esc(poss(p.name))} astrocartography map">
+    <path class="land" d="${landPath()}"/><path class="grat" d="${grat}"/>${lines}${labs}
+    ${dot(p.place.lon, p.place.lat, 'var(--text)', 1.4)}${spot ? dot(spot.lon, spot.lat, 'var(--a1)', 1.8) : ''}</svg>`;
+}
+function nearHTML(L){
+  if (!spot) return '';
+  const list = A.near(L, spot.lat, spot.lon, 1000).filter(n => shown.includes(n.body));
+  const rows = list.map(n => `<tr><td><details><summary><span style="color:${COLOR[n.body]}">${n.glyph}</span> ${n.body} ${LINE_NAME[n.line]}${n.km <= 300 ? ' <span class="pill warn">strong</span>' : ''}</summary>
+    ${para(`acg:${n.body}:${n.line}`)}</details></td><td>${Math.round(n.km).toLocaleString()} km</td><td class="dim">${Math.round(n.km * 0.621371).toLocaleString()} mi</td></tr>`).join('');
+  return `<div class="res near"><h3>Lines near ${esc(spot.label)}</h3>
+    <p class="note">Within 1,000 km, closest first. Open one to read what it tends to bring.${shown.length < 10 ? ' Only the planets ticked above.' : ''}</p>
+    ${list.length ? `<div class="scrollx"><table class="ctab"><tbody>${rows}</tbody></table></div>` : '<p class="note">No planet lines within 1,000 km of this place: a quieter spot, where your own chart speaks without a single planet turned up.</p>'}</div>`;
+}
+function legendHTML(){
+  const sw = dash => `<svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="var(--text)" stroke-width="1.5"${dash ? ` stroke-dasharray="${dash}"` : ''}/></svg>`;
+  return `<div class="legend"><span>${sw('')}MC overhead and ASC rising</span><span>${sw('7 4')}DSC setting</span><span>${sw('2 3')}IC below</span>
+    <span><svg width="8" height="8"><circle cx="4" cy="4" r="3.5" fill="var(--text)"/></svg>birthplace</span>
+    <span><svg width="8" height="8"><circle cx="4" cy="4" r="3.5" fill="var(--a1)"/></svg>place checked</span></div>`;
+}
+
+let cur = null;
+function render(){
+  if (!cur) return;
+  const { p, L } = cur;
+  $('out').innerHTML = `<div class="eyebrow" style="margin-top:28px">${esc(poss(p.name))} planet lines</div>
+    <div class="mapwrap">${mapSVG(L, p)}</div>${legendHTML()}
+    <p class="note" style="margin-top:6px">Tap or click anywhere on the map to check that spot. On a phone, scroll the map sideways.</p>${nearHTML(L)}`;
+  $('map').addEventListener('click', e => {
+    const svg = e.currentTarget, pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const q = pt.matrixTransform(svg.getScreenCTM().inverse());
+    spot = { lat: Math.max(-89, Math.min(89, -q.y)), lon: Math.max(-180, Math.min(180, q.x)) };
+    spot.label = `the map point ${TD.places.fmtCoord(spot)}`;
+    const sx = $('out').querySelector('.mapwrap').scrollLeft, y = scrollY;
+    render();
+    $('out').querySelector('.mapwrap').scrollLeft = sx; scrollTo({ top: y, behavior: 'instant' });
+  });
+}
+function go(){
+  const p = read();
+  if (!p) { cur = null; $('out').innerHTML = `<div class="res" style="margin-top:20px"><p class="note">${$('bt').value ? 'Pick a birth place from the list to draw the map.' : 'Enter a birth time to draw the map: without one the lines cannot be placed.'}</p></div>`; return; }
+  texts();
+  const c = TD.chart(p.input);
+  cur = { p, c, L: A.lines(c.utc) };
+  if (!spot) { const r = check.get(); if (r) spot = { lat: r.lat, lon: r.lon, label: TD.places.label(r) }; }
+  render();
+}
+go();
+</script></body></html>

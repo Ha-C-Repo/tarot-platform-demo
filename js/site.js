@@ -13,7 +13,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'],
-  ['birthchart.html','Birth chart'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
+  ['birthchart.html','Birth chart'], ['vedic.html','Vedic'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
   ['chinese.html','Chinese'], ['maya.html','Maya'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing']
 ];
@@ -43,7 +43,7 @@ function chrome(current){
         Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.<br>
         Traditional card meanings: A.E. Waite, <i>The Pictorial Key to the Tarot</i>, 1911. Public domain.<br>
         Place data: <a href="https://www.geonames.org/" rel="noopener" style="text-decoration:underline">GeoNames</a>,
-        licensed CC BY 4.0. Planet positions: Astronomy Engine by Don Cross, MIT licence. Chart wheel: AstroChart by Matheus Alves, MIT licence.</div>
+        licensed CC BY 4.0. Planet positions: Astronomy Engine by Don Cross, MIT licence. Chart wheel: AstroChart by Matheus Alves, MIT licence. World map: Natural Earth, public domain.</div>
     </div></footer>` + panel());
   document.body.insertAdjacentHTML('beforeend', modal());
   wire();
