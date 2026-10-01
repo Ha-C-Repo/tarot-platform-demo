@@ -127,6 +127,7 @@ const COMBO_SRC = {
   general: ['COMBOS', 'js/data/combos.js'],
   love: ['COMBOS_LOVE', 'js/data/combos-love.js'],
   work: ['COMBOS_WORK', 'js/data/combos-work.js'],
+  bridge: ['BRIDGES', 'js/data/bridges.js'],        // one sentence per pair, for Reading it through
 };
 const comboLoading = {};
 function comboTable(f){
@@ -281,7 +282,7 @@ const and = xs => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' a
 const COUNT = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
 /* Reading it through: the spread read as a whole, position by position, then as a set (js/reading.js). */
 function throughHTML(){
-  const sp = SP(), R = TD.reading.compose(sp, st.table.map(D.entry));
+  const sp = SP(), R = TD.reading.compose(sp, st.table.map(D.entry), comboTable('bridge'));
   const walk = R.walk.map(w => `<li><b>${esc(w.lead)}:</b> ${esc(w.kw)} <span>(${esc(w.card)})</span></li>`).join('');
   const thread = R.thread.map(t => `<li><b>${esc(t.why)}.</b> ${esc(t.t)}</li>`).join('');
   const nums = R.angel.map(a => `<li><b>${a.pattern}.</b> ${COUNT[a.count] || a.count} cards carry the number ${a.n}
@@ -303,7 +304,8 @@ function throughHTML(){
     <p class="src">Built by a fixed set of rules from the cards, their positions and their traditional
     correspondences: the same for everyone who draws the same cards in the same places. Astrology and elements:
     the Golden Dawn attributions (Book T, c. 1888), the system the 1909 deck was made in. Elemental dignities:
-    the Golden Dawn rule that opposite elements weaken each other.</p></div>`;
+    the Golden Dawn rule that opposite elements weaken each other. The sentence under each pair of positions is sample
+    text written for this demo, one for every pair of cards.</p></div>`;
 }
 function pairsHTML(){
   const sp = SP(), t = st.table, f = FOCUS();

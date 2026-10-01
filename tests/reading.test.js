@@ -109,6 +109,15 @@ module.exports = [
     const t = TD.reading.story(TD.spreadById('ppf'), [E('major-10'), E('cups-04', true), E('major-00')]).t;
     assert(t === 'From the Wheel of Fortune (turning) through the Four of Cups reversed (the offer you finally notice), this is moving toward The Fool (beginnings).', t);
   }],
+  ['Reading it through: a bridge sentence for each pair the spread reads together, right after the story', () => {
+    const sp = TD.spreadById('ppf'), es = [E('major-10'), E('cups-04', true), E('major-00')];
+    const table = { 'major-10|cups-04': 'Bridge one.', 'major-00|cups-04': 'Bridge two.', 'major-00|major-10': 'Never shown.' };
+    const th = TD.reading.thread(sp, es, table);
+    assert(th[0].why === 'The story' && th[1].t === 'Bridge one.' && th[2].t === 'Bridge two.', JSON.stringify(th.slice(0, 3)));
+    assert(th[1].why === 'How the past led here (Wheel of Fortune and Four of Cups)', th[1].why);
+    assert(!th.some(t => t.t === 'Never shown.'), 'first-to-last pair is not read in ppf');
+    assert(TD.reading.thread(sp, es).every(t => !/^Bridge/.test(t.t)), 'no table loaded: no bridges');
+  }],
   ['Reading it through: spread rules (zodiac houses, love, advice, full moon, Celtic Cross ending)', () => {
     const R = TD.reading, Z = TD.spreadById('zodiac');
     const z = R.spreadRules(Z, ['wands-02', 'major-05', 'cups-02', 'cups-03', 'wands-05', 'pentacles-08', 'swords-02', 'cups-05', 'wands-08', 'pentacles-02', 'swords-05', 'cups-08'].map(id => E(id)));

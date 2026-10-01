@@ -6,7 +6,9 @@
    METHOD, all rule-based and the same for everyone who draws the same cards in the same places:
    1. Position by position: each position has a role (past, obstacle, advice, ...) and the card's
       own keywords are read in that role; zodiac houses add the house's area of life. Then one
-      sentence walks the spread in order (STORY), with each card named and its first keyword.
+      sentence walks the spread in order (STORY), with each card named and its first keyword, and
+      each pair of positions the spread reads together gets its bridge sentence (TD.BRIDGES, one
+      written sentence per pair of cards, loaded by the page; skipped when not loaded).
    2. Elements: the element that leads, any element missing (four cards or more), and the Golden
       Dawn elemental dignities between cards the spread pairs up (opposites weaken each other).
    3. Movement (spreads that run through time): whether the card numbers rise or fall, and whether
@@ -74,6 +76,16 @@ function story(sp, entries){
   if (!roles || !make || entries.length < roles.length) return null;
   const r = {}; roles.forEach((role, k) => r[role] = ref(entries[k]));
   return { why: 'The story', t: make(r) };
+}
+
+/* One bridge sentence per pair the spread reads together, labelled with the pair and its two cards. */
+function bridges(sp, entries, table){
+  if (!table) return [];
+  return NS.spreadPairs(sp).filter(([i, j]) => entries[i] && entries[j]).map(([i, j, lab]) => {
+    const a = entries[i].card, b = entries[j].card, ia = NS.DECK.indexOf(a), ib = NS.DECK.indexOf(b);
+    const t = table[NS.pairKey(ia, ib)];
+    return t && { why: `${lab || sp.pos[i].name + ' and ' + sp.pos[j].name} (${a.name} and ${b.name})`, t };
+  }).filter(Boolean);
 }
 
 /* Rules that belong to one spread. Wording is our own; conventions commonly taught today. */
@@ -159,9 +171,10 @@ function spreadTotal(entries){
 }
 
 /* Everything the reading says about the spread as a set. Returns [{why, t}]. */
-function thread(sp, entries){
+function thread(sp, entries, bridgeTable){
   const out = [], X = A(), n = entries.length;
   const st = story(sp, entries); if (st) out.push(st);
+  out.push(...bridges(sp, entries, bridgeTable));
   out.push(...spreadRules(sp, entries));
   const els = entries.map(e => e.card.astro && e.card.astro.el).filter(Boolean);
 
@@ -227,15 +240,16 @@ function thread(sp, entries){
   return out;
 }
 
-/* The whole reading for a finished (or partly finished) spread. entries = st.table.map(deck.entry). */
-function compose(sp, entries){
+/* The whole reading for a finished (or partly finished) spread. entries = st.table.map(deck.entry);
+   bridgeTable = TD.BRIDGES when the page has loaded it. */
+function compose(sp, entries, bridgeTable){
   const walk = entries.map((e, k) => {
     const role = roleOf(sp, k);
     const lead = role === 'house' ? `${sp.pos[k].name} (${area(sp, k)})` : role === 'card' ? sp.pos[k].name : ROLE_LEAD[role];
     return { k, role, lead, card: nameOf(e), kw: kw(e), astro: e.card.astro ? e.card.astro.label : '', number: e.card.number };
   });
-  return { walk, thread: thread(sp, entries), angel: angelNumbers(entries), total: spreadTotal(entries) };
+  return { walk, thread: thread(sp, entries, bridgeTable), angel: angelNumbers(entries), total: spreadTotal(entries) };
 }
 
-NS.reading = { ROLES, ROLE_LEAD, ANGEL, STORY, roleOf, compose, thread, story, spreadRules, angelNumbers, spreadTotal };
+NS.reading = { ROLES, ROLE_LEAD, ANGEL, STORY, roleOf, compose, thread, story, bridges, spreadRules, angelNumbers, spreadTotal };
 })(window.TD);

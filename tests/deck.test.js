@@ -141,6 +141,19 @@ module.exports = [
     });
     return `${n} pairs x love, work`;
   }],
+  ['Bridge sentences: one for every pair of the 78 cards, one plain sentence of 15-28 words', () => {
+    const x = load(['js/cards.js', 'js/spreads.js', 'js/data/bridges.js']).TD;
+    const words = s => (String(s).match(/\S+/g) || []).length;
+    let n = 0;
+    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++) {
+      const k = x.pairKey(i, j), t = x.BRIDGES[k];
+      assert(words(t) >= 15 && words(t) <= 28, `${k}: missing or wrong length`);
+      assert(!/—|!/.test(t) && !/[.?]\s+\S/.test(t.trim()), `${k}: not one plain sentence`);
+      n++;
+    }
+    assert(Object.keys(x.BRIDGES).length === n && n === 3003, 'no stray bridge sentences');
+    return `${n} bridges`;
+  }],
   ['Spread analysis: Waite recurrence and the suit/majors conventions', () => {
     const e = (id, reversed) => ({ card: TD.DECK.find(c => c.id === id), reversed });
     const r1 = D.analyse([e('wands-14', false), e('cups-14', false), e('swords-03', false)]);
