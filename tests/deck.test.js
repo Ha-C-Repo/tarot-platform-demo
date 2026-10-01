@@ -121,31 +121,21 @@ module.exports = [
     x.SPREADS.forEach(sp => x.spreadPairs(sp).forEach(([i, j]) => assert(i < sp.n && j < sp.n && i !== j, `${sp.id}: bad pair ${i},${j}`)));
     return `${x.DECK.length} cards x ${keys.length} sections, ${n} pairs`;
   }],
-  ['Love and work pair readings: both cover every pair with a Major Arcana card and every pair of one suit (the rest fall back to the general reading)', () => {
+  ['Love and work pair readings: both cover all 3,003 pairs, no stray keys', () => {
     const x = load(['js/cards.js', 'js/spreads.js', 'js/data/combos-love.js', 'js/data/combos-work.js']).TD;
     const words = s => (String(s).match(/\S+/g) || []).length;
-    const suit = i => x.DECK[i].id.split('-')[0];
-    const pairs = [];
-    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++)
-      if (suit(i) === 'major' || suit(j) === 'major' || suit(i) === suit(j)) pairs.push([i, j]);
-    pairs.forEach(([i, j]) => {
+    let n = 0;
+    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++) {
       const k = x.pairKey(i, j);
       assert(words(x.COMBOS_LOVE[k]) >= 30, `${k}: missing love reading`);
       assert(words(x.COMBOS_WORK[k]) >= 30, `${k}: missing work reading`);
+      n++;
+    }
+    [x.COMBOS_LOVE, x.COMBOS_WORK].forEach(t => {
+      assert(Object.keys(t).length === n && n === 3003, 'no stray love/work pair readings');
+      assert(!/—/.test(Object.values(t).join(' ')), 'em dash in love/work text');
     });
-    const n = pairs.length;
-    assert(n === 231 + 4 * 308 + 4 * 91, `expected 1,827 pairs, got ${n}`);
-    // Pairs of minor cards from different suits are being added in batches: any present must be a real pair, in both tables.
-    const valid = new Set();
-    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++) valid.add(x.pairKey(i, j));
-    const extra = Object.keys(x.COMBOS_LOVE).filter(k => !pairs.some(([i, j]) => x.pairKey(i, j) === k));
-    extra.forEach(k => {
-      assert(valid.has(k), `${k}: not a pair key`);
-      assert(words(x.COMBOS_LOVE[k]) >= 30 && words(x.COMBOS_WORK[k]) >= 30, `${k}: love or work reading missing`);
-    });
-    assert(Object.keys(x.COMBOS_WORK).length === Object.keys(x.COMBOS_LOVE).length, 'love and work cover the same pairs');
-    [x.COMBOS_LOVE, x.COMBOS_WORK].forEach(t => assert(!/—/.test(Object.values(t).join(' ')), 'em dash in love/work text'));
-    return `${n} pairs x love, work, plus ${extra.length} of 1,176 cross-suit pairs`;
+    return `${n} pairs x love, work`;
   }],
   ['Bridge sentences: one for every pair of the 78 cards, one plain sentence of 15-28 words', () => {
     const x = load(['js/cards.js', 'js/spreads.js', 'js/data/bridges.js']).TD;
