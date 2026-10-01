@@ -98,6 +98,33 @@ module.exports = [
       assert(p.length === 2 && p[0][0] === 0 && p[0][1] === 1 && p[1][0] === 1 && p[1][1] === 2 && p.every(x => x[2]), `${id}: ${JSON.stringify(p)}`);
     });
   }],
+  ['Reading it through: one story sentence walks every multi-position spread in order, naming each card', () => {
+    ['ppf', 'soa', 'love', 'fullmoon', 'celtic'].forEach(id => {
+      const sp = TD.spreadById(id), es = TD.deck.shuffleCards(TD.deck.fresh()).slice(0, sp.n).map(TD.deck.entry);
+      const s = TD.reading.story(sp, es);
+      assert(s && s.t, `${id}: no story`);
+      es.forEach(e => assert(s.t.includes(e.card.name), `${id}: story leaves out ${e.card.name}`));
+      assert(!/\bthe The\b|undefined/.test(s.t), `${id}: ${s.t}`);
+    });
+    const t = TD.reading.story(TD.spreadById('ppf'), [E('major-10'), E('cups-04', true), E('major-00')]).t;
+    assert(t === 'From the Wheel of Fortune (turning) through the Four of Cups reversed (the offer you finally notice), this is moving toward The Fool (beginnings).', t);
+  }],
+  ['Reading it through: spread rules (zodiac houses, love, advice, full moon, Celtic Cross ending)', () => {
+    const R = TD.reading, Z = TD.spreadById('zodiac');
+    const z = R.spreadRules(Z, ['wands-02', 'major-05', 'cups-02', 'cups-03', 'wands-05', 'pentacles-08', 'swords-02', 'cups-05', 'wands-08', 'pentacles-02', 'swords-05', 'cups-08'].map(id => E(id)));
+    assert(z.some(x => /^At home in the 2nd house$/.test(x.why)), 'The Hierophant (Taurus) at home in the 2nd house (Taurus)');
+    assert(z.some(x => x.why === 'Major Arcana in the 2nd house'), 'Majors by house');
+    const love = R.spreadRules(TD.spreadById('love'), [E('cups-02'), E('major-06'), E('cups-13', true), E('wands-03'), E('cups-10')]);
+    assert(love.some(x => /both Water/.test(x.why)) && love.some(x => x.why === 'One side reversed') && love.some(x => x.why === 'A court card in their place'), 'love rules');
+    const soa = R.spreadRules(TD.spreadById('soa'), [E('cups-02'), E('wands-05'), E('major-14', true)]);
+    assert(soa.length === 2, 'advice Major and reversed');
+    const fm = R.spreadRules(TD.spreadById('fullmoon'), [E('major-02'), E('wands-03', true), E('major-18'), E('cups-01')]);
+    assert(fm.some(x => /Moon's own cards/.test(x.why) && /The High Priestess and The Moon/.test(x.t)) && fm.some(x => /release is reversed/.test(x.why)), 'full moon rules');
+    const cc = R.spreadRules(TD.spreadById('celtic'), ['cups-02', 'wands-05', 'major-01', 'swords-04', 'pentacles-06', 'cups-07', 'major-08', 'swords-09', 'cups-04', 'cups-12'].map(id => E(id)));
+    assert(cc.some(x => x.why === 'A court card in the final place') && cc.some(x => /both Water/.test(x.why)), 'Celtic Cross ending');
+    const big = R.thread(TD.spreadById('celtic'), ['cups-02', 'cups-03', 'wands-05', 'major-01', 'swords-04', 'pentacles-06', 'cups-07', 'major-08', 'swords-09', 'cups-12'].map(id => E(id)));
+    assert(!big.some(x => /^\w+ twice$/.test(x.why)), 'no "twice" notes in a 10-card spread');
+  }],
   ['Reading it through: time runs past to future (rising numbers, orientation turning, elements opposed)', () => {
     const sp = TD.spreadById('ppf');
     const up = TD.reading.thread(sp, [E('wands-01', true), E('cups-05'), E('swords-10')]);

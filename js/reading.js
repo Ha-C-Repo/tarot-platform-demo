@@ -5,14 +5,19 @@
 
    METHOD, all rule-based and the same for everyone who draws the same cards in the same places:
    1. Position by position: each position has a role (past, obstacle, advice, ...) and the card's
-      own keywords are read in that role.
+      own keywords are read in that role; zodiac houses add the house's area of life. Then one
+      sentence walks the spread in order (STORY), with each card named and its first keyword.
    2. Elements: the element that leads, any element missing (four cards or more), and the Golden
       Dawn elemental dignities between cards the spread pairs up (opposites weaken each other).
    3. Movement (spreads that run through time): whether the card numbers rise or fall, and whether
       the cards turn upright or reversed along the way.
-   4. Astrology: a sign or planet that comes up more than once.
+   4. Astrology: a sign or planet that comes up more than once (three times or more in spreads over five cards).
    5. Repeated numbers ("angel numbers"): two or more cards with the same number, read as 33, 333 ...
-   6. The spread's total: all card numbers added, reduced while above 22, named as a Major Arcana card
+   6. Spread rules (spreadRules): zodiac Majors by house and cards at home in their own sign; love
+      you-and-them element, orientation and a court card in their place; the advice card in
+      situation-obstacle-advice; the Moon's cards and the release card in the full moon; a court
+      card or a shared element at the end of the Celtic Cross.
+   7. The spread's total: all card numbers added, reduced while above 22, named as a Major Arcana card
       (22 is The Fool). Court cards carry no number. 11 and 22 are flagged as master numbers.
    Wording is written for this demo; a live site replaces it with the reader's own. */
 window.TD = window.TD || {};
@@ -43,6 +48,81 @@ function kw(e){ return (e.reversed ? e.card.rev : e.card.up).split(',').slice(0,
 function nameOf(e){ return e.card.name + (e.reversed ? ', reversed' : ''); }
 function list(xs){ return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]; }
 const TIMES = ['', 'once', 'twice', 'three times', 'four times', 'five times'];
+
+/* A card as it reads inside a sentence: "the Four of Pentacles reversed (a grip loosening)".
+   Minor cards take "the"; Major Arcana names carry their own article where they have one. */
+function ref(e){
+  const c = e.card, first = (e.reversed ? c.rev : c.up).split(',')[0].trim();
+  return `${c.arcana !== 'major' || c.name === 'Wheel of Fortune' ? 'the ' : ''}${c.name}${e.reversed ? ' reversed' : ''} (${first})`;
+}
+/* Short names for the twelve houses' areas of life, to sit inside sentences (the full notes are in spreads.js). */
+const HOUSE_AREA = ['self', 'money', 'communication', 'home', 'creativity and romance', 'daily work and health',
+  'partnership', 'shared money and change', 'travel and belief', 'career', 'friends and groups', 'rest and the hidden'];
+const area = (sp, k) => HOUSE_AREA[k];
+const ord = (sp, k) => sp.pos[k].name.split(' ')[0];
+
+/* One sentence that walks the spread in order, per spread. r = role -> ref(entry). */
+const STORY = {
+  ppf: r => `From ${r.past} through ${r.present}, this is moving toward ${r.future}.`,
+  soa: r => `Where you stand is ${r.present}. In the way is ${r.obstacle}. The advice is ${r.advice}.`,
+  love: r => `You bring ${r.self}; they bring ${r.other}; between you is ${r.connection}. In the way is ${r.obstacle}, and it can go toward ${r.outcome}.`,
+  fullmoon: r => `This full moon brings ${r.culmination} to a head. Release ${r.release}, give thanks for ${r.gratitude}, and carry ${r.carry} into the next cycle.`,
+  celtic: r => `At the heart is ${r.present}, crossed by ${r.obstacle}, with ${r.aim} as what you are reaching for. Underneath lies ${r.foundation}; passing away behind you is ${r.past}; coming in is ${r.future}. You meet it as ${r.self}, surrounded by ${r.environment}, with ${r.hopes} as your hope or fear. It points toward ${r.outcome}.`
+};
+function story(sp, entries){
+  const roles = ROLES[sp.id], make = STORY[sp.id];
+  if (!roles || !make || entries.length < roles.length) return null;
+  const r = {}; roles.forEach((role, k) => r[role] = ref(entries[k]));
+  return { why: 'The story', t: make(r) };
+}
+
+/* Rules that belong to one spread. Wording is our own; conventions commonly taught today. */
+function spreadRules(sp, entries){
+  const out = [], at = role => entries[(ROLES[sp.id] || []).indexOf(role)];
+  if (sp.id === 'zodiac') {
+    const maj = entries.map((e, k) => [e, k]).filter(([e]) => e.card.arcana === 'major');
+    if (maj.length && maj.length < entries.length)
+      out.push({ why: `Major Arcana in the ${list(maj.map(([, k]) => ord(sp, k)))} house${maj.length > 1 ? 's' : ''}`,
+        t: `The biggest themes sit in ${list(maj.map(([, k]) => area(sp, k)))}: give those parts of life the most attention.` });
+    entries.forEach((e, k) => {
+      const houseSign = sp.pos[k].name.split('· ')[1], a = e.card.astro;
+      if (a && a.sign && a.sign === houseSign)
+        out.push({ why: `At home in the ${ord(sp, k)} house`, t: `${e.card.name} belongs to ${houseSign}, the sign of its own house, so it speaks especially clearly about ${area(sp, k)}.` });
+    });
+  }
+  if (sp.id === 'love') {
+    const you = at('self'), them = at('other');
+    if (you && them) {
+      const a = you.card.astro.el, b = them.card.astro.el;
+      if (a && a === b) out.push({ why: `You and them: both ${a}`,
+        t: `You meet on the same ground, ${A().EL_MEANING[a]}, which makes understanding easier and means you may share the same blind spots.` });
+      if (you.reversed !== them.reversed) out.push({ why: `One side reversed`,
+        t: `${(you.reversed ? you : them).card.name} is reversed in ${you.reversed ? 'your' : 'their'} place: energy may be flowing more freely on one side than the other right now.` });
+      if (them.card.astro.kind === 'court') out.push({ why: 'A court card in their place',
+        t: `${them.card.name} may describe the other person directly: their manner, or the role they are playing in this.` });
+    }
+  }
+  if (sp.id === 'soa') {
+    const adv = at('advice');
+    if (adv && adv.card.arcana === 'major') out.push({ why: 'The advice is a Major Arcana card', t: 'It asks for a real shift in approach, not a small fix.' });
+    if (adv && adv.reversed) out.push({ why: 'The advice is reversed', t: 'The step may be to ease off, undo or stop something, rather than add more.' });
+  }
+  if (sp.id === 'fullmoon') {
+    const moon = entries.filter(e => e.card.astro.planet === 'Moon' || e.card.id === 'major-18');
+    if (moon.length) out.push({ why: `The Moon's own card${moon.length > 1 ? 's' : ''}`,
+      t: `${list(moon.map(e => e.card.name))} ${moon.length > 1 ? 'belong' : 'belongs'} to the Moon, fitting for a moon reading: trust what you sense as much as what you can prove.` });
+    const rel = at('release');
+    if (rel && rel.reversed) out.push({ why: 'The card to release is reversed', t: 'Letting go may already be underway, or it may be harder than it looks: be patient with it.' });
+  }
+  if (sp.id === 'celtic') {
+    const end = at('outcome'), hope = at('hopes');
+    if (end && end.card.astro.kind === 'court') out.push({ why: 'A court card in the final place',
+      t: `${end.card.name} often points to a person who will carry the outcome, or a role you will need to step into.` });
+    if (end && hope && end.card.astro.el && end.card.astro.el === hope.card.astro.el) out.push({ why: `Hopes or fears and the outcome: both ${end.card.astro.el}`,
+      t: 'What you hope for or fear is close to where this is heading, so it is worth knowing which of the two it is.' });
+  }
+  return out;
+}
 
 /* Repeated numbers. */
 const ANGEL = {
@@ -81,6 +161,8 @@ function spreadTotal(entries){
 /* Everything the reading says about the spread as a set. Returns [{why, t}]. */
 function thread(sp, entries){
   const out = [], X = A(), n = entries.length;
+  const st = story(sp, entries); if (st) out.push(st);
+  out.push(...spreadRules(sp, entries));
   const els = entries.map(e => e.card.astro && e.card.astro.el).filter(Boolean);
 
   // Elements that lead, and elements missing.
@@ -128,19 +210,20 @@ function thread(sp, entries){
     if (!p && f) out.push({ why: 'Upright behind, reversed ahead', t: 'The past card flowed and the future card is reversed: watch for momentum stalling, and give it attention early rather than late.' });
   }
 
-  // Astrology: a sign or planet that comes up more than once.
+  // Astrology: a sign or planet that comes up more than once (three or more in big spreads).
   const bySign = {}, byPlanet = {};
   entries.forEach(e => {
     const a = e.card.astro; if (!a) return;
     if (a.sign) (bySign[a.sign] = bySign[a.sign] || []).push(e.card.name);
     if (a.planet) (byPlanet[a.planet] = byPlanet[a.planet] || []).push(e.card.name);
   });
-  Object.keys(bySign).filter(s => bySign[s].length >= 2).forEach(s => out.push({
+  const rep = n <= 5 ? 2 : 3;                         // in big spreads a pair of repeats is chance
+  Object.keys(bySign).filter(s => bySign[s].length >= rep).forEach(s => out.push({
     why: `${s} ${TIMES[bySign[s].length] || bySign[s].length + ' times'}`,
     t: `${list(bySign[s])} ${bySign[s].length === 2 ? "both" : "all"} fall in ${s}, ${X.signEl(s) === "Air" || X.signEl(s) === "Earth" ? "an" : "a"} ${X.signEl(s)} sign: its themes are underlined in this reading.` }));
-  Object.keys(byPlanet).filter(p => byPlanet[p].length >= 2).forEach(p => out.push({
+  Object.keys(byPlanet).filter(p => byPlanet[p].length >= rep).forEach(p => out.push({
     why: `${p} ${TIMES[byPlanet[p].length] || byPlanet[p].length + ' times'}`,
-    t: `${list(byPlanet[p])} share ${p}: the same planetary note sounds more than once.` }));
+    t: `${list(byPlanet[p])} share ${p === 'Sun' || p === 'Moon' ? 'the ' + p : p}: the same planetary note sounds more than once.` }));
   return out;
 }
 
@@ -148,11 +231,11 @@ function thread(sp, entries){
 function compose(sp, entries){
   const walk = entries.map((e, k) => {
     const role = roleOf(sp, k);
-    const lead = role === 'house' ? sp.pos[k].name : role === 'card' ? sp.pos[k].name : ROLE_LEAD[role];
+    const lead = role === 'house' ? `${sp.pos[k].name} (${area(sp, k)})` : role === 'card' ? sp.pos[k].name : ROLE_LEAD[role];
     return { k, role, lead, card: nameOf(e), kw: kw(e), astro: e.card.astro ? e.card.astro.label : '', number: e.card.number };
   });
   return { walk, thread: thread(sp, entries), angel: angelNumbers(entries), total: spreadTotal(entries) };
 }
 
-NS.reading = { ROLES, ROLE_LEAD, ANGEL, roleOf, compose, thread, angelNumbers, spreadTotal };
+NS.reading = { ROLES, ROLE_LEAD, ANGEL, STORY, roleOf, compose, thread, story, spreadRules, angelNumbers, spreadTotal };
 })(window.TD);
