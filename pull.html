@@ -136,7 +136,7 @@ function comboTable(f){
   if (!comboLoading[src]) {
     comboLoading[src] = true;
     const el = document.createElement('script'); el.src = file;
-    el.onload = () => renderReading();
+    el.onload = () => steady(renderReading);
     el.onerror = () => { comboLoading[src] = 'failed'; renderReading(); };
     document.head.appendChild(el);
   }
@@ -381,27 +381,33 @@ function renderAll(){
 }
 
 /* ---------- the three buttons ---------- */
+/* Rebuilding the pile, the buttons and the reading can make the browser's scroll anchoring jump the
+   page (seen in Chrome: up several hundred pixels after every pull). Keep the visitor where they were. */
+function steady(fn){
+  const y = scrollY;
+  fn();
+  if (Math.abs(scrollY - y) > 1) scrollTo({ top: y, behavior: 'instant' });
+}
 function shuffle(){
   if (busy) return;
   busy = true;
   st = D.shuffle(st);                                  // the new order is fixed here, the moment you shuffle
-  renderPile(); renderStatus();                        // cards already pulled stay in their slots
+  steady(() => { renderPile(); renderStatus(); });     // cards already pulled stay in their slots
   $('pile').classList.add('shuffling');
-  setTimeout(() => { $('pile').classList.remove('shuffling'); busy = false; renderStatus(); }, reduced ? 0 : 1500);
+  setTimeout(() => steady(() => { $('pile').classList.remove('shuffling'); busy = false; renderStatus(); }), reduced ? 0 : 1500);
 }
 function pull(){
   const sp = SP();
   if (busy || st.table.length >= sp.n || needSig()) return;
   busy = true;
   const k = st.table.length, c = D.pull(st);
-  renderPile(); renderStatus();
+  steady(() => { renderPile(); renderStatus(); });
   const slot = $('s' + k), done = () => {
     setSlot(k, c, false);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       slot.querySelector('.flip').classList.add('up');
       setTimeout(() => {
-        meta(k, c); renderReading(); busy = false;
-        renderStatus();
+        steady(() => { meta(k, c); renderReading(); busy = false; renderStatus(); });
         if (st.table.length === sp.n) $('reading').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
       }, reduced ? 0 : 650);
     }));
