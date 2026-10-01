@@ -220,9 +220,57 @@ function aspectsHTML(c){
     2&deg; more with the Sun or Moon, the same orbs as the compatibility tool.${c.timeKnown ? '' : ' Faded: involves the Moon with no birth time.'}</p>
     <div class="scrollx"><table class="ctab"><tbody>${rows}</tbody></table></div></div>`;
 }
-const READING_PH = `<div class="ph" style="margin-top:14px"><span class="k">Coming next: the written reading</span>
-  <p>A plain-English paragraph for each planet in its sign and house, the rising sign and the main aspects,
-  written for this site. On a live site the reader can edit every word.</p></div>`;
+/* ---------- the written reading (js/data/natal-text.js, loaded the first time a chart is drawn) ---------- */
+let textState = null;                                     // null: not asked yet, 'loading', 'failed', or loaded
+function natalText(){
+  if (TD.NATAL_TEXT) return TD.NATAL_TEXT;
+  if (!textState) {
+    textState = 'loading';
+    const el = document.createElement('script'); el.src = 'js/data/natal-text.js';
+    const keep = () => { const y = scrollY; go(); if (Math.abs(scrollY - y) > 1) scrollTo({ top: y, behavior: 'instant' }); };   // no jump when it arrives
+    el.onload = keep; el.onerror = () => { textState = 'failed'; keep(); };
+    document.head.appendChild(el);
+  }
+  return null;
+}
+const ORDER = TD.BODIES.map(b => b.key);
+const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+function readingHTML(p, c){
+  const T = natalText();
+  const head = `<div class="eyebrow" style="margin-top:28px">${esc(poss(p.name))} reading</div>`;
+  if (!T) return head + `<div class="res"><p class="note">${textState === 'failed' ? 'The written reading could not be loaded.' : 'Loading the written reading&hellip;'}</p></div>`;
+  const para = t => t ? `<p class="interp">${esc(t)}</p>` : '';
+  const blocks = [];
+  if (c.angles) {
+    const rs = signOf(c.angles.asc);
+    blocks.push(`<div class="res"><h3>Rising sign: ${rs}</h3>${para(T['rising:' + rs])}</div>`);
+  }
+  c.planets.forEach(pl => {
+    const sg = signOf(pl.lon);
+    if (!c.timeKnown && pl.key === 'Moon' && pl.signUncertain) {
+      const [s0, s1] = [signOf(pl.range[0]), signOf(pl.range[1])];
+      blocks.push(`<div class="res"><h3>${pl.glyph} Moon in ${s0} or ${s1}</h3><p class="note">The Moon changed sign on your birthday,
+        so its sign depends on your birth time. Both readings are here; the birth time decides which is yours.</p>
+        <h4>${s0}</h4>${para(T['sign:Moon:' + s0])}<h4>${s1}</h4>${para(T['sign:Moon:' + s1])}</div>`);
+      return;
+    }
+    const where = pl.house ? ` &middot; ${ordinal(pl.house)} house` : '';
+    blocks.push(`<div class="res"><h3>${pl.glyph} ${pl.key} in ${sg}${where}${pl.retro ? ' <span class="pill">retrograde</span>' : ''}</h3>
+      ${para(T[`sign:${pl.key}:${sg}`])}${pl.house ? `<h4>In the ${ordinal(pl.house)} house</h4>${para(T[`house:${pl.key}:${pl.house}`])}` : ''}</div>`);
+  });
+  const asp = N.aspects(c).filter(a => ORDER.includes(a.a) && ORDER.includes(a.b) && !a.uncertain).map(a => {
+    const [x, y] = ORDER.indexOf(a.a) < ORDER.indexOf(a.b) ? [a.a, a.b] : [a.b, a.a];
+    return Object.assign({ x, y, text: T[`aspect:${x}|${y}:${a.type}`] }, a);
+  }).filter(a => a.text);
+  const one = a => `<div class="res"><h3>${G(a.x)} ${a.x} ${a.glyph} ${a.type} ${G(a.y)} ${a.y} <span class="pill">orb ${a.orb.toFixed(1)}&deg;</span></h3>${para(a.text)}</div>`;
+  const TOP = 6;
+  const aspHTML = asp.length ? `<div class="eyebrow" style="margin-top:22px">Aspects, closest first</div>${asp.slice(0, TOP).map(one).join('')}
+    ${asp.length > TOP ? `<details class="more"><summary>${asp.length - TOP} more aspects</summary>${asp.slice(TOP).map(one).join('')}</details>` : ''}` : '';
+  return head + `<p class="note">Sample text written for this demo, the same for everyone with the same placement.
+    ${c.timeKnown ? '' : 'No birth time: the rising sign, the houses and the Moon&rsquo;s aspects are left out.'}
+    Generational placements (Uranus, Neptune and Pluto by sign) are shared by everyone born within a few years.</p>
+    <div class="grid g2" style="align-items:start">${blocks.join('')}</div>${aspHTML}`;
+}
 
 function go(){
   $('hsysnote').textContent = { placidus: 'Houses: Placidus, the system most apps show, dividing each degree’s own time above and below the horizon into thirds.',
@@ -234,7 +282,7 @@ function go(){
   const c = TD.chart(p.input);
   $('top').innerHTML = topHTML(p, c);
   $('detail').innerHTML = `<div class="grid g2" style="margin-top:6px;align-items:start">${positionsHTML(c)}<div>${housesHTML(c)}${balanceHTML(c)}</div></div>
-    ${aspectsHTML(c)}${READING_PH}`;
+    ${aspectsHTML(c)}${readingHTML(p, c)}`;
   wheel(c);
 }
 go();

@@ -49,5 +49,18 @@ module.exports = [
     });
     const sunMars = list.find(a => a.a === 'Sun' && a.b === 'Mars');
     assert(sunMars && sunMars.type === 'sextile', 'Sun 19 Cancer sextile Mars 19 Taurus');
+  }],
+  ['Written reading: a text for every planet in every sign and house, every rising sign and every aspect between two planets', () => {
+    const X = load(['js/astro.js', 'js/data/natal-text.js']).TD, T = X.NATAL_TEXT;
+    const P = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    const words = s => (String(s).match(/\S+/g) || []).length, keys = [];
+    P.forEach(p => { X.SIGNS.forEach(s => keys.push([`sign:${p}:${s}`, 70])); for (let h = 1; h <= 12; h++) keys.push([`house:${p}:${h}`, 60]); });
+    X.SIGNS.forEach(s => keys.push([`rising:${s}`, 90]));
+    P.forEach((a, i) => P.slice(i + 1).forEach(b => ['conjunction', 'sextile', 'square', 'trine', 'opposition'].forEach(t => keys.push([`aspect:${a}|${b}:${t}`, 50]))));
+    keys.forEach(([k, min]) => assert(words(T[k]) >= min, `${k}: missing or short`));
+    assert(Object.keys(T).length === keys.length && keys.length === 477, 'no stray keys');
+    const all = Object.values(T).join(' ');
+    assert(!/—|!/.test(all) && !/\b(he|she|his|her|him)\b/i.test(all), 'no em dash, exclamation or gendered pronoun');
+    return `${keys.length} texts`;
   }]
 ];
