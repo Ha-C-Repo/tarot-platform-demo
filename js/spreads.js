@@ -37,6 +37,7 @@ const WAITE = {
 
 NS.SPREADS = [
   { id: 'ppf', name: 'Past, present, future', n: 3, layout: 'row',
+    pairs: [[0, 1, 'How the past led here'], [1, 2, 'Where this leads next']],
     blurb: 'Three cards: where the question came from, where it stands, where it is heading.',
     pos: [P('Past', 'What has shaped the question: the ground it grew from.'),
           P('Present', 'Where things stand now.'),
@@ -52,6 +53,7 @@ NS.SPREADS = [
     pos: [P('The answer', 'A plain answer first, then the card’s meaning for the detail.')] },
 
   { id: 'soa', name: 'Situation, obstacle, advice', n: 3, layout: 'row',
+    pairs: [[0, 1, 'What is blocking the situation'], [1, 2, 'How the advice answers the obstacle']],
     blurb: 'Three cards for a problem you are in the middle of.',
     pos: [P('Situation', 'Where things stand.'),
           P('Obstacle', 'What is in the way.'),

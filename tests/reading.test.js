@@ -92,6 +92,12 @@ module.exports = [
     });
     return `${TD.SPREADS.length} spreads x 200 random reads, ${lines} lines`;
   }],
+  ['Three-card spreads read their pairs as transitions: first to second, second to third, never first to last', () => {
+    ['ppf', 'soa'].forEach(id => {
+      const p = TD.spreadPairs(TD.spreadById(id));
+      assert(p.length === 2 && p[0][0] === 0 && p[0][1] === 1 && p[1][0] === 1 && p[1][1] === 2 && p.every(x => x[2]), `${id}: ${JSON.stringify(p)}`);
+    });
+  }],
   ['Reading it through: time runs past to future (rising numbers, orientation turning, elements opposed)', () => {
     const sp = TD.spreadById('ppf');
     const up = TD.reading.thread(sp, [E('wands-01', true), E('cups-05'), E('swords-10')]);
