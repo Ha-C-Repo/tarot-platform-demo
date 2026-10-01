@@ -52,7 +52,7 @@ h1,h2,h3,.dsp{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transfo
 .mark::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--ink)}
 .brand b{font-family:'Anton',Impact,sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:.02em;
   white-space:nowrap;font-weight:400}
-.navlinks{display:flex;gap:20px;font-size:13px;font-weight:600;color:var(--muted);
+.navlinks{display:flex;gap:6px 15px;font-size:13px;font-weight:600;color:var(--muted);
   margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
 .navlinks a:hover{color:var(--text)}
 .navlinks a.on{color:var(--text)}

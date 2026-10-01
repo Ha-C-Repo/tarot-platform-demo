@@ -13,7 +13,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'],
-  ['birthchart.html','Birth chart'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
+  ['birthchart.html','Birth chart'], ['horoscope.html','Horoscope'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
   ['chinese.html','Chinese'], ['maya.html','Maya'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing']
 ];

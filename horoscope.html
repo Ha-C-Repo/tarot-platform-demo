@@ -1,0 +1,211 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Your horoscope — tarot platform demo</title>
+<meta name="description" content="A personal horoscope from your own birth chart: what the planets are doing to your chart today, the dates each contact peaks this month, the year ahead and the retrograde calendar.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/horoscope.html">
+<meta property="og:title" content="Your horoscope — tarot platform demo">
+<meta property="og:description" content="A personal horoscope from your own birth chart: today, the month ahead, the year ahead and the retrograde calendar.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.tr h3{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.when{font-size:12px;color:var(--muted);margin-top:2px}
+.cal td{vertical-align:top}
+.cal details summary{cursor:pointer}
+.cal details p{white-space:normal;margin-top:6px;color:var(--text);font-size:13px;line-height:1.55}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tool &middot; personal, not by sun sign</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Your horoscope</h1>
+  <p class="lede">Worked out from your own birth chart: what today&rsquo;s planets are doing to it, the dates each
+    contact peaks over the coming month, the slow transits of the year ahead and the retrograde calendar.</p>
+
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card pad">
+      <div class="row2">
+        <div><label class="f" for="nm">Name</label><input id="nm" value="You"></div>
+        <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+        <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      <div class="row2" style="margin-top:12px">
+        <div><label class="f" for="day">Horoscope for</label><input id="day" type="date"></div>
+        <div><label class="f" for="hsys">Houses</label><select id="hsys"><option value="placidus">Placidus</option><option value="koch">Koch</option><option value="whole">Whole Sign</option><option value="equal">Equal</option></select></div>
+      </div>
+      <button class="btn primary wide" id="go" style="margin-top:16px">Show my horoscope</button>
+      <p class="note" style="margin-top:10px">Shares your details with the <a href="birthchart.html" style="text-decoration:underline">birth chart</a> page, in this browser only.</p>
+      <div class="warn"><span class="k">Method</span>
+        <p>Planet positions from Astronomy Engine. A transit is a moving planet forming an exact angle (conjunction,
+        sextile, square, trine or opposition) to a point in your birth chart: your Sun to Saturn, and with a birth
+        time your Ascendant and Midheaven. &ldquo;In effect&rdquo; means within 2&deg; (1.5&deg; for Uranus, Neptune and
+        Pluto). Exact dates are found to the minute and shown in your browser&rsquo;s time zone; slow planets can pass
+        the same point up to three times as they turn retrograde. Retrograde stations checked against Swiss
+        Ephemeris to within an hour. The Moon&rsquo;s contacts change every few hours, so the Moon is read by house
+        instead. Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+    </div>
+    <div id="today"></div>
+  </div>
+  <div id="month"></div>
+  <div id="year"></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/transits.js"></script><script src="js/places.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('horoscope.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const X = TD.transits, DAY = 864e5, KEY = 'tarotdemo.natal';
+const G = k => k === 'Ascendant' ? 'AC' : k === 'Midheaven' ? 'MC' : (TD.BODIES.find(b => b.key === k) || {}).glyph || '';
+const AG = t => (TD.ASPECTS.find(a => a.key === t) || {}).glyph || '';
+const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+const fmtD = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtDY = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtT = d => d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const poss = n => /^you$/i.test(String(n).trim()) ? 'Your' : n + '’s';
+
+/* ---------- the form, shared with birthchart.html ---------- */
+let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+if (saved) { $('nm').value = saved.nm || 'You'; $('bd').value = saved.bd || $('bd').value; $('bt').value = saved.bt || '';
+  $('bu').checked = !!saved.bu; $('bt').disabled = !!saved.bu; if (saved.hsys) $('hsys').value = saved.hsys; }
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+$('day').value = iso(new Date());
+const place = TD.places.picker($('bp'), () => go(), saved && saved.place || 'Denver');
+$('bu').addEventListener('change', () => { $('bt').disabled = $('bu').checked; go(); });
+['nm', 'bd', 'bt', 'hsys', 'day'].forEach(id => $(id).addEventListener('change', go));
+$('go').onclick = go;
+function read(){
+  const b = $('bd').value, pl = place.get();
+  if (!b || !pl) return null;
+  const [y, mo, d] = b.split('-').map(Number);
+  const known = !$('bu').checked && !!$('bt').value;
+  const [h, mi] = known ? $('bt').value.split(':').map(Number) : [12, 0];
+  try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, saved || {}, { nm: $('nm').value, bd: b, bt: $('bt').value, bu: $('bu').checked, hsys: $('hsys').value, place: pl.name }))); } catch (e) {}
+  return { name: $('nm').value || 'You', input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: $('hsys').value } };
+}
+/* The moment the horoscope is for: now if the chosen day is today, else noon local time that day. */
+function moment(){
+  const [y, m, d] = $('day').value.split('-').map(Number), now = new Date();
+  return iso(now) === $('day').value ? now : new Date(y, m - 1, d, 12, 0);
+}
+
+/* ---------- texts (js/data/transit-text.js, loaded on first use) ---------- */
+let textState = null;
+function texts(){
+  if (TD.TRANSIT_TEXT) return TD.TRANSIT_TEXT;
+  if (!textState) {
+    textState = 'loading';
+    const el = document.createElement('script'); el.src = 'js/data/transit-text.js';
+    const keep = () => { const y = scrollY; go(); if (Math.abs(scrollY - y) > 1) scrollTo({ top: y, behavior: 'instant' }); };
+    el.onload = keep; el.onerror = () => { textState = 'failed'; keep(); };
+    document.head.appendChild(el);
+  }
+  return null;
+}
+const T = k => (TD.TRANSIT_TEXT || {})[k] || '';
+const tkey = h => `transit:${h.mover}:${h.natal}:${h.kind}`;
+const para = t => t ? `<p class="interp">${esc(t)}</p>` : (textState === 'failed' ? '' : '<p class="note">Loading&hellip;</p>');
+const title = h => `${G(h.mover)} ${h.mover} ${AG(h.type)} ${h.type} your ${G(h.natal)} ${h.natal}`;
+
+/* ---------- today ---------- */
+function todayHTML(p, c, when){
+  const parts = [];
+  if (c.cusps) {
+    const sun = X.houseNow(c, 'Sun', when), moon = X.houseNow(c, 'Moon', when);
+    parts.push(`<div class="res"><h3>${G('Moon')} The Moon in your ${ordinal(moon.house)} house</h3>
+      <p class="when">Until ${moon.next ? fmtT(moon.next) : 'later'}</p>${para(T('moonhouse:' + moon.house))}</div>`);
+    parts.push(`<div class="res"><h3>${G('Sun')} The Sun in your ${ordinal(sun.house)} house</h3>
+      <p class="when">Until ${sun.next ? fmtDY(sun.next) : 'later'}</p>${para(T('sunhouse:' + sun.house))}</div>`);
+  } else {
+    parts.push('<div class="res"><p class="note">No birth time: houses, the Ascendant and the Midheaven are left out, so the Moon and Sun by house are not shown.</p></div>');
+  }
+  const act = X.active(c, when);
+  const cards = act.map(a => {
+    const span = X.FAST[a.mover] ? 12 * DAY : 400 * DAY;
+    const ps = X.passes(c, a, new Date(+when - span), new Date(+when + span));
+    const dates = ps.length ? `Exact ${ps.map(h => (X.FAST[h.mover] ? fmtD : fmtDY)(h.time) + (h.retro ? ' (retrograde)' : '')).join(', ')}.` : '';
+    return `<div class="res tr"><h3>${title(a)}</h3>
+      <p class="when">${a.applying ? 'Building' : 'Easing'}, ${a.orb.toFixed(1)}&deg; from exact. ${dates}</p>${para(T(tkey(a)))}</div>`;
+  });
+  return `<div class="res"><h3>${esc(poss(p.name))} horoscope for ${fmtDY(when)}</h3>
+      <p class="note">${act.length} transit${act.length === 1 ? '' : 's'} in effect${c.timeKnown ? '' : ' (no birth time: the Moon in your chart is approximate)'}.</p></div>
+    ${parts.join('')}${cards.join('') || '<div class="res"><p class="note">No planet is within orb of your chart today: a quiet day.</p></div>'}`;
+}
+
+/* ---------- the month ahead ---------- */
+function monthHTML(c, when){
+  const hs = X.hits(c, when, new Date(+when + 30 * DAY));
+  if (!hs.length) return '';
+  const rows = hs.map(h => `<tr><td>${fmtT(h.time)}</td><td><details><summary>${title(h)}${h.retro ? ' <span class="pill">retrograde</span>' : ''}</summary>${para(T(tkey(h)))}</details></td></tr>`).join('');
+  return `<div class="eyebrow" style="margin-top:26px">The next 30 days</div>
+    <div class="res"><p class="note">Every exact contact between the moving planets and your chart, in date order. Tap one for its reading.</p>
+    <div class="scrollx"><table class="ctab cal"><tbody>${rows}</tbody></table></div></div>`;
+}
+
+/* ---------- the year ahead: slow transits and the retrograde calendar ---------- */
+function yearHTML(c, when){
+  const end = new Date(+when + 365 * DAY);
+  const hs = X.hits(c, when, end, { movers: ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] });
+  const groups = {};
+  hs.forEach(h => { const k = h.mover + '|' + h.natal + '|' + h.type; (groups[k] = groups[k] || []).push(h); });
+  const slow = Object.values(groups).sort((a, b) => a[0].time - b[0].time).map(g => {
+    const h = g[0];
+    return `<div class="res tr"><h3>${title(h)}</h3>
+      <p class="when">Exact ${g.map(x => fmtDY(x.time) + (x.retro ? ' (retrograde)' : '')).join(', ')}</p>${para(T(tkey(h)))}</div>`;
+  }).join('');
+  // Retrograde periods: walk each planet's stations in order, from 200 days back (longer than any
+  // retrograde) so a period already under way has its start; keep periods that end after today.
+  const st = X.stations(new Date(+when - 200 * DAY), end), periods = [];
+  [...new Set(st.map(s => s.planet))].forEach(pl => {
+    let open = null, first = true;
+    st.filter(s => s.planet === pl).forEach(s => {
+      if (s.kind === 'retrograde') open = s.time;
+      else { periods.push({ planet: pl, from: open || (first ? null : undefined), to: s.time }); open = null; }
+      first = false;
+    });
+    if (open) periods.push({ planet: pl, from: open, to: null });
+  });
+  const retro = periods.filter(r => !r.to || r.to >= when).sort((a, b) => (a.from || when) - (b.from || when)).map(r => {
+    const now = (!r.from || r.from <= when) && (!r.to || r.to >= when);
+    return `<tr><td>${G(r.planet)} ${r.planet}${now ? ' <span class="pill warn">now</span>' : ''}</td>
+      <td>${r.from ? fmtDY(r.from) : 'already'} &ndash; ${r.to ? fmtDY(r.to) : 'beyond the year'}</td>
+      <td><details><summary>What it means</summary>${para(T('retro:' + r.planet))}</details></td></tr>`;
+  }).join('');
+  return `<div class="eyebrow" style="margin-top:26px">The year ahead</div>
+    ${slow ? `<p class="note" style="margin:6px 0">The slow planets, Jupiter to Pluto, touching your chart in the next twelve months. These set the
+      background of the year; most pass the same point more than once.</p><div class="grid g2" style="align-items:start">${slow}</div>`
+      : '<div class="res"><p class="note">No slow planet touches your chart exactly in the next twelve months.</p></div>'}
+    <div class="res"><h3>Retrograde calendar</h3><p class="note">When each planet appears to move backwards, from station to station, in your time zone.</p>
+    <div class="scrollx"><table class="ctab cal"><tbody>${retro}</tbody></table></div></div>`;
+}
+
+let runId = 0;
+function go(){
+  const p = read();
+  if (!p) { $('today').innerHTML = '<div class="res"><p class="note">Pick a birth place from the list to see your horoscope.</p></div>'; $('month').innerHTML = $('year').innerHTML = ''; return; }
+  texts();
+  const c = TD.chart(p.input), when = moment(), id = ++runId;
+  $('today').innerHTML = todayHTML(p, c, when);
+  $('month').innerHTML = '<div class="res" style="margin-top:26px"><p class="note">Working out the month and the year ahead&hellip;</p></div>';
+  $('year').innerHTML = '';
+  // The longer searches run after the first paint so the page answers at once.
+  setTimeout(() => { if (id !== runId) return; $('month').innerHTML = monthHTML(c, when);
+    setTimeout(() => { if (id !== runId) return; $('year').innerHTML = yearHTML(c, when); }, 0); }, 30);
+}
+go();
+</script></body></html>

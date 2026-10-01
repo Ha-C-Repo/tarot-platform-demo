@@ -287,6 +287,7 @@ NS.tzOffsetMs = tzOffsetMs;
 NS.localToUTC = localToUTC;
 NS.fmtOffset = fmtOffset;
 NS.planetPositions = positions;
+NS.eclLon = eclLon;
 NS.meanNode = meanNode;
 NS.meanLilith = meanLilith;
 NS.ascFor = ascFor;
