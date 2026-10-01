@@ -67,7 +67,7 @@ function panel(){
       <div class="seg" role="group" aria-label="Viewing as">
         <button type="button" data-tier="free" aria-pressed="${brand.tier==='free'}">Free visitor</button>
         <button type="button" data-tier="sub" aria-pressed="${brand.tier==='sub'}">Subscriber</button></div>
-      <p class="note" style="margin:0">Free shows the ads, the members' lock and the once-a-day card pull.
+      <p class="note" style="margin:0">Free shows the ads and the members' lock. Card readings are unlimited in both views.
         Subscriber removes the ads and unlocks everything.</p></div>
     <button class="btn wide" id="dtour" style="font-size:13px;padding:10px;margin-bottom:8px">Take the tour</button>
     <button class="btn wide" id="dreset" style="font-size:13px;padding:10px">Reset demo data</button>

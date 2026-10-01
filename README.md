@@ -17,7 +17,7 @@ so it works at any depth on the published site, and is not meant to be opened fr
 | Where | What it does |
 |---|---|
 | **Customise** (bottom right) | Practice name, role, city, reading price, one of four palettes: the whole site rebrands live. |
-| **Viewing as** (in Customise) | *Subscriber* (default): no ads, everything unlocked, unlimited readings. *Free visitor*: ad slots, the members' Vault locked, one card reading a day. Flip it in front of a prospect. |
+| **Viewing as** (in Customise) | *Subscriber* (default): no ads, everything unlocked, unlimited readings. *Free visitor*: ad slots and the members' Vault locked. Card readings are unlimited in both views, so a prospect can try every spread. Flip it in front of a prospect. |
 | **Take the tour** (home page, and in Customise) | 12-step guided tour across the pages, ending on Customise. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
 
 Everything is stored in that browser only, and cleared by **Reset demo data**.

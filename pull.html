@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
-  <div class="eyebrow"><span class="freeonly">Free &middot; one reading a day</span><span class="subonly">Members &middot; as many readings as you like</span></div>
+  <div class="eyebrow"><span class="freeonly">Free &middot; as many readings as you like</span><span class="subonly">Members &middot; as many readings as you like</span></div>
   <h1 style="font-size:clamp(34px,6vw,54px)">Shuffle,<br><span class="prism">then pull</span></h1>
   <p class="lede" id="drawmeta">Choose a spread and hold your question in mind. Shuffle as many times as feels right,
     or not at all, then pull the cards one at a time.</p>
@@ -53,9 +53,6 @@
     </div>
     <div class="slotwrap">
       <div class="slots" id="slots"></div>
-      <div id="lock" class="lockmsg hide">That is today&rsquo;s free reading. Free visitors get one a day, and the
-        cards above stay until tomorrow. Subscribers shuffle and pull as often as they like: switch the view to
-        <b>Subscriber</b> in <b>Customise</b>, or use <b>Reset demo data</b> there to see the once-a-day lock again.</div>
     </div>
   </div>
 
@@ -90,13 +87,9 @@
 <script>
 TD.chrome('pull.html');
 const D = TD.deck;
-const FREEKEY = 'tarotdemo.freeday';
-const today = () => new Date().toDateString();
 let st = D.state(), busy = false;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const freeUsed = () => { try { return localStorage.getItem(FREEKEY) === today(); } catch (e) { return false; } };
-const locked = () => !TD.isSubscriber() && freeUsed();
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* A link such as pull.html?spread=fullmoon opens that spread, unless a reading is already on the table. */
@@ -151,15 +144,15 @@ function comboTable(f){
 
 /* ---------- the spread picker ---------- */
 function renderPicker(){
-  const cur = SP(), n = st.table.length, lk = locked();
+  const cur = SP(), n = st.table.length;
   $('spreadpick').innerHTML = TD.SPREADS.map(s =>
-    `<button type="button" data-sp="${s.id}" aria-pressed="${s.id === cur.id}"${busy || lk ? ' disabled' : ''}>${esc(s.name)}</button>`).join('');
+    `<button type="button" data-sp="${s.id}" aria-pressed="${s.id === cur.id}"${busy ? ' disabled' : ''}>${esc(s.name)}</button>`).join('');
   $('spreadpick').querySelectorAll('button').forEach(b => b.onclick = () => chooseSpread(b.dataset.sp));
   let blurb = esc(cur.blurb);
   if (cur.moon) blurb += ' ' + moonLine();
   if (cur.yesno) blurb += ' <b>' + cur.rule.replace(/’/g, '&rsquo;') + '</b>';
   $('spreadblurb').innerHTML = blurb;
-  $('spreadlock').classList.toggle('hide', !n || lk);
+  $('spreadlock').classList.toggle('hide', !n);
   $('sigrow').classList.toggle('hide', !cur.significator);
   if (cur.significator) renderSigSelect();
 }
@@ -172,7 +165,7 @@ function moonLine(){
 let sigBuilt = false;
 function renderSigSelect(){
   const sel = $('sigsel');
-  sel.disabled = !!st.table.length || busy || locked();
+  sel.disabled = !!st.table.length || busy;
   if (sigBuilt) { sel.value = st.sig ? String(st.sig.i) : ''; return; }
   sigBuilt = true;
   const courts = TD.DECK.map((c, i) => [c, i]).filter(([c]) => /^(Page|Knight|Queen|King) of/.test(c.name));
@@ -203,13 +196,12 @@ function ago(ms){
 }
 function needSig(){ return SP().significator && !st.sig; }
 function renderStatus(){
-  const n = st.table.length, N = SP().n, lk = locked();
+  const n = st.table.length, N = SP().n;
   $('deckstat').textContent = `Last shuffled ${ago(st.shuffledAt)}. ` +
     (n >= N ? 'Reading complete.' : needSig() ? 'Choose a Significator to begin.' : n ? `${n} of ${N} cards pulled.` : 'Ready to pull.');
-  $('bpull').disabled = busy || n >= N || !st.deck.length || lk || needSig();
-  $('bshuffle').disabled = busy || lk;
-  $('bgather').disabled = busy || !n || lk;
-  $('lock').classList.toggle('hide', !lk);
+  $('bpull').disabled = busy || n >= N || !st.deck.length || needSig();
+  $('bshuffle').disabled = busy;
+  $('bgather').disabled = busy || !n;
   renderPicker();
 }
 
@@ -388,7 +380,7 @@ function renderAll(){
 
 /* ---------- the three buttons ---------- */
 function shuffle(){
-  if (busy || locked()) return;
+  if (busy) return;
   busy = true;
   st = D.shuffle(st);                                  // the new order is fixed here, the moment you shuffle
   renderPile(); renderStatus();                        // cards already pulled stay in their slots
@@ -397,7 +389,7 @@ function shuffle(){
 }
 function pull(){
   const sp = SP();
-  if (busy || locked() || st.table.length >= sp.n || needSig()) return;
+  if (busy || st.table.length >= sp.n || needSig()) return;
   busy = true;
   const k = st.table.length, c = D.pull(st);
   renderPile(); renderStatus();
@@ -407,7 +399,6 @@ function pull(){
       slot.querySelector('.flip').classList.add('up');
       setTimeout(() => {
         meta(k, c); renderReading(); busy = false;
-        if (st.table.length === sp.n && !TD.isSubscriber()) { try { localStorage.setItem(FREEKEY, today()); } catch (e) {} }
         renderStatus();
         if (st.table.length === sp.n) $('reading').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
       }, reduced ? 0 : 650);
@@ -429,11 +420,10 @@ function pull(){
   setTimeout(() => { fly.remove(); done(); }, 620);
 }
 function gather(){
-  if (busy || locked() || !st.table.length) return;
+  if (busy || !st.table.length) return;
   st = D.gather(st);
   renderAll();
 }
 $('bshuffle').onclick = shuffle; $('bpull').onclick = pull; $('bgather').onclick = gather;
-document.addEventListener('tierchange', renderStatus);
 renderAll();
 </script></body></html>
