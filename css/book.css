@@ -1,0 +1,127 @@
+/* book.css — the Handbook as a bound spell book: dark tooled cover, parchment pages, crimson rubrics.
+   The pages keep their own paper colours in every site palette; the cover and the controls use the site's tokens. */
+.grimoire{--paper:#F1E7D0;--paper2:#E4D3AE;--ink2:#2A1D14;--ink3:#5C4636;--rubric:#8E1F33;--gilt:#B48A3C;
+  --board:#1B1016;--board2:#0D070A;margin-top:22px}
+.gr-book{position:relative;border-radius:18px;background:radial-gradient(120% 90% at 30% 10%,#2A1822,var(--board) 45%,var(--board2));
+  box-shadow:0 40px 80px -30px #000,inset 0 0 0 1px rgba(180,138,60,.28),inset 0 0 0 7px var(--board2),inset 0 0 0 8px rgba(180,138,60,.22)}
+.gr-book::before{content:'';position:absolute;inset:0;border-radius:18px;pointer-events:none;opacity:.35;
+  background:repeating-radial-gradient(circle at 20% 30%,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+
+/* ---------- the cover ---------- */
+.gr-cover{padding:clamp(18px,4vw,34px)}
+.gr-cframe{position:relative;max-width:560px;margin:0 auto;padding:clamp(26px,6vw,46px) clamp(18px,5vw,40px);text-align:center;
+  border:1px solid rgba(180,138,60,.45);border-radius:10px;box-shadow:inset 0 0 0 6px transparent,inset 0 0 0 7px rgba(180,138,60,.25)}
+.gr-cframe::before,.gr-cframe::after{content:'';position:absolute;width:26px;height:26px;border:1px solid rgba(180,138,60,.6)}
+.gr-cframe::before{top:10px;left:10px;border-right:0;border-bottom:0}
+.gr-cframe::after{bottom:10px;right:10px;border-left:0;border-top:0}
+.gr-sigil{width:min(250px,62vw);height:auto;display:block;margin:0 auto 18px;filter:drop-shadow(0 0 18px rgba(168,85,247,.35))}
+.gr-ctitle{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:clamp(34px,7vw,54px);letter-spacing:.08em;line-height:1;
+  background:linear-gradient(180deg,#F3DFA8,#B48A3C 70%,#7C5A22);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gr-csub{font-family:'CormorantV',Georgia,serif;font-style:italic;font-size:19px;color:#D9C7A3;margin:10px auto 0;max-width:30ch;line-height:1.3}
+.gr-cbtns{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:24px}
+.gr-cbtns .btn{min-width:220px}
+
+/* ---------- inside: bar, pages, footer ---------- */
+.gr-inside{padding:10px}
+.gr-bar,.gr-foot{display:flex;align-items:center;gap:8px;padding:4px 6px;color:#D9C7A3}
+.gr-ib{background:none;border:1px solid rgba(180,138,60,.35);color:#E9DBBB;border-radius:9px;padding:7px 9px;display:inline-flex;align-items:center;gap:6px;
+  font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;line-height:1}
+.gr-ib:hover{border-color:var(--gilt);color:#fff}
+.gr-ib:disabled{opacity:.35;cursor:default}
+.gr-head{flex:1;min-width:0;text-align:center;line-height:1.25}
+.gr-head b{display:block;font-family:'CormorantV',Georgia,serif;font-style:italic;font-weight:600;font-size:16px;color:#F1E3C2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gr-head span{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#B9A47E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:560px){.gr-bar .gr-ib span{display:none}}
+
+.gr-view{position:relative;height:clamp(440px,calc(100svh - 230px),820px);overflow:hidden;padding:30px 34px;border-radius:6px;outline:none;
+  color:var(--ink2);background:radial-gradient(140% 120% at 50% 40%,var(--paper) 55%,var(--paper2));
+  box-shadow:inset 0 0 0 1px rgba(90,60,30,.25),inset 0 0 40px rgba(120,80,30,.18),0 1px 0 #F7EFDC,0 3px 0 #D9C59A,0 5px 0 #CDB585}
+.gr-view:focus-visible{box-shadow:inset 0 0 0 2px var(--a3)}
+.gr-spread .gr-view::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:46px;margin-left:-23px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(80,50,20,.16) 42%,rgba(60,35,15,.3) 50%,rgba(80,50,20,.16) 58%,transparent)}
+@media(max-width:560px){.gr-view{padding:22px 20px;height:calc(100svh - 190px);min-height:420px}}
+.gr-scroll .gr-view{height:auto;overflow:visible}
+.gr-flow{height:100%}
+.gr-scroll .gr-flow{height:auto;max-width:68ch;margin:0 auto}
+@media (prefers-reduced-motion: reduce){.gr-flow{transition:none}}
+.gr-prog{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;color:#B9A47E;letter-spacing:.06em}
+.gr-prog i{display:block;width:min(260px,60%);height:3px;border-radius:3px;background:rgba(180,138,60,.25)}
+.gr-prog i b{display:block;height:100%;border-radius:3px;background:var(--prism);transition:width .3s}
+.gr-turn{padding:9px 12px}
+
+/* ---------- typography on the page ---------- */
+.gr-flow{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-size:18px;line-height:1.55;
+  hyphens:auto;-webkit-hyphens:auto;text-align:justify;text-rendering:optimizeLegibility}
+.gr-flow p{margin:0 0 .7em;orphans:2;widows:2}
+.gr-flow p + p{text-indent:1.3em;margin-top:-.45em}
+.gr-flow p.c,.gr-flow .c{text-align:center;text-indent:0}
+.gr-flow p.r{text-align:right}
+.gr-flow .sc{font-variant:small-caps;letter-spacing:.03em}
+.gr-flow p.hang{padding-left:1.4em;text-indent:-1.4em}
+.gr-flow h3,.gr-flow h4,.gr-flow h5{font-family:'CormorantV',Georgia,serif;font-style:italic;font-weight:600;color:var(--rubric);
+  text-align:center;break-after:avoid;line-height:1.2;margin:1em 0 .5em;text-transform:none;letter-spacing:0}
+.gr-flow h3{font-size:1.35em}.gr-flow h4{font-size:1.15em}.gr-flow h5{font-size:1em}
+.gr-flow blockquote{margin:.6em 1.2em;font-size:.93em}
+.gr-flow table{border-collapse:collapse;margin:.6em auto;font-size:.8em;break-inside:avoid;text-align:left}
+.gr-flow td,.gr-flow th{border-bottom:1px solid rgba(90,60,30,.25);padding:3px 6px;vertical-align:top}
+.gr-flow img{display:block;max-width:100%;max-height:72%;margin:.8em auto;mix-blend-mode:multiply;break-inside:avoid;border-radius:2px}
+.gr-scroll .gr-flow img{max-height:520px}
+.gr-flow img.glyph{display:inline;height:1em;width:auto;margin:0 .1em;vertical-align:-.15em}
+.gr-flow sup.fn{font-size:.62em;color:var(--rubric);font-weight:700;cursor:pointer;padding:0 .15em;font-family:'InterV',sans-serif}
+.gr-flow sup.fn:hover{text-decoration:underline}
+.gr-flow a{color:var(--rubric);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.gr-flow hr{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(90,60,30,.4),transparent);margin:1em 0}
+.gr-flow .sub{font-style:italic;font-size:.9em;color:var(--ink3);text-align:center;text-indent:0;margin-bottom:1.2em}
+.gr-flow section.notes{font-size:.82em;border-top:1px solid rgba(90,60,30,.3);margin-top:1.5em;padding-top:.4em}
+.gr-flow section.notes p{text-indent:0;margin:0 0 .5em;text-align:left}
+.gr-flow section.notes b{color:var(--rubric)}
+.gr-first::first-letter{font-family:'Anton',Impact,sans-serif;float:left;font-size:3.5em;line-height:.85;padding:.05em .08em 0 0;color:var(--rubric)}
+.gr-first{text-indent:0!important}
+
+.gr-chhead,.gr-selhead{text-align:center;margin-bottom:1.2em;break-inside:avoid}
+.gr-chtitle{font-family:'CormorantV',Georgia,serif;font-style:italic;font-weight:600;font-size:1.75em;line-height:1.1;color:var(--ink2);
+  margin:.2em 0 .3em;text-transform:none;letter-spacing:0}
+.gr-chhead::after,.gr-selhead::after{content:'';display:block;width:120px;height:9px;margin:.6em auto 0;
+  background:radial-gradient(circle,var(--rubric) 2.5px,transparent 3px) center/9px 9px no-repeat,linear-gradient(90deg,transparent,rgba(142,31,51,.55),transparent) center/100% 1px no-repeat}
+.gr-kicker{font-family:'InterV',sans-serif;font-size:.6em;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--ink3);text-align:center}
+.gr-selhead p{text-align:center;text-indent:0}
+.gr-small{font-family:'InterV',sans-serif;font-size:.68em;line-height:1.5;color:var(--ink3);text-align:left;text-indent:0!important;hyphens:none}
+
+/* title pages and contents */
+.gr-tp{text-align:center}
+.gr-tp p{text-indent:0}
+.gr-booktitle{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:1.9em;line-height:1;letter-spacing:.03em;color:var(--ink2);margin:.4em 0 .2em}
+.gr-sub{font-style:italic;color:var(--ink3);font-size:.95em}
+.gr-by{font-variant:small-caps;font-size:1.1em;letter-spacing:.05em;margin-top:.8em}
+.gr-with{font-style:italic;font-size:.88em;color:var(--ink3)}
+.gr-ed{font-size:.8em;color:var(--ink3)}
+.gr-orn{color:var(--rubric);margin:.8em 0;display:flex;justify-content:center}
+.gr-intro{text-align:justify!important}
+.gr-begin{font-family:'InterV',sans-serif;font-weight:800;font-size:.75em;letter-spacing:.12em;text-transform:uppercase;color:#FFF5E6;
+  background:var(--rubric);border:0;border-radius:999px;padding:.8em 1.6em;cursor:pointer;margin:.6em 0 .4em}
+.gr-begin:hover{filter:brightness(1.15)}
+.gr-chs{list-style:none;padding:0;margin:0;text-align:left;font-size:.9em}
+.gr-chs li{padding:.18em 0;break-inside:avoid}
+.gr-chs li.gr-g{font-family:'InterV',sans-serif;font-size:.62em;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--ink3);margin-top:.9em}
+.gr-chs a,.gr-list a{color:var(--ink2);text-decoration:none;border-bottom:1px dotted rgba(90,60,30,.45)}
+.gr-chs a:hover,.gr-list a:hover{color:var(--rubric)}
+.gr-part{text-align:left;margin:1.3em 0;break-inside:avoid-column}
+.gr-part .gr-kicker{text-align:left}
+.gr-part h3{display:flex;align-items:center;gap:.4em;justify-content:flex-start;text-align:left;margin:.1em 0 .2em;font-size:1.4em}
+.gr-picon{color:var(--rubric);flex:none}
+.gr-blurb{font-style:italic;font-size:.88em;color:var(--ink3);text-align:left}
+.gr-list{list-style:none;padding:0;margin:.3em 0 0}
+.gr-list li{margin:.35em 0;line-height:1.3}
+.gr-list li span{display:block;font-size:.78em;color:var(--ink3)}
+.gr-end{text-align:center;color:var(--rubric);margin-top:2em;break-inside:avoid}
+.gr-end p{font-size:.85em;text-indent:0;text-align:center;margin-top:.4em}
+
+/* the footnote card */
+.gr-note{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);width:min(520px,calc(100% - 28px));max-height:45%;overflow:auto;z-index:5;
+  background:#FBF4E4;color:var(--ink2);border:1px solid rgba(142,31,51,.45);border-radius:12px;padding:14px 40px 14px 16px;
+  font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-size:15px;line-height:1.5;box-shadow:0 20px 40px -18px #000}
+.gr-note b{color:var(--rubric)}
+.gr-note .gr-ib{position:absolute;top:8px;right:8px;color:var(--ink3);border-color:rgba(90,60,30,.3);padding:5px}
+.gr-inside{position:relative}
+@media(max-width:560px){.gr-flow{text-align:left;font-size:17px}}

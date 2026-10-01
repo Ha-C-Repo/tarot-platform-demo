@@ -288,7 +288,7 @@ function go(){
   const modScore = a.modality === b.modality ? 8 : 15;
   const total = elScore + anScore + lifeScore + modScore;
   const card = p => `<div class="res"><h3>${esc(p.name)}</h3>
-      <div class="big" style="font-size:30px">${p.glyph}&#xFE0E; ${p.sign}</div>
+      <div class="big" style="font-size:30px">${p.glyph} ${p.sign}</div>
       <div class="kv"><span>Element / modality</span><span>${p.element} · ${p.modality}</span></div>
       <div class="kv"><span>Chinese animal</span><span>${p.animal}</span></div>
       <div class="kv"><span>Life path</span><span>${p.life}</span></div></div>`;

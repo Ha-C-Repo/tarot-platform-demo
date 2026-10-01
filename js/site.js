@@ -43,10 +43,12 @@ function chrome(current){
         Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.<br>
         Traditional card meanings: A.E. Waite, <i>The Pictorial Key to the Tarot</i>, 1911. Public domain.<br>
         Place data: <a href="https://www.geonames.org/" rel="noopener" style="text-decoration:underline">GeoNames</a>,
-        licensed CC BY 4.0. Planet positions: Astronomy Engine by Don Cross, MIT licence. Chart wheel: AstroChart by Matheus Alves, MIT licence. World map: Natural Earth, public domain.</div>
+        licensed CC BY 4.0. Planet positions: Astronomy Engine by Don Cross, MIT licence. Chart wheel: AstroChart by Matheus Alves, MIT licence. World map: Natural Earth, public domain.
+        Handbook texts and figures: public domain, from Project Gutenberg and Wikisource.</div>
     </div></footer>` + panel());
   document.body.insertAdjacentHTML('beforeend', modal());
   wire();
+  if (NS.fillIcons) NS.fillIcons();          // <i data-icon> placeholders -> the drawn symbols in js/icons.js
   if (NS.tour) NS.tour.boot(current);
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

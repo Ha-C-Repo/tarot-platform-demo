@@ -308,7 +308,7 @@ function fmtLon(lon, opts = {}){
   const l = norm(lon);
   let si = Math.floor(l / 30), deg = Math.floor(l - si * 30), min = Math.round((l - si * 30 - deg) * 60);
   if (min === 60) { min = 0; deg += 1; if (deg === 30) { deg = 0; si = (si + 1) % 12; } }
-  const sign = opts.glyph ? NS.SIGN_GLYPH[si] + '︎' : NS.SIGNS[si];
+  const sign = opts.glyph ? NS.SIGN_GLYPH[si] : NS.SIGNS[si];
   return `${deg}°${String(min).padStart(2, '0')}′ ${sign}`;
 }
 

@@ -106,8 +106,8 @@ function phaseName(jd) {
 
 const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra',
                       'Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
-const SIGN_GLYPH = ['♈','♉','♊','♋','♌','♍',
-                           '♎','♏','♐','♑','♒','♓'];
+// Each followed by U+FE0E (text presentation), so phones draw the astrological sign, not an emoji.
+const SIGN_GLYPH = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'].map(g => g + '\uFE0E');
 const ELEMENT  = ['Fire','Earth','Air','Water'];
 const signOf     = lon => SIGNS[Math.floor(norm360(lon) / 30)];
 const signIndex  = lon => Math.floor(norm360(lon) / 30);

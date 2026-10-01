@@ -33,10 +33,10 @@ const MAJOR = [
   ['The World','completion, the whole circle, arrival','nearly there, a loop left open']
 ];
 const SUITS = {
-  wands:    { glyph:'⚘', el:'Fire',  name:'Wands' },
-  cups:     { glyph:'♓', el:'Water', name:'Cups' },
-  swords:   { glyph:'⚔', el:'Air',   name:'Swords' },
-  pentacles:{ glyph:'⭐', el:'Earth', name:'Pentacles' }
+  wands:    { icon:'wands',     el:'Fire',  name:'Wands' },        // drawn symbols, js/icons.js
+  cups:     { icon:'cups',      el:'Water', name:'Cups' },
+  swords:   { icon:'swords',    el:'Air',   name:'Swords' },
+  pentacles:{ icon:'pentacles', el:'Earth', name:'Pentacles' }
 };
 const PIPS = {
   wands:[['Ace','a spark, the first move','a spark not acted on'],
@@ -93,7 +93,7 @@ Object.entries(PIPS).forEach(([suit,list])=>{
     id:`${suit}-${String(i+1).padStart(2,'0')}`,
     name:`${rank} of ${SUITS[suit].name}`, arcana:'minor',
     numeral:rank==='Ace'?'A':(i<10?ROMAN[i+1]:rank[0]),
-    suit, element:SUITS[suit].el, glyph:SUITS[suit].glyph, up, rev,
+    suit, element:SUITS[suit].el, icon:SUITS[suit].icon, up, rev,
     img:`assets/cards/${suit}-${String(i+1).padStart(2,'0')}-${slug(rank)}.jpg`
   }));
 });
@@ -232,7 +232,6 @@ function cardFaceSVG(c){
 /* Card face. Uses the real 1909 scan when present, otherwise the design above. */
 function faceHTML(entry, opts = {}){
   const c = entry.card, rev = entry.reversed;
-  const mark = c.arcana === 'major' ? c.numeral : `${c.numeral} ${c.glyph}`;
   return `<figure class="tc${rev?' rev':''}">
     <div class="tcface">
       <img src="${c.img}" alt="${c.name}" loading="lazy"
