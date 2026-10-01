@@ -121,8 +121,8 @@ document.querySelectorAll('#focusseg [data-f]').forEach(b => b.onclick = () => {
 });
 
 /* Pair readings are big, so they load only when a reading first needs them. Love and work versions
-   are separate files and so far cover every pair with a Major Arcana card or two cards of one suit;
-   a pair of minor cards from different suits shows the general reading, labelled as such. */
+   are separate files and do not yet cover every pair (see the header of combos-love.js for the count);
+   a pair they do not cover shows the general reading, labelled as such. */
 const COMBO_SRC = {
   general: ['COMBOS', 'js/data/combos.js'],
   love: ['COMBOS_LOVE', 'js/data/combos-love.js'],

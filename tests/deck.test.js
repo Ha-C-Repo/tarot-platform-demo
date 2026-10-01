@@ -135,11 +135,17 @@ module.exports = [
     });
     const n = pairs.length;
     assert(n === 231 + 4 * 308 + 4 * 91, `expected 1,827 pairs, got ${n}`);
-    [x.COMBOS_LOVE, x.COMBOS_WORK].forEach(t => {
-      assert(Object.keys(t).length === n, 'no stray love/work pair readings');
-      assert(!/—/.test(Object.values(t).join(' ')), 'em dash in love/work text');
+    // Pairs of minor cards from different suits are being added in batches: any present must be a real pair, in both tables.
+    const valid = new Set();
+    for (let i = 0; i < 78; i++) for (let j = i + 1; j < 78; j++) valid.add(x.pairKey(i, j));
+    const extra = Object.keys(x.COMBOS_LOVE).filter(k => !pairs.some(([i, j]) => x.pairKey(i, j) === k));
+    extra.forEach(k => {
+      assert(valid.has(k), `${k}: not a pair key`);
+      assert(words(x.COMBOS_LOVE[k]) >= 30 && words(x.COMBOS_WORK[k]) >= 30, `${k}: love or work reading missing`);
     });
-    return `${n} pairs x love, work`;
+    assert(Object.keys(x.COMBOS_WORK).length === Object.keys(x.COMBOS_LOVE).length, 'love and work cover the same pairs');
+    [x.COMBOS_LOVE, x.COMBOS_WORK].forEach(t => assert(!/—/.test(Object.values(t).join(' ')), 'em dash in love/work text'));
+    return `${n} pairs x love, work, plus ${extra.length} of 1,176 cross-suit pairs`;
   }],
   ['Bridge sentences: one for every pair of the 78 cards, one plain sentence of 15-28 words', () => {
     const x = load(['js/cards.js', 'js/spreads.js', 'js/data/bridges.js']).TD;
