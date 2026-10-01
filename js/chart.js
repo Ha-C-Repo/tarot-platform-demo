@@ -71,6 +71,11 @@ function positions(date){
     return { key: b.key, glyph: b.glyph, lon, speed: sp, retro: sp < 0 };
   });
 }
+/* Black Moon Lilith, the mean lunar apogee: Meeus (Astronomical Algorithms, 2nd ed.) ch. 50, mean perigee + 180. */
+function meanLilith(date){
+  const t = (AE().MakeTime(date).tt) / 36525;
+  return norm(83.3532465 + 4069.0137287 * t - 0.0103200 * t * t - t * t * t / 80053 + t * t * t * t / 18999000 + 180);
+}
 /* Mean lunar node, Meeus (Astronomical Algorithms, 2nd ed.) eq. 47.7 */
 function meanNode(date){
   const t = (AE().MakeTime(date).tt) / 36525;
@@ -78,27 +83,81 @@ function meanNode(date){
 }
 
 /* ---------- angles and houses ---------- */
+/* The ecliptic point rising on the eastern horizon when the local sidereal angle is ramc (degrees). */
+function ascFor(ramc, eps, phi){
+  const r = ramc * RAD;
+  let asc = norm(Math.atan2(Math.cos(r), -(Math.sin(r) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / RAD);
+  // The formula can return the western (setting) point near the poles; if so, take the opposite point.
+  const raAsc = Math.atan2(Math.sin(asc * RAD) * Math.cos(eps), Math.cos(asc * RAD)) / RAD;
+  const ha = norm(ramc - raAsc);
+  return ha > 0 && ha < 180 ? { asc: norm(asc + 180), flipped: true } : { asc, flipped: false };
+}
 function angles(date, lat, lon){
   const time = AE().MakeTime(date);
   const eps = AE().e_tilt(time).tobl * RAD;
   const ramc = norm(AE().SiderealTime(date) * 15 + lon);         // local apparent sidereal time, degrees
   const r = ramc * RAD, phi = lat * RAD;
   const mc = norm(Math.atan2(Math.sin(r), Math.cos(r) * Math.cos(eps)) / RAD);
-  let asc = norm(Math.atan2(Math.cos(r), -(Math.sin(r) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / RAD);
-  // The Ascendant is the ecliptic point on the EASTERN horizon. The formula above can return the
-  // western (setting) point near the poles; if so, take the opposite point.
-  const raAsc = Math.atan2(Math.sin(asc * RAD) * Math.cos(eps), Math.cos(asc * RAD)) / RAD;
-  const ha = norm(ramc - raAsc);
-  let flipped = false;
-  if (ha > 0 && ha < 180) { asc = norm(asc + 180); flipped = true; }
-  return { asc, mc, ramc, lst: ramc / 15, obliquity: eps / RAD, flipped };
+  const { asc, flipped } = ascFor(ramc, eps, phi);
+  return { asc, mc, ramc, lst: ramc / 15, obliquity: eps / RAD, lat, flipped };
 }
-const HOUSE_SYSTEMS = { whole: 'Whole Sign', equal: 'Equal' };
-function houseCusps(asc, system){
+const HOUSE_SYSTEMS = { placidus: 'Placidus', koch: 'Koch', whole: 'Whole Sign', equal: 'Equal' };
+const QUADRANT = { placidus: 1, koch: 1 };
+/* Ecliptic longitude of the point with right ascension ra (degrees). */
+const lonOfRA = (ra, eps) => norm(Math.atan2(Math.sin(ra * RAD), Math.cos(ra * RAD) * Math.cos(eps)) / RAD);
+/* Placidus: cusps 11, 12, 2, 3 trisect each point's own diurnal or nocturnal semi-arc in time
+   (iterated; converges in a few steps). Undefined where points never rise or set (|lat| > ~66.5). */
+function placidus(a){
+  const eps = a.obliquity * RAD, phi = a.lat * RAD, out = [];
+  const cusp = (f, upper) => {
+    let lon = lonOfRA(a.ramc + (upper ? 90 * f : 180 - 90 * f), eps);
+    for (let i = 0; i < 50; i++) {
+      const dec = Math.asin(Math.sin(eps) * Math.sin(lon * RAD)), x = Math.tan(phi) * Math.tan(dec);
+      if (Math.abs(x) >= 1) return null;
+      const ad = Math.asin(x) / RAD;
+      const ra = upper ? a.ramc + f * (90 + ad) : a.ramc + 180 - f * (90 - ad);
+      const next = lonOfRA(ra, eps);
+      if (Math.abs(((next - lon + 540) % 360) - 180) < 1e-7) return next;
+      lon = next;
+    }
+    return lon;
+  };
+  const c11 = cusp(1 / 3, true), c12 = cusp(2 / 3, true), c2 = cusp(2 / 3, false), c3 = cusp(1 / 3, false);
+  if ([c11, c12, c2, c3].some(v => v == null)) return null;
+  return [a.asc, c2, c3, norm(a.mc + 180), norm(c11 + 180), norm(c12 + 180), norm(a.asc + 180), norm(c2 + 180), norm(c3 + 180), a.mc, c11, c12];
+}
+/* Koch: cusps are the Ascendants at the moments the Midheaven degree had covered thirds of its own
+   diurnal semi-arc. Undefined where the Midheaven degree never sets. */
+function koch(a){
+  const eps = a.obliquity * RAD, phi = a.lat * RAD;
+  const dec = Math.asin(Math.sin(eps) * Math.sin(a.mc * RAD)), x = Math.tan(phi) * Math.tan(dec);
+  if (Math.abs(x) >= 1) return null;
+  const dsa = 90 + Math.asin(x) / RAD, at = k => ascFor(a.ramc + k * dsa / 3, eps, phi).asc;
+  const c11 = at(-2), c12 = at(-1), c2 = at(1), c3 = at(2);
+  return [a.asc, c2, c3, norm(a.mc + 180), norm(c11 + 180), norm(c12 + 180), norm(a.asc + 180), norm(c2 + 180), norm(c3 + 180), a.mc, c11, c12];
+}
+/* Twelve cusp longitudes, house 1 first. Placidus and Koch need the full angles object; where they are
+   undefined (polar latitudes) this returns null and the caller falls back (chart() uses Porphyry). */
+function houseCusps(asc, system, a){
+  if (system === 'placidus') return a ? placidus(a) : null;
+  if (system === 'koch') return a ? koch(a) : null;
+  if (system === 'porphyry') return a ? porphyry(a) : null;
   const start = system === 'equal' ? asc : Math.floor(norm(asc) / 30) * 30;
   return Array.from({length: 12}, (_, i) => norm(start + 30 * i));
 }
-function houseOf(lon, asc, system){
+/* Porphyry: each quadrant between the angles split into three equal parts of ecliptic longitude. */
+function porphyry(a){
+  const ic = norm(a.mc + 180), dsc = norm(a.asc + 180);
+  const q = (from, to) => { const d = norm(to - from) / 3; return [norm(from + d), norm(from + 2 * d)]; };
+  const [c2, c3] = q(a.asc, ic), [c5, c6] = q(ic, dsc), [c8, c9] = q(dsc, a.mc), [c11, c12] = q(a.mc, a.asc);
+  return [a.asc, c2, c3, ic, c5, c6, dsc, c8, c9, a.mc, c11, c12];
+}
+/* House number (1-12) of a longitude. Quadrant systems need the cusps from houseCusps(). */
+function houseOf(lon, asc, system, cusps){
+  if ((QUADRANT[system] || system === 'porphyry') && cusps) {
+    for (let i = 0; i < 12; i++) if (norm(lon - cusps[i]) < norm(cusps[(i + 1) % 12] - cusps[i])) return i + 1;
+    return 12;
+  }
   if (system === 'equal') return Math.floor(norm(lon - asc) / 30) + 1;
   return ((Math.floor(norm(lon) / 30) - Math.floor(norm(asc) / 30) + 12) % 12) + 1;
 }
@@ -130,7 +189,7 @@ function midpoint(a, b){ const d = ((b - a + 540) % 360) - 180; return norm(a + 
 /* ---------- a full chart ----------
    p: {y, mo, d, h, mi, timeKnown, lat, lon, tz, system} */
 function chart(p){
-  const system = p.system === 'equal' ? 'equal' : 'whole';
+  const system = HOUSE_SYSTEMS[p.system] ? p.system : 'whole';
   const out = { input: p, system, timeKnown: !!p.timeKnown };
   let when;
   if (p.timeKnown) {
@@ -147,10 +206,19 @@ function chart(p){
   out.utc = when;
   out.planets = positions(when);
   out.node = meanNode(when);
+  out.lilith = meanLilith(when);
   if (p.timeKnown) {
     out.angles = angles(when, p.lat, p.lon);
-    out.cusps = houseCusps(out.angles.asc, system);
-    out.planets.forEach(pl => { pl.house = houseOf(pl.lon, out.angles.asc, system); });
+    out.cusps = houseCusps(out.angles.asc, system, out.angles);
+    if (!out.cusps) {                    // Placidus / Koch undefined this far north or south
+      out.houseFallback = { from: system, to: 'porphyry' };
+      out.system = 'porphyry';
+      out.cusps = porphyry(out.angles);
+    }
+    out.planets.forEach(pl => { pl.house = houseOf(pl.lon, out.angles.asc, out.system, out.cusps); });
+    const sun = out.planets[0].lon, moon = out.planets[1].lon;
+    out.dayBirth = houseOf(sun, out.angles.asc, 'porphyry', porphyry(out.angles)) >= 7;   // Sun above the horizon
+    out.fortune = out.dayBirth ? norm(out.angles.asc + moon - sun) : norm(out.angles.asc + sun - moon);
   } else {
     // For each body, does its sign change during the day? (Almost always only the Moon.)
     const s0 = positions(new Date(out.daySpan.start)), s1 = positions(new Date(out.daySpan.end));
@@ -220,6 +288,10 @@ NS.localToUTC = localToUTC;
 NS.fmtOffset = fmtOffset;
 NS.planetPositions = positions;
 NS.meanNode = meanNode;
+NS.meanLilith = meanLilith;
+NS.ascFor = ascFor;
+NS.porphyry = porphyry;
+NS.QUADRANT = QUADRANT;
 NS.angles = angles;
 NS.HOUSE_SYSTEMS = HOUSE_SYSTEMS;
 NS.houseCusps = houseCusps;

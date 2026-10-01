@@ -1,0 +1,241 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Birth chart — tarot platform demo</title>
+<meta name="description" content="A full natal chart from birth date, time and place: the chart wheel, every planet's sign and house, Placidus, Koch, Whole Sign or Equal houses, aspects, dignities and balance.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/birthchart.html">
+<meta property="og:title" content="Birth chart — tarot platform demo">
+<meta property="og:description" content="A full natal chart from birth date, time and place: the chart wheel, every planet's sign and house, aspects, dignities and balance.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.wheelbox{display:flex;justify-content:center}
+.wheelbox svg{max-width:100%;height:auto}
+.bal{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:13px}
+.bal .b{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bal .b i{display:block;height:100%;background:var(--prism)}
+.bal small{color:var(--muted)}
+.digpill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+.digpill.good{color:var(--a4);border-color:var(--a4)}
+.digpill.hard{color:#FF6B81;border-color:#FF6B81}
+#detail .ctab td:nth-child(2){white-space:normal;min-width:7em}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tool &middot; the one people pay for elsewhere</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Birth chart</h1>
+  <p class="lede">Your full natal chart from your birth date, time and place: the chart wheel, every planet&rsquo;s sign
+    and house, the angles, aspects, dignities and the balance of elements.</p>
+
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card pad" id="form">
+      <div class="row2">
+        <div><label class="f" for="nm">Name</label><input id="nm" value="You"></div>
+        <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+        <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      <div class="row" style="margin-top:12px"><label class="f" for="hsys">House system</label>
+        <select id="hsys">
+          <option value="placidus">Placidus (default)</option>
+          <option value="koch">Koch</option>
+          <option value="whole">Whole Sign</option>
+          <option value="equal">Equal, from the Ascendant</option>
+        </select></div>
+      <button class="btn primary wide" id="go" style="margin-top:16px">Draw the chart</button>
+      <div class="warn"><span class="k">Method</span>
+        <p>Planet positions from Astronomy Engine: apparent positions on the tropical zodiac, checked against a published
+        professional chart to within a quarter of an arcminute. House cusps (Placidus, Koch, Porphyry) checked against
+        Swiss Ephemeris to within a tenth of an arcminute. Birth time is turned into world time with your browser&rsquo;s
+        own time-zone history. <span id="hsysnote"></span> Placidus and Koch cannot be drawn above about 66&deg; north
+        or south, where some degrees never rise or set; there the chart says so and uses Porphyry. North node: mean.
+        Black Moon Lilith: mean lunar apogee, within about 8 arcminutes of Swiss Ephemeris. Part of Fortune: Ascendant
+        + Moon &minus; Sun by day, reversed by night. The wheel is drawn with AstroChart (MIT licence).
+        Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+    </div>
+    <div id="top"></div>
+  </div>
+  <div id="detail"></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script><script src="js/vendor/astrochart.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/natal.js"></script><script src="js/places.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('birthchart.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const N = TD.natal, signOf = lon => TD.SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+const G = k => (TD.BODIES.find(b => b.key === k) || {}).glyph || '';
+const KEY = 'tarotdemo.natal';                              // this visitor's last chart, in this browser only
+
+/* ---------- the form, remembered in this browser ---------- */
+let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+if (saved) { $('nm').value = saved.nm || 'You'; $('bd').value = saved.bd || $('bd').value; $('bt').value = saved.bt || '';
+  $('bu').checked = !!saved.bu; $('bt').disabled = !!saved.bu; if (saved.hsys) $('hsys').value = saved.hsys; }
+const place = TD.places.picker($('bp'), () => go(), saved && saved.place || 'Denver');
+$('bu').addEventListener('change', () => { $('bt').disabled = $('bu').checked; go(); });
+['nm', 'bd', 'bt', 'hsys'].forEach(id => $(id).addEventListener('change', go));
+$('go').onclick = go;
+
+function read(){
+  const iso = $('bd').value, pl = place.get();
+  if (!iso || !pl) return null;
+  const [y, mo, d] = iso.split('-').map(Number);
+  const known = !$('bu').checked && !!$('bt').value;
+  const [h, mi] = known ? $('bt').value.split(':').map(Number) : [12, 0];
+  try { localStorage.setItem(KEY, JSON.stringify({ nm: $('nm').value, bd: iso, bt: $('bt').value, bu: $('bu').checked, hsys: $('hsys').value, place: pl.name })); } catch (e) {}
+  return { name: $('nm').value || 'You', place: pl, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: $('hsys').value } };
+}
+const poss = n => /^you$/i.test(String(n).trim()) ? 'Your' : n + '’s';
+
+/* ---------- the wheel (AstroChart draws it from our positions and cusps) ---------- */
+function wheel(c){
+  const box = $('wheel'); if (!box || !window.astrochart) return;
+  box.innerHTML = '';
+  const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+  const size = Math.min(560, box.clientWidth || 360);
+  const planets = {};
+  c.planets.forEach(p => { planets[p.key] = [p.lon, p.speed]; });
+  planets.NNode = [c.node]; planets.SNode = [(c.node + 180) % 360]; planets.Lilith = [c.lilith];
+  if (c.fortune != null) planets.Fortune = [c.fortune];
+  // No birth time: no Ascendant, so the wheel uses whole signs from 0 Aries and draws no angles.
+  const cusps = c.cusps || Array.from({length: 12}, (_, i) => i * 30);
+  const ink = v('--text') || '#eee', line = v('--line') || '#444', muted = v('--muted') || '#999';
+  const settings = {
+    COLOR_BACKGROUND: 'transparent', POINTS_COLOR: ink, SIGNS_COLOR: ink, CIRCLE_COLOR: line, LINE_COLOR: line,
+    CUSPS_FONT_COLOR: muted, SYMBOL_AXIS_FONT_COLOR: ink, STROKE_ONLY: false, SHOW_DIGNITIES_TEXT: false,
+    COLOR_ARIES: v('--a1'), COLOR_LEO: v('--a1'), COLOR_SAGITTARIUS: v('--a1'),
+    COLOR_TAURUS: v('--a4'), COLOR_VIRGO: v('--a4'), COLOR_CAPRICORN: v('--a4'),
+    COLOR_GEMINI: v('--a5'), COLOR_LIBRA: v('--a5'), COLOR_AQUARIUS: v('--a5'),
+    COLOR_CANCER: v('--a3'), COLOR_SCORPIO: v('--a3'), COLOR_PISCES: v('--a3'),
+    ASPECTS: { conjunction: { degree: 0, orbit: 6, color: 'transparent' }, sextile: { degree: 60, orbit: 4, color: v('--a3') },
+               square: { degree: 90, orbit: 6, color: '#FF6B81' }, trine: { degree: 120, orbit: 6, color: v('--a4') },
+               opposition: { degree: 180, orbit: 6, color: '#FF6B81' } }
+  };
+  try {
+    const ch = new astrochart.Chart('wheel', size, size, settings);
+    const r = ch.radix({ planets, cusps });
+    r.aspects();
+    if (!c.angles) box.querySelectorAll('[id$="-axis"]').forEach(e => e.remove());
+  } catch (e) { box.innerHTML = '<p class="note">The wheel could not be drawn here. The tables below have every position.</p>'; }
+}
+
+/* ---------- sections ---------- */
+function topHTML(p, c){
+  const b3 = N.bigThree(c), t = c.tzInfo;
+  const moon = b3.moon || `${b3.moonRange[0]} or ${b3.moonRange[1]} <span class="pill warn">needs a time</span>`;
+  const local = `${String(p.input.h).padStart(2,'0')}:${String(p.input.mi).padStart(2,'0')}`;
+  const flags = [];
+  if (c.timeKnown && t.status === 'ambiguous') flags.push('This clock time happened twice that night (clocks went back); the first occurrence is used.');
+  if (c.timeKnown && t.status === 'gap') flags.push('This clock time was skipped that night (clocks went forward); it is read on the earlier offset.');
+  if (p.input.y < 1970) flags.push('Pre-1970 time-zone records can be approximate for some places.');
+  if (c.houseFallback) flags.push(`${TD.HOUSE_SYSTEMS[c.houseFallback.from]} houses cannot be drawn at this latitude, so Porphyry houses are used.`);
+  const ruler = N.chartRuler(c);
+  return `<div class="res"><h3>${esc(p.name)}</h3>
+    <div class="kv"><span>${G('Sun')} Sun</span><span>${b3.sun}</span></div>
+    <div class="kv"><span>${G('Moon')} Moon</span><span>${moon}</span></div>
+    <div class="kv"><span>Rising</span><span>${b3.rising ? b3.rising + ' ' + TD.fmtLon(c.angles.asc).split(' ')[0] : '<span class="pill warn">needs a birth time</span>'}</span></div>
+    ${ruler ? `<div class="kv"><span>Chart ruler</span><span>${G(ruler.key)} ${ruler.key}${ruler.modern ? ' (modern: ' + ruler.modern + ')' : ''} in ${signOf(ruler.lon)}, house ${ruler.house}</span></div>` : ''}
+    <p class="note" style="margin-top:6px">${c.timeKnown ? `${local} local, ${TD.fmtOffset(t.offsetMin)} &rarr; ${c.utc.toISOString().slice(11, 16)} UTC on ${c.utc.toISOString().slice(0, 10)}.`
+      : 'Birth time unknown: planets at local noon. No rising sign, houses or angles.'} ${esc(TD.places.label(p.place))}, ${TD.places.fmtCoord(p.place)}.</p>
+    ${flags.map(f => `<p class="note" style="color:var(--a5)">${f}</p>`).join('')}</div>
+    <div class="res"><h3>The chart wheel</h3><div class="wheelbox" id="wheel"></div>
+    ${c.timeKnown ? '' : '<p class="note">No birth time: the wheel starts at 0&deg; Aries with one sign per segment, and shows no Ascendant or houses.</p>'}</div>`;
+}
+function digPill(key, lon){
+  const d = N.dignity(key, lon); if (!d) return '';
+  return `<span class="digpill ${d === 'domicile' || d === 'exaltation' ? 'good' : 'hard'}">${d}</span>`;
+}
+/* "9°18′ to 21°41′ Sagittarius" when the day's Moon stays in one sign; both signs written out when it changes. */
+function moonRange(r){
+  const a = TD.fmtLon(r[0]), b = TD.fmtLon(r[1]);
+  return signOf(r[0]) === signOf(r[1]) ? `${a.split(' ')[0]} to ${b}` : `${a} to ${b}`;
+}
+function positionsHTML(c){
+  const rows = [];
+  if (c.angles) {
+    rows.push(`<tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(c.angles.asc)}</td><td>1</td><td></td><td></td></tr>`);
+    rows.push(`<tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(c.angles.mc)}</td><td>10</td><td></td><td></td></tr>`);
+  }
+  c.planets.forEach(pl => {
+    const unc = !c.timeKnown && pl.key === 'Moon';
+    rows.push(`<tr${unc ? ' class="dim"' : ''}><td class="g">${pl.glyph}</td><td>${pl.key}</td>
+      <td>${unc ? moonRange(pl.range) : TD.fmtLon(pl.lon)}</td>
+      <td>${pl.house || '&mdash;'}</td><td>${pl.retro ? 'R' : ''}</td><td>${digPill(pl.key, pl.lon)}</td></tr>`);
+  });
+  const pt = (g, name, lon) => `<tr class="dim"><td class="g">${g}</td><td>${name}</td><td>${TD.fmtLon(lon)}</td>
+    <td>${c.angles ? TD.houseOf(lon, c.angles.asc, c.system, c.cusps) : '&mdash;'}</td><td></td><td></td></tr>`;
+  rows.push(pt('&#9738;', 'North node (mean)', c.node), pt('&#9739;', 'South node', (c.node + 180) % 360), pt('&#9790;', 'Black Moon Lilith (mean)', c.lilith));
+  if (c.fortune != null) rows.push(pt('&#8855;', `Part of Fortune (${c.dayBirth ? 'day' : 'night'} birth)`, c.fortune));
+  return `<div class="res"><h3>Positions</h3>
+    <p class="note">${c.timeKnown ? TD.HOUSE_SYSTEMS[c.system] + ' houses.' : 'No birth time: positions at local noon. The Moon moves about 13&deg; a day, so its range for the day is shown.'}
+    R = retrograde. Dignity is the planet&rsquo;s essential dignity in its sign (traditional table, seven classical planets).</p>
+    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th><th>Rx</th><th>Dignity</th></tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div></div>`;
+}
+function housesHTML(c){
+  if (!c.cusps) return '';
+  const rows = c.cusps.map((cu, i) => {
+    const s = Math.floor(cu / 30), ruler = N.RULER[s];
+    const inside = c.planets.filter(p => p.house === i + 1).map(p => p.glyph).join(' ');
+    return `<tr><td>${i + 1}</td><td>${TD.fmtLon(cu)}</td><td>${G(ruler)} ${ruler}</td><td style="font-size:15px">${inside}</td></tr>`;
+  }).join('');
+  return `<div class="res"><h3>House cusps</h3><p class="note">${TD.HOUSE_SYSTEMS[c.system]}. Ruler = traditional ruler of the sign on the cusp.</p>
+    <div class="scrollx"><table class="ctab"><thead><tr><th>House</th><th>Cusp</th><th>Ruler</th><th>Planets</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function balanceHTML(c){
+  const b = N.balance(c);
+  const bar = (label, list) => `<span>${label}</span><span class="b"><i style="width:${Math.round(100 * list.length / b.n)}%"></i></span><span>${list.length} <small>${list.map(k => k === 'Ascendant' ? 'AC' : G(k)).join(' ')}</small></span>`;
+  const lead = o => { const m = Math.max(...Object.values(o).map(x => x.length)); return Object.keys(o).filter(k => o[k].length === m).join(' and '); };
+  const missing = Object.keys(b.el).filter(k => !b.el[k].length);
+  const hemi = b.hemi ? `<h4 style="margin-top:14px">Hemispheres</h4><div class="bal">${bar('Above the horizon', b.hemi.above)}${bar('Below', b.hemi.below)}${bar('East (self-led)', b.hemi.east)}${bar('West (other-led)', b.hemi.west)}</div>` : '';
+  return `<div class="res"><h3>Balance</h3><p class="note">Counted over the ten planets${c.angles ? ' and the Ascendant' : ''}, one each.
+    Leading element: ${lead(b.el)}. Leading modality: ${lead(b.mod)}.${missing.length ? ' No ' + missing.join(' or ') + '.' : ''}</p>
+    <div class="bal" style="margin-top:10px">${Object.keys(b.el).map(k => bar(k, b.el[k])).join('')}</div>
+    <div class="bal" style="margin-top:12px">${Object.keys(b.mod).map(k => bar(k, b.mod[k])).join('')}</div>${hemi}</div>`;
+}
+function aspectsHTML(c){
+  const list = N.aspects(c);
+  if (!list.length) return '';
+  const GA = k => k === 'Ascendant' ? 'AC' : k === 'Midheaven' ? 'MC' : G(k);
+  const rows = list.map(a => {
+    const ap = N.applying(c, a), o = Math.floor(a.orb), om = Math.round((a.orb - o) * 60);
+    return `<tr${a.uncertain ? ' class="dim"' : ''}><td>${GA(a.a)} ${a.a}</td><td>${a.glyph} ${a.type}</td><td>${GA(a.b)} ${a.b}</td>
+      <td>${o}&deg;${String(om).padStart(2, '0')}&prime;</td><td>${ap == null ? '' : ap ? 'applying' : 'separating'}</td></tr>`;
+  }).join('');
+  return `<div class="res"><h3>Aspects</h3><p class="note">${list.length} major aspects, closest first. Orbs: 6&deg; (sextile 4&deg;),
+    2&deg; more with the Sun or Moon, the same orbs as the compatibility tool.${c.timeKnown ? '' : ' Faded: involves the Moon with no birth time.'}</p>
+    <div class="scrollx"><table class="ctab"><tbody>${rows}</tbody></table></div></div>`;
+}
+const READING_PH = `<div class="ph" style="margin-top:14px"><span class="k">Coming next: the written reading</span>
+  <p>A plain-English paragraph for each planet in its sign and house, the rising sign and the main aspects,
+  written for this site. On a live site the reader can edit every word.</p></div>`;
+
+function go(){
+  $('hsysnote').textContent = { placidus: 'Houses: Placidus, the system most apps show, dividing each degree’s own time above and below the horizon into thirds.',
+    koch: 'Houses: Koch, dividing the Midheaven degree’s time above the horizon into thirds.',
+    whole: 'Houses: Whole Sign, the rising sign is the whole first house, the next sign the second, and so on.',
+    equal: 'Houses: Equal, twelve 30-degree houses from the exact Ascendant.' }[$('hsys').value];
+  const p = read();
+  if (!p) { $('top').innerHTML = '<div class="res"><p class="note">Pick a birth place from the list to draw the chart.</p></div>'; $('detail').innerHTML = ''; return; }
+  const c = TD.chart(p.input);
+  $('top').innerHTML = topHTML(p, c);
+  $('detail').innerHTML = `<div class="grid g2" style="margin-top:6px;align-items:start">${positionsHTML(c)}<div>${housesHTML(c)}${balanceHTML(c)}</div></div>
+    ${aspectsHTML(c)}${READING_PH}`;
+  wheel(c);
+}
+go();
+</script></body></html>

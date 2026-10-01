@@ -151,5 +151,36 @@ module.exports = [
     }));
     assert(s.contacts.every(c => !c.uncertain), 'uncertain contacts must not be scored');
     return `score ${s.score}, ${s.contacts.length} scored contacts`;
+  }],
+  ['Placidus, Koch and Porphyry cusps match Swiss Ephemeris within 0.1 arcminute (8 charts, 34S to 70N)', () => {
+    const fx = require('./fixtures/houses-swisseph.json');
+    let n = 0;
+    fx.cases.forEach(c => {
+      const [y, mo, d, h, mi] = c.local;
+      ['placidus', 'koch'].forEach(sys => {
+        const ch = TD.chart({ y, mo, d, h, mi, timeKnown: true, lat: c.lat, lon: c.lon, tz: c.tz, system: sys });
+        assert(ch.utc.toISOString() === c.utc, `${c.name}: UTC ${ch.utc.toISOString()} vs ${c.utc}`);
+        if (c[sys] === null) {                       // undefined at this latitude: Swiss Ephemeris refuses too
+          assert(ch.houseFallback && ch.system === 'porphyry', `${c.name} ${sys}: should fall back to Porphyry`);
+          return;
+        }
+        ch.cusps.forEach((v, i) => { assert(sep(v, c[sys][i]) * 60 < 0.1, `${c.name} ${sys} cusp ${i + 1}: ${v.toFixed(4)} vs ${c[sys][i]}`); n++; });
+      });
+      const a = TD.chart({ y, mo, d, h, mi, timeKnown: true, lat: c.lat, lon: c.lon, tz: c.tz, system: 'whole' }).angles;
+      TD.porphyry(a).forEach((v, i) => { assert(sep(v, c.porphyry[i]) * 60 < 0.1, `${c.name} porphyry cusp ${i + 1}`); n++; });
+      assert(sep(a.asc, c.asc) * 60 < 0.1 && sep(a.mc, c.mc) * 60 < 0.1, `${c.name}: Asc/MC`);
+    });
+    return `${n} cusps`;
+  }],
+  ['Quadrant houses: every planet gets the house whose cusps enclose it; Part of Fortune follows day/night', () => {
+    const ch = TD.chart({ y: 1992, mo: 7, d: 11, h: 14, mi: 20, timeKnown: true, lat: 39.7392, lon: -104.9903, tz: 'America/Denver', system: 'placidus' });
+    ch.planets.forEach(p => {
+      const i = p.house - 1, a = ch.cusps[i], b = ch.cusps[(i + 1) % 12];
+      assert(norm(p.lon - a) < norm(b - a), `${p.key} not inside house ${p.house}`);
+    });
+    const sun = ch.planets[0].lon, moon = ch.planets[1].lon, asc = ch.angles.asc;
+    assert(ch.dayBirth === true, '14:20 in July in Denver is a day birth');
+    assert(sep(ch.fortune, norm(asc + moon - sun)) < 1e-9, 'day formula: Asc + Moon - Sun');
+    assert(ch.lilith >= 0 && ch.lilith < 360, 'Lilith computed');
   }]
 ];
