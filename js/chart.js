@@ -71,6 +71,28 @@ function positions(date){
     return { key: b.key, glyph: b.glyph, lon, speed: sp, retro: sp < 0 };
   });
 }
+/* Chiron from the JPL table in js/data/chiron.js (TD.CHIRON, load it first; without it Chiron is left out).
+   Cubic interpolation of the heliocentric J2000 vector, minus the Earth's heliocentric vector, corrected for
+   light time, then turned into the true ecliptic of date like the planets. null outside 1900-2100. */
+function chironLon(date){
+  const C = NS.CHIRON; if (!C) return null;
+  const at = tdbJD => {
+    const f = (tdbJD - C.jd0) / C.step, i = Math.floor(f), u = f - i;
+    if (i < 1 || i + 2 >= C.n) return null;
+    const w = [-u * (u - 1) * (u - 2) / 6, (u + 1) * (u - 1) * (u - 2) / 2, -(u + 1) * u * (u - 2) / 2, (u + 1) * u * (u - 1) / 6];
+    return [0, 1, 2].map(k => w.reduce((s, wj, j) => s + wj * C.xyz[(i - 1 + j) * 3 + k], 0) / 1e6);
+  };
+  const time = AE().MakeTime(date), jd = time.tt + 2451545.0, earth = AE().HelioVector(AE().Body.Earth, time);
+  const rot = AE().Rotation_ECL_EQJ();
+  let v = null, lt = 0;
+  for (let k = 0; k < 2; k++) {                       // light time: where Chiron was when the light left it
+    const h = at(jd - lt); if (!h) return null;
+    const e = AE().RotateVector(rot, new (AE().Vector)(h[0], h[1], h[2], time));
+    v = new (AE().Vector)(e.x - earth.x, e.y - earth.y, e.z - earth.z, time);
+    lt = Math.hypot(v.x, v.y, v.z) / 173.1446;        // AU per day at the speed of light
+  }
+  return AE().Ecliptic(v).elon;
+}
 /* Black Moon Lilith, the mean lunar apogee: Meeus (Astronomical Algorithms, 2nd ed.) ch. 50, mean perigee + 180. */
 function meanLilith(date){
   const t = (AE().MakeTime(date).tt) / 36525;
@@ -192,7 +214,9 @@ function chart(p){
   const system = HOUSE_SYSTEMS[p.system] ? p.system : 'whole';
   const out = { input: p, system, timeKnown: !!p.timeKnown };
   let when;
-  if (p.timeKnown) {
+  if (p.utc != null) {                     // an exact instant (solar return, Davison): no local-time conversion
+    when = new Date(p.utc); out.timeKnown = true; out.tzInfo = { utc: +when, offsetMin: 0, status: 'ok' };
+  } else if (p.timeKnown) {
     const t = localToUTC(p.y, p.mo, p.d, p.h, p.mi, p.tz);
     out.tzInfo = t; when = new Date(t.utc);
   } else {
@@ -207,7 +231,13 @@ function chart(p){
   out.planets = positions(when);
   out.node = meanNode(when);
   out.lilith = meanLilith(when);
-  if (p.timeKnown) {
+  const ch = chironLon(when);
+  if (ch != null) {
+    let sp = chironLon(new Date(when.getTime() + 43200e3)) - chironLon(new Date(when.getTime() - 43200e3));
+    if (sp > 180) sp -= 360; if (sp < -180) sp += 360;
+    out.chiron = { lon: ch, speed: sp, retro: sp < 0 };
+  }
+  if (out.timeKnown) {
     out.angles = angles(when, p.lat, p.lon);
     out.cusps = houseCusps(out.angles.asc, system, out.angles);
     if (!out.cusps) {                    // Placidus / Koch undefined this far north or south
@@ -290,6 +320,7 @@ NS.planetPositions = positions;
 NS.eclLon = eclLon;
 NS.meanNode = meanNode;
 NS.meanLilith = meanLilith;
+NS.chironLon = chironLon;
 NS.ascFor = ascFor;
 NS.porphyry = porphyry;
 NS.QUADRANT = QUADRANT;

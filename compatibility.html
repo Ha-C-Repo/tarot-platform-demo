@@ -57,7 +57,7 @@
           <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
         </fieldset>
         <div class="row"><label class="f" for="hsys">House system</label>
-          <select id="hsys"><option value="whole">Whole Sign (default)</option><option value="equal">Equal, from the Ascendant</option></select></div>
+          <select id="hsys"><option value="whole">Whole Sign (default)</option><option value="equal">Equal, from the Ascendant</option><option value="placidus">Placidus</option><option value="koch">Koch</option></select></div>
         <button class="btn primary wide" id="fgo" style="margin-top:16px">Compare the charts</button>
         <div class="warn" id="weighting"><span class="k">The score is a heuristic, and here is the weighting</span>
           <p id="weighttext"></p></div>
@@ -66,8 +66,8 @@
           published professional chart to within a quarter of an arcminute. Birth time is turned into world time
           with your browser&rsquo;s own time-zone history, which knows about daylight saving back through the
           20th century. Before 1970 some places&rsquo; records are approximate, and older births may have been
-          recorded in local mean time. <span id="hsysnote"></span> Placidus houses are not offered yet: they fail
-          near the poles and are a planned addition.</p></div>
+          recorded in local mean time. <span id="hsysnote"></span> Placidus and Koch fall back to Porphyry above about
+          66&deg; latitude, and say so. Davison chart: the midpoint of the two births in time and in place.</p></div>
       </div>
       <div id="fout"></div>
     </div>
@@ -98,7 +98,7 @@
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
 <script src="js/vendor/astronomy.browser.min.js"></script>
-<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/places.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/tools.js"></script><script src="js/places.js"></script>
 <script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
 <script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
@@ -185,7 +185,7 @@ function chartTable(p, c){
   const rows = [];
   if (c.angles) {
     rows.push(`<tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(c.angles.asc)}</td><td>1</td><td></td></tr>`);
-    rows.push(`<tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(c.angles.mc)}</td><td>${TD.houseOf(c.angles.mc, c.angles.asc, c.system)}</td><td></td></tr>`);
+    rows.push(`<tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(c.angles.mc)}</td><td>${TD.houseOf(c.angles.mc, c.angles.asc, c.system, c.cusps)}</td><td></td></tr>`);
   }
   c.planets.forEach(pl => {
     let pos = TD.fmtLon(pl.lon);
@@ -193,9 +193,9 @@ function chartTable(p, c){
     rows.push(`<tr${!c.timeKnown && pl.key === 'Moon' ? ' class="dim"' : ''}><td class="g">${pl.glyph}</td><td>${pl.key}</td><td>${pos}</td>
       <td>${pl.house || '&mdash;'}</td><td>${pl.retro ? 'R' : ''}</td></tr>`);
   });
-  rows.push(`<tr class="dim"><td class="g">&#9738;</td><td>North node (mean)</td><td>${TD.fmtLon(TD.meanNode(c.utc))}</td><td>${c.angles ? TD.houseOf(TD.meanNode(c.utc), c.angles.asc, c.system) : '&mdash;'}</td><td></td></tr>`);
+  rows.push(`<tr class="dim"><td class="g">&#9738;</td><td>North node (mean)</td><td>${TD.fmtLon(TD.meanNode(c.utc))}</td><td>${c.angles ? TD.houseOf(TD.meanNode(c.utc), c.angles.asc, c.system, c.cusps) : '&mdash;'}</td><td></td></tr>`);
   return `<div class="res"><h3>${esc(poss(p.name))} chart</h3>
-    <p class="note">${c.timeKnown ? TD.HOUSE_SYSTEMS[c.system] + ' houses.' : 'No birth time: positions at local noon. The Moon moves about 13&deg; a day, so its full range for the day is shown. Houses and the Ascendant need a time and are left out.'}</p>
+    <p class="note">${c.timeKnown ? TD.HOUSE_SYSTEMS[c.system] + ' houses.' + (c.houseFallback ? ' (' + TD.HOUSE_SYSTEMS[c.houseFallback.from] + ' cannot be drawn at this latitude.)' : '') : 'No birth time: positions at local noon. The Moon moves about 13&deg; a day, so its full range for the day is shown. Houses and the Ascendant need a time and are left out.'}</p>
     <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th><th>Rx</th></tr></thead>
     <tbody>${rows.join('')}</tbody></table></div></div>`;
 }
@@ -235,10 +235,23 @@ function compositeHTML(A, B, pa, pb){
     ${!A.timeKnown || !B.timeKnown ? ' The composite Moon is approximate without both birth times.' : ''}</p>
     <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th></tr></thead><tbody>${ang}${rows}</tbody></table></div></div>`;
 }
+function davisonHTML(A, B){
+  const D = TD.tools.davison(A, B, $('hsys').value);
+  const rows = D.planets.map(p => `<tr><td class="g">${p.glyph}</td><td>${p.key}</td><td>${TD.fmtLon(p.lon)}</td><td>${p.house || '&mdash;'}</td></tr>`).join('');
+  const ang = `<tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(D.angles.asc)}</td><td>1</td></tr><tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(D.angles.mc)}</td><td>10</td></tr>`;
+  const lat = D.place.lat, lon = D.place.lon;
+  return `<div class="res"><h3>Davison chart</h3>
+    <p class="note">The relationship as a real moment: the chart for the instant halfway between the two births
+    (${D.utc.toISOString().slice(0, 16).replace('T', ' ')} UTC), at the point halfway between the two birthplaces
+    (${Math.abs(lat).toFixed(2)}&deg;${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(2)}&deg;${lon >= 0 ? 'E' : 'W'}). ${TD.HOUSE_SYSTEMS[D.system]} houses.
+    ${!A.timeKnown || !B.timeKnown ? ' Without both birth times the Davison Moon, Ascendant and houses are approximate (noon is used).' : ''}</p>
+    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th></tr></thead><tbody>${ang}${rows}</tbody></table></div></div>`;
+}
 function fgo(){
-  $('hsysnote').textContent = $('hsys').value === 'equal'
-    ? 'Houses: Equal, twelve 30-degree houses starting at the exact Ascendant.'
-    : 'Houses: Whole Sign, the rising sign is the whole first house, the next sign the second, and so on.';
+  $('hsysnote').textContent = { equal: 'Houses: Equal, twelve 30-degree houses starting at the exact Ascendant.',
+    whole: 'Houses: Whole Sign, the rising sign is the whole first house, the next sign the second, and so on.',
+    placidus: 'Houses: Placidus, each degree’s own time above and below the horizon divided into thirds.',
+    koch: 'Houses: Koch, the Midheaven degree’s time above the horizon divided into thirds.' }[$('hsys').value];
   const pa = readPerson('a'), pb = readPerson('b');
   if (!pa || !pb) { $('fout').innerHTML = '<div class="res"><p class="note">Pick a birth place for both people from the list to compare the charts.</p></div>'; $('fdetail').innerHTML = ''; return; }
   const A = TD.chart(pa.input), B = TD.chart(pb.input), s = TD.synastry(A, B);
@@ -249,7 +262,7 @@ function fgo(){
         ${s.contacts.length} scored contacts. Heuristic score, weighting published on the left.</p></div>
     ${bigThree(pa, A)}${bigThree(pb, B)}`;
   $('fdetail').innerHTML = `<div class="grid g2" style="margin-top:6px;align-items:start">${chartTable(pa, A)}${chartTable(pb, B)}</div>
-    ${gridHTML(A, B, s, pa, pb)}<div class="grid g2" style="align-items:start">${contactsHTML(s, pa, pb)}${compositeHTML(A, B, pa, pb)}</div>`;
+    ${gridHTML(A, B, s, pa, pb)}<div class="grid g2" style="align-items:start">${contactsHTML(s, pa, pb)}<div>${compositeHTML(A, B, pa, pb)}${davisonHTML(A, B)}</div></div>`;
 }
 
 /* ---------- quick mode: unchanged from the first demo ---------- */

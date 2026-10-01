@@ -52,10 +52,11 @@ h1,h2,h3,.dsp{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transfo
 .mark::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--ink)}
 .brand b{font-family:'Anton',Impact,sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:.02em;
   white-space:nowrap;font-weight:400}
-.navlinks{display:flex;gap:6px 15px;font-size:13px;font-weight:600;color:var(--muted);
+.navlinks{display:flex;gap:6px 13px;font-size:13px;font-weight:600;color:var(--muted);
   margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
 .navlinks a:hover{color:var(--text)}
 .navlinks a.on{color:var(--text)}
+@media(min-width:861px){.navlinks a[href="index.html"]{display:none}}   /* the logo is the home link on desktop; the phone menu keeps Home */
 .navcta{flex:none;background:var(--a1);color:#12060C;font-weight:800;font-size:13px;
   padding:9px 15px;border-radius:9px;white-space:nowrap}
 @media(max-width:860px){.navlinks{display:none}.navin{gap:12px}}

@@ -1,0 +1,249 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Astrology tools — tarot platform demo</title>
+<meta name="description" content="Solar return chart, secondary progressions, Saturn, Jupiter and lunar returns, eclipses in your chart, the void-of-course Moon and planetary hours.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/tools.html">
+<meta property="og:title" content="Astrology tools — tarot platform demo">
+<meta property="og:description" content="Solar return, progressions, returns, eclipses, the void-of-course Moon and planetary hours, from your own chart.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.wheelbox{display:flex;justify-content:center}.wheelbox svg{max-width:100%;height:auto}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.jump a{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--muted)}
+.jump a:hover{color:var(--text)}
+.cal td{vertical-align:top}.cal details summary{cursor:pointer}
+.cal details p,.res details p{white-space:normal;margin-top:6px;font-size:13px;line-height:1.55}
+tr.nowrow td{color:var(--text);font-weight:700}
+section.tool{scroll-margin-top:80px}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free tools &middot; the ones apps charge for</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Astrology tools</h1>
+  <p class="lede">Your solar return, progressions and returns, the eclipses that touch your chart, the void-of-course
+    Moon and planetary hours, all worked out from your own birth details.</p>
+  <div class="jump"><a href="#solar-return">Solar return</a><a href="#progressions">Progressions</a><a href="#returns">Returns</a>
+    <a href="#eclipses">Eclipses</a><a href="#void-moon">Void-of-course Moon</a><a href="#hours">Planetary hours</a></div>
+
+  <div class="card pad" style="margin-top:18px">
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <div class="row2">
+          <div><label class="f" for="nm">Name</label><input id="nm" value="You"></div>
+          <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+          <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      </div>
+      <div>
+        <div class="row2">
+          <div><label class="f" for="np">Where you are now</label><input id="np" placeholder="Start typing a city"></div>
+          <div><label class="f" for="day">Date</label><input id="day" type="date"></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div><label class="f" for="sry">Solar return year</label><input id="sry" type="number" min="1900" max="2100"></div>
+          <div><label class="f" for="hsys">Houses</label><select id="hsys"><option value="placidus">Placidus</option><option value="koch">Koch</option><option value="whole">Whole Sign</option><option value="equal">Equal</option></select></div>
+        </div>
+        <button class="btn primary wide" id="go" style="margin-top:16px">Work it out</button>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px">Shares your details with the <a href="birthchart.html" style="text-decoration:underline">birth chart</a> and
+      <a href="horoscope.html" style="text-decoration:underline">horoscope</a> pages, in this browser only. &ldquo;Where you are now&rdquo; sets the
+      solar return&rsquo;s houses and the planetary hours; it starts as your birthplace.</p>
+  </div>
+  <div id="out"></div>
+  <div class="warn"><span class="k">Method</span>
+    <p>Positions from Astronomy Engine. Solar return: the moment the Sun returns to its exact birth longitude, cast for where
+    you are. Progressions: secondary (one day after birth for each year of life); progressed angles by solar arc. Returns:
+    each pass of Saturn or Jupiter over its birth position, and the Moon&rsquo;s return to its birth position. Eclipses:
+    Astronomy Engine&rsquo;s eclipse search, at the moment of greatest eclipse; &ldquo;touches&rdquo; means within 3&deg; of a
+    point in your chart. Void-of-course Moon: from the Moon&rsquo;s last exact major aspect to any planet, Sun to Pluto, until it
+    enters the next sign. Planetary hours: daylight and night each split into twelve hours from the local sunrise and sunset,
+    in the Chaldean order starting from the day&rsquo;s ruler. Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script><script src="js/vendor/astrochart.js"></script><script src="js/data/chiron.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/transits.js"></script><script src="js/tools.js"></script>
+<script src="js/wheel.js"></script><script src="js/places.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('tools.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const K = TD.tools, DAY = 864e5, KEY = 'tarotdemo.natal';
+const G = k => (TD.BODIES.find(b => b.key === k) || {}).glyph || '';
+const signOf = lon => TD.SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+const fmtDY = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtT = d => d.toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+const fmtS = d => d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/* ---------- form ---------- */
+let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+if (saved) { $('nm').value = saved.nm || 'You'; $('bd').value = saved.bd || $('bd').value; $('bt').value = saved.bt || '';
+  $('bu').checked = !!saved.bu; $('bt').disabled = !!saved.bu; if (saved.hsys) $('hsys').value = saved.hsys; }
+$('day').value = iso(new Date());
+const birth = TD.places.picker($('bp'), () => go(), saved && saved.place || 'Denver');
+const here = TD.places.picker($('np'), () => go(), saved && (saved.now || saved.place) || 'Denver');
+$('bu').addEventListener('change', () => { $('bt').disabled = $('bu').checked; go(); });
+['nm', 'bd', 'bt', 'hsys', 'day', 'sry'].forEach(id => $(id).addEventListener('change', go));
+$('go').onclick = go;
+/* Default solar return year: the year of the most recent birthday. */
+function defaultSRYear(){
+  const [, m, d] = $('bd').value.split('-').map(Number), now = new Date(), y = now.getFullYear();
+  return (now.getMonth() + 1 > m || (now.getMonth() + 1 === m && now.getDate() >= d)) ? y : y - 1;
+}
+function read(){
+  const b = $('bd').value, pl = birth.get(), nw = here.get() || pl;
+  if (!b || !pl) return null;
+  const [y, mo, d] = b.split('-').map(Number);
+  const known = !$('bu').checked && !!$('bt').value;
+  const [h, mi] = known ? $('bt').value.split(':').map(Number) : [12, 0];
+  try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, saved || {}, { nm: $('nm').value, bd: b, bt: $('bt').value, bu: $('bu').checked, hsys: $('hsys').value, place: pl.name, now: nw.name }))); } catch (e) {}
+  if (!$('sry').value) $('sry').value = defaultSRYear();
+  return { name: $('nm').value || 'You', now: nw, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: $('hsys').value } };
+}
+
+/* ---------- texts ---------- */
+let textState = null;
+function texts(){
+  if (TD.TOOLS_TEXT) return;
+  if (textState) return;
+  textState = 'loading';
+  const el = document.createElement('script'); el.src = 'js/data/tools-text.js';
+  const keep = () => { const y = scrollY; go(); if (Math.abs(scrollY - y) > 1) scrollTo({ top: y, behavior: 'instant' }); };
+  el.onload = keep; el.onerror = () => { textState = 'failed'; keep(); };
+  document.head.appendChild(el);
+}
+const T = k => (TD.TOOLS_TEXT || {})[k] || '';
+const para = k => T(k) ? `<p class="interp">${esc(T(k))}</p>` : (textState === 'failed' ? '' : '<p class="note">Loading&hellip;</p>');
+
+/* ---------- sections ---------- */
+function srHTML(p, c){
+  const y = +$('sry').value || defaultSRYear();
+  const sr = K.solarReturn(c, y, p.now, $('hsys').value);
+  const sun = sr.planets[0], asc = signOf(sr.angles.asc);
+  const rows = sr.planets.map(pl => `<tr><td class="g">${pl.glyph}</td><td>${pl.key}</td><td>${TD.fmtLon(pl.lon)}</td><td>${pl.house}</td><td>${pl.retro ? 'R' : ''}</td></tr>`).join('');
+  return { html: `<section class="tool" id="solar-return"><div class="eyebrow" style="margin-top:28px">Solar return ${y}</div>
+    <div class="grid g2" style="align-items:start">
+      <div><div class="res"><h3>${fmtT(sr.utc)}</h3><p class="note">The Sun back at ${TD.fmtLon(c.planets[0].lon)}, its birth position,
+        cast for ${esc(TD.places.label(p.now))}. ${TD.HOUSE_SYSTEMS[sr.system]} houses.${sr.houseFallback ? ' Placidus and Koch cannot be drawn this far north or south, so Porphyry is used.' : ''}</p>${para('return:Solar')}</div>
+        <div class="res"><h3>Rising sign of the year: ${asc}</h3>${para('sr-asc:' + asc)}</div>
+        <div class="res"><h3>${G('Sun')} Sun in the ${ordinal(sun.house)} house of the year</h3>${para('sr-sun:' + sun.house)}</div></div>
+      <div><div class="res"><h3>The solar return chart</h3><div class="wheelbox" id="srwheel"></div></div>
+        <div class="res"><div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th><th>Rx</th></tr></thead>
+        <tbody><tr><td class="g">AC</td><td>Ascendant</td><td>${TD.fmtLon(sr.angles.asc)}</td><td>1</td><td></td></tr>
+        <tr><td class="g">MC</td><td>Midheaven</td><td>${TD.fmtLon(sr.angles.mc)}</td><td>10</td><td></td></tr>${rows}</tbody></table></div></div></div>
+    </div></section>`, sr };
+}
+function progHTML(p, c, when){
+  const pr = K.progressions(c, when), age = ((+when - +c.utc) / (365.2422 * DAY)).toFixed(1);
+  const rows = pr.planets.map((pl, i) => `<tr><td class="g">${pl.glyph}</td><td>${pl.key}</td><td>${TD.fmtLon(pl.lon)}</td>
+    <td class="dim">${TD.fmtLon(c.planets[i].lon)}</td><td>${pl.retro ? 'R' : ''}</td></tr>`).join('');
+  const ang = pr.asc != null ? `<tr><td class="g">AC</td><td>Ascendant (solar arc)</td><td>${TD.fmtLon(pr.asc)}</td><td class="dim">${TD.fmtLon(c.angles.asc)}</td><td></td></tr>
+    <tr><td class="g">MC</td><td>Midheaven (solar arc)</td><td>${TD.fmtLon(pr.mc)}</td><td class="dim">${TD.fmtLon(c.angles.mc)}</td><td></td></tr>` : '';
+  const span = (a, b) => `${a ? fmtDY(a) : 'before'} to ${b ? fmtDY(b) : 'later'}`;
+  return `<section class="tool" id="progressions"><div class="eyebrow" style="margin-top:28px">Progressions at age ${age}</div>
+    <div class="grid g2" style="align-items:start">
+      <div><div class="res"><h3>${G('Moon')} Progressed Moon in ${pr.moonSign.sign}</h3><p class="when note">${span(pr.moonSign.from, pr.moonSign.to)}</p>${para('prog-moon:' + pr.moonSign.sign)}</div>
+        <div class="res"><h3>Progressed lunar phase: ${pr.phase.name}</h3><p class="when note">${span(pr.phase.from, pr.phase.to)}; the Moon ${Math.round(pr.phase.angle)}&deg; ahead of the Sun</p>${para('prog-phase:' + pr.phase.name)}</div></div>
+      <div class="res"><h3>Progressed positions</h3><p class="note">The chart for ${fmtT(pr.progressed)} UTC, ${age} days after birth.
+        ${pr.arc != null ? `Solar arc ${pr.arc.toFixed(2)}&deg;.` : 'No birth time: no progressed angles.'} Faded: natal.</p>
+        <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Progressed</th><th>Natal</th><th>Rx</th></tr></thead><tbody>${ang}${rows}</tbody></table></div></div>
+    </div></section>`;
+}
+function returnsHTML(p, c, when){
+  const sat = K.saturnReturns(c), jup = K.jupiterReturns(c, when, 25), lun = K.lunarReturn(c, when);
+  const ageAt = t => Math.floor((+t - +c.utc) / (365.2422 * DAY));
+  const satRows = sat.map(r => `<tr${r.passes.some(t => Math.abs(t - when) < 365 * DAY) ? ' class="nowrow"' : ''}><td>${ordinal(r.n)} return</td><td>${r.passes.map(fmtDY).join(', ')}</td><td>age ${ageAt(r.passes[0])}</td></tr>`).join('');
+  const jupRows = jup.map(r => `<tr><td>${r.passes.map(fmtDY).join(', ')}</td><td>age ${ageAt(r.passes[0])}</td></tr>`).join('');
+  return `<section class="tool" id="returns"><div class="eyebrow" style="margin-top:28px">Returns</div>
+    <div class="grid g2" style="align-items:start">
+      <div class="res"><h3>${G('Saturn')} Saturn returns</h3><div class="scrollx"><table class="ctab cal"><tbody>${satRows || '<tr><td>None in a lifetime window</td></tr>'}</tbody></table></div>${para('return:Saturn')}</div>
+      <div><div class="res"><h3>${G('Jupiter')} Next Jupiter returns</h3><div class="scrollx"><table class="ctab cal"><tbody>${jupRows}</tbody></table></div>${para('return:Jupiter')}</div>
+        <div class="res"><h3>${G('Moon')} Next lunar return</h3><p class="when note">${lun ? fmtT(lun) : ''}${c.timeKnown ? '' : ' (no birth time: the Moon is approximate)'}</p>${para('return:Lunar')}</div></div>
+    </div></section>`;
+}
+function eclipsesHTML(p, c, when){
+  const list = K.eclipses(when, 24), pts = c.planets.map(x => ({ key: x.key, lon: x.lon }));
+  if (c.angles) pts.push({ key: 'Ascendant', lon: c.angles.asc }, { key: 'Midheaven', lon: c.angles.mc });
+  const rows = list.map(e => {
+    const house = c.cusps ? TD.houseOf(e.lon, c.angles.asc, c.system, c.cusps) : null;
+    const touch = pts.filter(x => TD.separation(x.lon, e.lon) <= 3 || Math.abs(TD.separation(x.lon, e.lon) - 180) <= 3)
+      .map(x => `${x.key === 'Ascendant' ? 'AC' : x.key === 'Midheaven' ? 'MC' : G(x.key)} ${x.key}`).join(', ');
+    return `<tr><td>${fmtDY(e.time)}</td><td>${e.kind} ${e.type}</td><td>${TD.fmtLon(e.lon)}</td>
+      <td><details><summary>${house ? ordinal(house) + ' house' : 'What it means'}${touch ? ' &middot; touches ' + touch : ''}</summary>
+      ${para('eclipse:' + e.type)}${house ? para('eclipse-house:' + house) : ''}</details></td></tr>`;
+  }).join('');
+  return `<section class="tool" id="eclipses"><div class="eyebrow" style="margin-top:28px">Eclipses, the next two years</div>
+    <div class="res"><p class="note">Solar eclipses fall at the new moon, lunar at the full moon. The degree is the Sun&rsquo;s (solar) or the
+      Moon&rsquo;s (lunar) at greatest eclipse.${c.cusps ? ' Tap one to read what it means for the house it falls in.' : ' With a birth time, each eclipse is placed in your houses.'}</p>
+    <div class="scrollx"><table class="ctab cal"><tbody>${rows}</tbody></table></div></div></section>`;
+}
+function vocHTML(when){
+  const list = K.voidMoon(when, 7);
+  const rows = list.map(v => {
+    const now = v.start <= when && v.end >= when;
+    return `<tr${now ? ' class="nowrow"' : ''}><td>${fmtS(v.start)}</td><td>${fmtS(v.end)}</td><td>${v.from} &rarr; ${v.into}</td>
+      <td>${v.aspect ? `last aspect: ${TD.ASPECTS.find(a => a.angle === v.aspect.angle).key} ${G(v.aspect.body)} ${v.aspect.body}` : 'no aspect in this sign'}${now ? ' <span class="pill warn">now</span>' : ''}</td></tr>`;
+  }).join('');
+  return `<section class="tool" id="void-moon"><div class="eyebrow" style="margin-top:28px">Void-of-course Moon, the next seven days</div>
+    <div class="res"><p class="note">Times in your browser&rsquo;s time zone. The same for everyone.</p>
+    <div class="scrollx"><table class="ctab cal"><thead><tr><th>From</th><th>Until</th><th>Sign</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${para('voc')}</div></section>`;
+}
+function hoursHTML(p){
+  const [y, mo, d] = $('day').value.split('-').map(Number), pl = p.now;
+  const ph = K.planetaryHours(y, mo, d, pl);
+  if (!ph) return `<section class="tool" id="hours"><div class="eyebrow" style="margin-top:28px">Planetary hours</div>
+    <div class="res"><p class="note">The Sun does not both rise and set at ${esc(TD.places.label(pl))} on this date, so there are no planetary hours.</p></div></section>`;
+  const tm = t => t.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: pl.tz });
+  const nowT = new Date();
+  const rows = ph.hours.map(h => `<tr${h.start <= nowT && h.end > nowT ? ' class="nowrow"' : ''}><td>${h.night ? 'Night' : 'Day'} ${h.night ? h.n - 12 : h.n}</td>
+    <td>${tm(h.start)} &ndash; ${tm(h.end)}</td><td><details><summary>${G(h.planet)} ${h.planet}</summary>${para('hour:' + h.planet)}</details></td></tr>`).join('');
+  return `<section class="tool" id="hours"><div class="eyebrow" style="margin-top:28px">Planetary hours</div>
+    <div class="res"><h3>${G(ph.ruler)} ${new Date(Date.UTC(y, mo - 1, d)).toLocaleDateString(undefined, { weekday: 'long', timeZone: 'UTC' })}, the day of ${ph.ruler}</h3>
+    <p class="note">At ${esc(TD.places.label(pl))}, in its local time: sunrise ${tm(ph.sunrise)}, sunset ${tm(ph.sunset)}. Day hours are a twelfth of
+      the daylight, night hours a twelfth of the dark, so they are rarely 60 minutes.</p>
+    <div class="scrollx"><table class="ctab cal"><tbody>${rows}</tbody></table></div></div></section>`;
+}
+
+let runId = 0;
+function go(){
+  const p = read();
+  if (!p) { $('out').innerHTML = '<div class="res"><p class="note">Pick a birth place from the list to work things out.</p></div>'; return; }
+  texts();
+  const c = TD.chart(p.input), id = ++runId;
+  const [y, m, d] = $('day').value.split('-').map(Number), now = new Date();
+  const when = iso(now) === $('day').value ? now : new Date(y, m - 1, d, 12, 0);
+  const parts = [];
+  const step = (fn) => new Promise(r => setTimeout(() => { if (id === runId) parts.push(fn()); r(); }, 0));
+  const paint = () => { if (id !== runId) return; $('out').innerHTML = parts.join('') + (parts.length < 6 ? '<div class="res" style="margin-top:26px"><p class="note">Working it out&hellip;</p></div>' : ''); };
+  let sr = null;
+  // One section at a time, painting after each, so the page answers at once and fills in.
+  step(() => { if (!c.timeKnown) return `<section class="tool" id="solar-return"><div class="eyebrow" style="margin-top:28px">Solar return</div><div class="res"><p class="note">A solar return needs your birth time: the Sun&rsquo;s exact birth position decides the moment.</p></div></section>`;
+      const o = srHTML(p, c); sr = o.sr; return o.html; })
+    .then(() => { paint(); if (sr) TD.drawWheel('srwheel', sr); return step(() => progHTML(p, c, when)); })
+    .then(() => step(() => returnsHTML(p, c, when)))
+    .then(() => step(() => eclipsesHTML(p, c, when)))
+    .then(() => step(() => vocHTML(when)))
+    .then(() => step(() => hoursHTML(p)))
+    .then(() => { const y0 = scrollY; paint(); if (sr) TD.drawWheel('srwheel', sr); if (Math.abs(scrollY - y0) > 1) scrollTo({ top: y0, behavior: 'instant' });
+      if (location.hash && !go.jumped) { go.jumped = true; const t = document.querySelector(location.hash); if (t) t.scrollIntoView(); } });
+}
+go();
+</script></body></html>
