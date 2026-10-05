@@ -20,14 +20,12 @@
 <meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
-<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/report.css">
 <style>
-.rh2{font-size:clamp(22px,3.4vw,28px);margin:2px 0 4px}
-#out .interp{font-size:15px;line-height:1.65;color:var(--text);margin-top:8px}
-#out h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--dim);margin-top:14px}
 .lead{font-size:14.5px;line-height:1.6;color:var(--a2);margin-top:6px}
 </style></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="rscreen">
   <div class="eyebrow">Report &middot; the one people pay for elsewhere</div>
   <h1 style="font-size:clamp(34px,6vw,52px)">Karmic path</h1>
   <p class="lede">What you arrived with and where you are headed: the lunar nodes, Saturn&rsquo;s lessons, Jupiter&rsquo;s gifts,
@@ -60,8 +58,9 @@
         aspects as lessons and gifts. Chapter 6, the Vedic view. Chapter 7, the balance of your chart.</p>
       <p class="note" style="margin-top:8px">The companion <a href="pastlife.html">Past lives</a> report reads the Cayce-style
         sojourns, past-life settings, numerology and the tarot.</p>
-      <button class="btn wide printbtn" onclick="print()" style="margin-top:12px">Print or save as PDF</button>
+      <button class="btn wide printbtn" type="button" data-report-print style="margin-top:12px">Print or save as PDF</button>
     </div>
+  </div>
   </div>
   <div id="out"></div>
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
@@ -86,14 +85,14 @@ function render(ctx, H){
   out.push(H.chapter(1, 'The nodes: the road behind and the road ahead', `South Node in ${sn}${nodes.sn.house ? `, ${H.ordinal(nodes.sn.house)} house` : ''}; North Node in ${nn}${nodes.nn.house ? `, ${H.ordinal(nodes.nn.house)} house` : ''}.`),
     `<div class="grid g2" style="align-items:start">${H.block(`By sign: from ${sn} toward ${nn}`, H.para(T[nodes.signKey]))}
       ${nodes.houseKey ? H.block(`By house: from the ${H.ordinal(nodes.sn.house)} toward the ${H.ordinal(nodes.nn.house)}`, H.para(T[nodes.houseKey])) : H.block('By house', '<p class="note">The nodes&rsquo; houses need a birth time.</p>')}</div>`,
-    ctx.onNodes.length ? H.block('Planets on the nodes', ctx.onNodes.map(x => `<h4>${H.glyph(x.key)} ${x.key} on the ${x.end === 'nn' ? 'North' : 'South'} Node &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[x.textKey])}`).join(''))
-      : H.block('Planets on the nodes', '<p class="note">No planet sits within 8&deg; of either node.</p>'));
+    H.items('Planets on the nodes', ctx.onNodes.map(x => `<h4>${H.glyph(x.key)} ${x.key} on the ${x.end === 'nn' ? 'North' : 'South'} Node &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[x.textKey])}`),
+      '<p class="note">No planet sits within 8&deg; of either node.</p>'));
 
   /* ---- 2: Saturn, 3: Jupiter ---- */
   const planetChapter = (n, k, title, intro) => {
     const hard = aspOf(k, a => a.hard), soft = aspOf(k, a => a.soft || a.type === 'conjunction');
     return H.chapter(n, title, intro) + H.block(placed(k), lead(k) + signAndHouse(k))
-      + (hard.length || soft.length ? H.block(`${k}&rsquo;s aspects`, hard.map(aspHTML).join('') + soft.map(aspHTML).join('')) : '');
+      + (hard.length || soft.length ? H.items(`${k}&rsquo;s aspects`, hard.concat(soft).map(aspHTML)) : '');
   };
   out.push(planetChapter(2, 'Saturn', 'Saturn: the lesson', 'In karmic astrology Saturn marks the work this life asks for, the place where effort turns into mastery.'),
     planetChapter(3, 'Jupiter', 'Jupiter: the gift', 'Jupiter marks what you arrived already good at, the place where faith and generosity open doors.'));
@@ -101,10 +100,10 @@ function render(ctx, H){
   /* ---- 4: twelfth house and retrogrades ---- */
   const twelfth = c.timeKnown ? c.planets.filter(p => p.house === 12) : null;
   out.push(H.chapter(4, 'The twelfth house and retrograde planets', 'What works out of sight, and what is done inwardly or on a second pass.'),
-    H.block('The twelfth house', twelfth === null ? '<p class="note">Houses need a birth time.</p>'
-      : twelfth.length ? twelfth.map(p => `<h4>${H.glyph(p.key)} ${p.key} in the twelfth</h4>${H.para(T[`house:${p.key}:12`])}`).join('')
-      : `<p class="note">No planet in your twelfth house. Its ruler, ${TD.natal.RULER[Math.floor((((c.cusps ? c.cusps[11] : c.angles.asc + 330) % 360) + 360) % 360 / 30)]}, carries its themes instead.</p>`),
-    H.block('Retrograde at birth', ctx.retro.length ? ctx.retro.map(r => `<h4>${H.glyph(r.key)} ${r.key}</h4>${H.para(T[r.textKey])}`).join('') : '<p class="note">No planet was retrograde when you were born.</p>'));
+    twelfth === null ? H.items('The twelfth house', [], '<p class="note">Houses need a birth time.</p>')
+      : H.items('The twelfth house', twelfth.map(p => `<h4>${H.glyph(p.key)} ${p.key} in the twelfth</h4>${H.para(T[`house:${p.key}:12`])}`),
+        `<p class="note">No planet in your twelfth house. Its ruler, ${TD.natal.RULER[Math.floor((((c.cusps ? c.cusps[11] : c.angles.asc + 330) % 360) + 360) % 360 / 30)]}, carries its themes instead.</p>`),
+    H.items('Retrograde at birth', ctx.retro.map(r => `<h4>${H.glyph(r.key)} ${r.key}</h4>${H.para(T[r.textKey])}`), '<p class="note">No planet was retrograde when you were born.</p>'));
 
   /* ---- 5: Sun, Moon, Rising + aspects as lessons and gifts ---- */
   const moon = P('Moon');
@@ -116,8 +115,8 @@ function render(ctx, H){
   const hardP = asp.filter(a => a.hard && PERS.includes(a.x)).slice(0, 6), softP = asp.filter(a => a.soft && PERS.includes(a.x)).slice(0, 6);
   out.push(H.chapter(5, 'Sun, Moon and Rising, and the aspects as lessons and gifts', 'Hard aspects (squares, oppositions) read as lessons still in progress; easy ones (trines, sextiles) as gifts already earned.'),
     `<div class="grid g2" style="align-items:start">${lum.join('')}</div>`,
-    `<div class="grid g2" style="align-items:start">${H.block('Lessons in progress', hardP.length ? hardP.map(aspHTML).join('') : '<p class="note">No hard aspects between your personal planets and the rest.</p>')}
-      ${H.block('Gifts already earned', softP.length ? softP.map(aspHTML).join('') : '<p class="note">No easy aspects from your personal planets.</p>')}</div>`);
+    `<div class="grid g2" style="align-items:start">${H.items('Lessons in progress', hardP.map(aspHTML), '<p class="note">No hard aspects between your personal planets and the rest.</p>')}
+      ${H.items('Gifts already earned', softP.map(aspHTML), '<p class="note">No easy aspects from your personal planets.</p>')}</div>`);
 
   /* ---- 6: Vedic ---- */
   const ketu = v.grahas.find(g => g.key === 'Ketu');
@@ -135,5 +134,5 @@ function render(ctx, H){
     H.disclaimer);
   return out.join('');
 }
-TD.reportPage({ page: 'karmic.html', render });
+TD.reportPage({ page: 'karmic.html', render, cover: { kicker: 'A karmic astrology reading', title: 'Karmic path', card: 'major-10', caption: 'the card of cycles and turning points' } });
 </script></body></html>

@@ -58,13 +58,22 @@ function chrome(current){
 }
 /* Report pages get a Print button under the intro; printing opens every closed details section first
    and closes them again afterwards, so the printed report carries the full reading. */
+/* Lazy images below the screen never load before a print, so they print blank: switch them to eager and wait
+   (at most 6 s) until every image has loaded or failed, then print. */
+function printWhenReady(){
+  const imgs = [...document.images];
+  imgs.forEach(i => { if (i.loading === 'lazy') i.loading = 'eager'; });
+  const ready = imgs.map(i => i.complete ? null : new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); })).filter(Boolean);
+  Promise.race([Promise.all(ready), new Promise(r => setTimeout(r, 6000))]).then(() => window.print());
+}
+NS.printWhenReady = printWhenReady;
 const PRINTABLE = ['birthchart.html', 'vedic.html', 'horoscope.html', 'signs.html', 'journal.html', 'tools.html', 'compatibility.html', 'numerology.html'];
 function printable(current){
   if (PRINTABLE.includes(current)) {
     const lede = document.querySelector('.wrap .lede');
     if (lede) {
       lede.insertAdjacentHTML('afterend', '<button class="btn printbtn" type="button" data-print style="margin-top:14px">Print or save as PDF</button>');
-      lede.nextElementSibling.onclick = () => window.print();
+      lede.nextElementSibling.onclick = () => printWhenReady();
     }
   }
   let opened = [];

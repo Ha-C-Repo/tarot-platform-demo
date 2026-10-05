@@ -50,7 +50,9 @@ const H = {
   glyph: k => (NS.BODIES.find(b => b.key === k) || {}).glyph || '',
   para: t => t ? `<p class="interp">${esc(t)}</p>` : '',
   poss: n => /^you$/i.test(String(n).trim()) ? 'Your' : esc(n) + '’s',
-  chapter: (n, title, intro) => `<div class="eyebrow" style="margin-top:34px">Chapter ${n}</div><h2 class="rh2">${title}</h2>${intro ? `<p class="note">${intro}</p>` : ''}`,
+  chapter: (n, title, intro) => `<div class="eyebrow rchead" style="margin-top:34px">Chapter ${n}</div><h2 class="rh2">${title}</h2>${intro ? `<p class="note">${intro}</p>` : ''}`,
+  /* A titled group of separate boxes, one per item, so no box is split across printed pages. */
+  items: (title, list, empty) => `<div class="rgroup"><h3 class="rgh">${title}</h3>${list.length ? list.map(x => `<div class="res">${x}</div>`).join('') : `<div class="res">${empty || ''}</div>`}</div>`,
   block: (h, body) => `<div class="res">${h ? `<h3>${h}</h3>` : ''}${body}</div>`,
   ORDER: ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'],
   /* Major aspects between the ten planets, inner planet first, closest first; the Moon's are dropped with no birth time. */
@@ -63,7 +65,7 @@ const H = {
   },
   card(id, role){
     const card = NS.DECK.find(c => c.id === id);
-    return `<div class="bc">${NS.faceHTML({ card, reversed: false }, { caption: false })}<b>${card.name}</b><span>${role}</span></div>`;
+    return `<div class="bc">${NS.faceHTML({ card, reversed: false }, { caption: false, eager: true })}<b>${card.name}</b><span>${role}</span></div>`;
   },
   disclaimer: '<p class="note" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Past-life readings are a spiritual tradition, not a historical record.</p>'
 };
@@ -100,9 +102,33 @@ function reportPage(opts){
       if (textState !== 'failed') return;
     }
     const ctx = context(p, $('ayan') ? $('ayan').value : 'fagan');
-    $('out').innerHTML = opts.render(ctx, H);
+    const body = opts.render(ctx, H);
+    $('out').innerHTML = (opts.cover ? printPages(ctx, body, opts.cover) : '') + body;
   }
+  document.querySelectorAll('[data-report-print]').forEach(b => { b.onclick = () => (NS.printWhenReady || print)(); });
   go();
+}
+
+/* Print-only cover and "About this report" page. cover: { kicker, title, card: 'major-20', caption } */
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function printPages(ctx, body, cover){
+  const p = ctx.p, i = p.input, card = NS.DECK.find(c => c.id === cover.card), brand = NS.brand || {};
+  let where = p.place && p.place.name || '';
+  try { if (NS.places && NS.places.label && p.place.lat != null) where = NS.places.label(p.place); } catch (e) {}
+  const when = `${i.d} ${MONTHS[i.mo - 1]} ${i.y}${i.timeKnown ? `, ${String(i.h).padStart(2, '0')}:${String(i.mi).padStart(2, '0')}` : ', birth time unknown'}`;
+  const now = new Date(), made = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  const chapters = [...body.matchAll(/<h2 class="rh2">([\s\S]*?)<\/h2>/g)].map(m => m[1]);
+  const method = [...document.querySelectorAll('#form .warn p')].map(x => `<p>${x.innerHTML}</p>`).join('');
+  const who = /^you$/i.test(String(p.name).trim()) ? 'you' : esc(p.name);
+  return `<div class="pcover">
+      <div><div class="pc-brand">${esc(brand.name || '')}${brand.role ? ' &middot; ' + esc(brand.role) : ''}</div>
+        <div class="pc-kicker">${cover.kicker}</div><h1 class="pc-title">${cover.title}</h1><div class="pc-for">Prepared for ${who}</div></div>
+      ${card ? `<figure class="pc-card"><div><img src="${card.img}" alt="${esc(card.name)}" loading="eager"><figcaption>${esc(card.name)}${cover.caption ? ', ' + cover.caption : ''}. Rider-Waite-Smith deck, 1909, Pamela Colman Smith.</figcaption></div></figure>` : ''}
+      <div><div class="pc-birth">Born ${when}<br>${esc(where)}</div>
+        <div class="pc-foot">Prepared ${made}. For reflection and entertainment.</div></div>
+    </div>
+    <div class="pabout"><h2>About this report</h2><h3>Contents</h3><ol>${chapters.map(c => `<li>${c}</li>`).join('')}</ol>
+      ${method ? `<h3>How it was made</h3>${method}` : ''}</div>`;
 }
 
 NS.reportPage = reportPage;

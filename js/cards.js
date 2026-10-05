@@ -243,7 +243,7 @@ function faceHTML(entry, opts = {}){
   const c = entry.card, rev = entry.reversed;
   return `<figure class="tc${rev?' rev':''}">
     <div class="tcface">
-      <img src="${c.img}" alt="${c.name}" loading="lazy"
+      <img src="${c.img}" alt="${c.name}" loading="${opts.eager ? 'eager' : 'lazy'}"
            onerror="this.closest('.tcface').classList.add('noimg');this.remove()">
       <div class="tcfall">${cardFaceSVG(c)}</div><span class="tcrevmark">\u21BA</span>
     </div>
