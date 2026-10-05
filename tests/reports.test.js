@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path');
 const load = require('./load');
 const FILES = ['js/vendor/astronomy.browser.min.js', 'js/data/chiron.js', 'js/astro.js', 'js/chart.js', 'js/natal.js', 'js/vedic.js',
   'js/numerology.js', 'js/factors.js', 'js/cards.js', 'js/data/correspondences.js', 'js/data/extra-text.js',
-  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js'];
+  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/tools.js'];
 const W = load(FILES), TD = W.TD, F = TD.factors;
 const assert = (c, msg) => { if (!c) throw new Error(msg); };
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/fagan-swisseph.json'), 'utf8'));
@@ -121,21 +121,30 @@ module.exports = [
     assert(F.outOfBounds(c).map(x => x.key).join() === 'Mars', 'Mars out of bounds in March 2006 (dec 24.1)');
     return `worst ${worst.toFixed(3)}'`;
   }],
+  ['Saturn cycle: returns match tools.js saturnReturns to the day, stages in order', () => {
+    const c = TD.chart(CHARTS[0][2]), cyc = F.saturnCycle(c);
+    const mine = cyc.filter(x => x.kind === 'return').map(x => x.passes.map(p => p.toISOString().slice(0, 10)).join(' ')).join(' | ');
+    const ref = TD.tools.saturnReturns(c).map(r => r.passes.map(p => p.toISOString().slice(0, 10)).join(' ')).join(' | ');
+    assert(mine === ref, mine + ' vs ' + ref);
+    assert(cyc.map(x => x.kind).slice(0, 4).join() === 'wax,opp,wane,return' && cyc[0].age > 6 && cyc[0].age < 9, 'first stages ' + cyc.map(x => x.kind + '@' + x.age.toFixed(1)).join(' '));
+    assert(cyc.filter(x => x.kind === 'return').map(x => x.textKey).join() === 'sat:return1,sat:return2,sat:return3', 'return keys');
+  }],
   ['House rulers: twelve, each pointing to the house its ruler occupies', () => {
     const c = TD.chart(CHARTS[0][2]), hr = F.houseRulers(c);
     assert(hr.length === 12 && hr.map(x => x.textKey).join(' ') === 'ruler:1:7 ruler:2:11 ruler:3:4 ruler:4:4 ruler:5:11 ruler:6:7 ruler:7:9 ruler:8:10 ruler:9:2 ruler:10:9 ruler:11:10 ruler:12:9', hr.map(x => x.textKey).join(' '));
     assert(F.houseRulers(TD.chart(CHARTS[1][2])) === null, 'no time, no rulers');
   }],
-  ['report.html: all five reports render every test chart with all their texts', () => {
+  ['report.html: all ten reports render every test chart with all their texts', () => {
     const ctx = load(FILES.concat(['js/reportpage.js', 'js/reports.js']), { document: { getElementById: () => null } });
     const R = ctx.TD.REPORTS, H = ctx.TD.reportHelpers;
-    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras', Object.keys(R).join());
+    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras,solarreturn,lunarreturn,progressions,saturn,relocation', Object.keys(R).join());
     let n = 0;
     Object.entries(R).forEach(([id, rep]) => CHARTS.forEach(([label, name, input]) => {
-      const html = rep.render(ctx.TD.reportContext({ name, place: { name: label }, input }, 'fagan'), H); n++;
+      const reloc = { name: 'London', lat: 51.5072, lon: -0.1276, tz: 'Europe/London' };
+      const html = rep.render(ctx.TD.reportContext({ name, place: { name: label }, reloc, input }, 'fagan'), H); n++;
       assert(!/undefined|NaN|\[object/.test(html), `${id} ${label}: ${(html.match(/.{60}(undefined|NaN|\[object).{20}/) || [''])[0]}`);
       assert(!/<p class="interp"><\/p>|<p class="affirm"[^>]*><\/p>/.test(html), `${id} ${label}: empty text`);
-      assert((html.match(/class="eyebrow rchead"/g) || []).length >= 3, `${id} ${label}: chapters`);
+      assert((html.match(/class="eyebrow rchead"/g) || []).length >= (id === 'relocation' && !input.timeKnown ? 1 : 2), `${id} ${label}: chapters`);
     }));
     return n + ' renders';
   }],

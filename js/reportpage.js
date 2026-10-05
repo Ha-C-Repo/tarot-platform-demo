@@ -10,11 +10,11 @@ window.TD = window.TD || {};
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const KEY = 'tarotdemo.natal';
-const TEXT_FILES = ['js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js'];
+const TEXT_FILES = ['js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js'];
 let textState = null;
 
 function loadTexts(then){
-  if (NS.NATAL_TEXT && NS.VEDIC_TEXT && NS.REPORT_TEXT) return true;
+  if (NS.NATAL_TEXT && NS.VEDIC_TEXT && NS.REPORT_TEXT && NS.TOOLS_TEXT) return true;
   if (textState) return false;
   textState = 'loading';
   let i = 0;
@@ -39,7 +39,7 @@ function context(p, mode){
   return { p, c, v, iso, named, num, karmic, st, soj, mode,
     nodes: F.nodes(c), onNodes: F.onNodes(c), retro: F.retrogrades(c), emphasis: F.emphasis(c), fortune: F.fortune(c),
     chakras: F.chakras(c, st), ak: F.atmakaraka(v), conv: F.convergence(c, v, num, karmic, soj, st),
-    T: Object.assign({}, NS.NATAL_TEXT, NS.VEDIC_TEXT, NS.REPORT_TEXT) };
+    T: Object.assign({}, NS.TOOLS_TEXT, NS.NATAL_TEXT, NS.VEDIC_TEXT, NS.REPORT_TEXT) };
 }
 
 /* Helpers the report pages share. */
@@ -47,7 +47,7 @@ const H = {
   esc,
   signOf: lon => NS.SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)],
   ordinal: n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'),
-  glyph: k => (NS.BODIES.find(b => b.key === k) || {}).glyph || '',
+  glyph: k => { const g = (NS.BODIES.find(b => b.key === k) || {}).glyph; return g ? `<span class="gl">${g}</span>` : ''; },
   para: t => t ? `<p class="interp">${esc(t)}</p>` : '',
   poss: n => /^you$/i.test(String(n).trim()) ? 'Your' : esc(n) + '’s',
   chapter: (n, title, intro) => `<div class="eyebrow rchead" style="margin-top:34px">Chapter ${n}</div><h2 class="rh2">${title}</h2>${intro ? `<p class="note">${intro}</p>` : ''}`,
@@ -67,8 +67,8 @@ const H = {
     const card = NS.DECK.find(c => c.id === id);
     return `<div class="bc">${NS.faceHTML({ card, reversed: false }, { caption: false, eager: true })}<b>${card.name}</b><span>${role}</span></div>`;
   },
-  disclaimerPlain: '<p class="note" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Astrology describes tendencies, never certainties, and is no substitute for professional advice.</p>',
-  disclaimer: '<p class="note" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Past-life readings are a spiritual tradition, not a historical record.</p>'
+  disclaimerPlain: '<p class="note rdisc" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Astrology describes tendencies, never certainties, and is no substitute for professional advice.</p>',
+  disclaimer: '<p class="note rdisc" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Past-life readings are a spiritual tradition, not a historical record.</p>'
 };
 
 function reportPage(opts){
@@ -79,6 +79,9 @@ function reportPage(opts){
   const MKEY = 'tarotdemo.ayanamsa';
   try { const m = localStorage.getItem(MKEY); if (m && $('ayan')) $('ayan').value = m; } catch (e) {}
   const place = NS.places.picker($('bp'), () => go(), saved && saved.place || 'Denver');
+  /* Optional second place: where you are now (return charts, saved as 'now' like tools.html) or a place to relocate to. */
+  const here = $('np') ? NS.places.picker($('np'), () => go(), saved && (saved.now || saved.place) || 'Denver') : null;
+  const away = $('rp') ? NS.places.picker($('rp'), () => go(), saved && saved.reloc || 'London') : null;
   $('bu').addEventListener('change', () => { $('bt').disabled = $('bu').checked; go(); });
   ['nm', 'bd', 'bt', 'ayan'].forEach(id => $(id) && $(id).addEventListener('change', go));
   $('go').onclick = go;
@@ -91,9 +94,10 @@ function reportPage(opts){
     const [h, mi] = known ? $('bt').value.split(':').map(Number) : [12, 0];
     let prev = null; try { prev = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
     const hsys = prev && prev.hsys || 'placidus';
-    try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, prev, { nm: $('nm').value, bd: iso, bt: $('bt').value, bu: $('bu').checked, hsys, place: pl.name })));
+    try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, prev, { nm: $('nm').value, bd: iso, bt: $('bt').value, bu: $('bu').checked, hsys, place: pl.name },
+      here && here.get() ? { now: here.get().name } : {}, away && away.get() ? { reloc: away.get().name } : {})));
       if ($('ayan')) localStorage.setItem(MKEY, $('ayan').value); } catch (e) {}
-    return { name: $('nm').value || 'You', place: pl, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: hsys } };
+    return { name: $('nm').value || 'You', place: pl, now: here && here.get() || pl, reloc: away && away.get() || null, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: hsys } };
   }
   function go(){
     const p = read();
@@ -121,6 +125,7 @@ function printPages(ctx, body, cover){
   const chapters = [...body.matchAll(/<h2 class="rh2">([\s\S]*?)<\/h2>/g)].map(m => m[1]);
   const method = [...document.querySelectorAll('#form .warn p')].map(x => `<p>${x.innerHTML}</p>`).join('');
   const who = /^you$/i.test(String(p.name).trim()) ? 'you' : esc(p.name);
+  const disc = (body.match(/<p class="note rdisc"[^>]*>([\s\S]*?)<\/p>/) || [])[1];
   return `<div class="pcover">
       <div><div class="pc-brand">${esc(brand.name || '')}${brand.role ? ' &middot; ' + esc(brand.role) : ''}</div>
         <div class="pc-kicker">${cover.kicker}</div><h1 class="pc-title">${cover.title}</h1><div class="pc-for">Prepared for ${who}</div></div>
@@ -129,7 +134,7 @@ function printPages(ctx, body, cover){
         <div class="pc-foot">Prepared ${made}. For reflection and entertainment.</div></div>
     </div>
     <div class="pabout"><h2>About this report</h2><h3>Contents</h3><ol>${chapters.map(c => `<li>${c}</li>`).join('')}</ol>
-      ${method ? `<h3>How it was made</h3>${method}` : ''}</div>`;
+      ${method ? `<h3>How it was made</h3>${method}` : ''}${disc ? `<h3>Please note</h3><p>${disc}</p>` : ''}</div>`;
 }
 
 NS.reportPage = reportPage;

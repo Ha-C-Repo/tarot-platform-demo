@@ -178,5 +178,43 @@ function outOfBounds(c){
     .filter(x => Math.abs(x.dec) > limit).map(x => Object.assign(x, { limit, textKey: 'oob:' + x.key }));
 }
 
-NS.factors = { cuspSign, houseRulers, declination, outOfBounds, PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
+/* ---------- Saturn's cycle to its own birth place ----------
+   Every time transiting Saturn reaches 90 (waxing square), 180 (opposition), 270 (waning square) or 360 (return)
+   degrees past natal Saturn, from 300 days after birth (Saturn can retrograde back over its birth place in the
+   first months) to age 95. Sampled every 10 days (Saturn moves under 0.14 deg a day), each crossing refined by
+   bisection to about 3 hours; passes of one aspect within 300 days are grouped (retrogrades). */
+function saturnCycle(c){
+  const L0 = c.planets.find(p => p.key === 'Saturn').lon, DAY = 864e5, YEAR = 365.2422 * DAY;
+  const wrap = d => ((d % 360) + 540) % 360 - 180, at = t => NS.eclLon('Saturn', new Date(t));
+  const KIND = { 90: 'wax', 180: 'opp', 270: 'wane', 0: 'return' }, hits = [];
+  const t0 = +c.utc + 300 * DAY, end = +c.utc + 95 * YEAR, step = 10 * DAY;
+  const f = (t, a) => wrap(at(t) - L0 - a);
+  let prev = t0, lons = at(t0);
+  for (let t = t0 + step; t <= end; t += step) {
+    const l = at(t);
+    [90, 180, 270, 0].forEach(a => {
+      const fa = wrap(lons - L0 - a), fb = wrap(l - L0 - a);
+      if ((fa < 0) !== (fb < 0) && Math.abs(fa) < 20) {
+        let lo = prev, hi = t;
+        for (let k = 0; k < 12; k++) { const m = (lo + hi) / 2; if ((f(m, a) < 0) === (fa < 0)) lo = m; else hi = m; }
+        hits.push({ kind: KIND[a], time: new Date((lo + hi) / 2) });
+      }
+    });
+    prev = t; lons = l;
+  }
+  const out = [];
+  hits.sort((a, b) => a.time - b.time).forEach(h => {
+    const last = out.filter(x => x.kind === h.kind).pop();
+    if (last && h.time - last.passes[last.passes.length - 1] < 300 * DAY) last.passes.push(h.time);
+    else out.push({ kind: h.kind, passes: [h.time] });
+  });
+  let ret = 0;
+  out.sort((a, b) => a.passes[0] - b.passes[0]).forEach(x => {
+    x.age = (x.passes[0] - c.utc) / YEAR;
+    x.textKey = x.kind === 'return' ? 'sat:return' + Math.min(3, ++ret) : 'sat:' + x.kind;
+  });
+  return out;
+}
+
+NS.factors = { saturnCycle, cuspSign, houseRulers, declination, outOfBounds, PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
 })(window.TD);

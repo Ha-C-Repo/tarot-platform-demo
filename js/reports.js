@@ -19,6 +19,24 @@ function signLens(H, T, c, k, lens, title){
   return H.block(`${title}: ${H.glyph(k)} ${k} in ${S(p.lon)}`, H.para(T[`${lens}:${S(p.lon)}`]));
 }
 const cusp = (ctx, n) => { const s = NS.factors.cuspSign(ctx.c, n); return s == null ? null : NS.SIGNS[s]; };
+/* Planets within 8 degrees of an angle of a chart: [{key, angle: 'ASC'|'DSC'|'MC'|'IC', orb}] */
+function angular(ch){
+  if (!ch.angles) return [];
+  const A = { ASC: ch.angles.asc, DSC: ch.angles.asc + 180, MC: ch.angles.mc, IC: ch.angles.mc + 180 }, out = [];
+  ch.planets.forEach(p => { Object.entries(A).forEach(([k, l]) => { const o = NS.separation(p.lon, l); if (o <= 8) out.push({ key: p.key, angle: k, orb: o }); }); });
+  return out.sort((a, b) => a.orb - b.orb);
+}
+const ANGLE_NAME = { ASC: 'rising (Ascendant)', DSC: 'setting (Descendant)', MC: 'overhead (Midheaven)', IC: 'below (IC)' };
+/* Where the person is now (return charts) or the place to read (relocation); the birth place when not given. */
+const herePlace = (ctx, which) => { const p = ctx.p[which]; return p && p.lat != null ? p : { lat: ctx.p.input.lat, lon: ctx.p.input.lon, tz: ctx.p.input.tz, name: 'the birth place' }; };
+const placeName = pl => { try { return NS.places && pl.cc !== undefined ? NS.places.label(pl) : pl.name; } catch (e) { return pl.name; } };
+const DAYMS = 864e5, YEARMS = 365.2422 * DAYMS;
+const fmtDate = d => d.toISOString().slice(0, 10);
+const sinceBirthday = c => { /* the solar-return year in force today: last birthday's year */
+  const now = new Date(), b = c.utc; let y = now.getUTCFullYear();
+  if (Date.UTC(y, b.getUTCMonth(), b.getUTCDate()) > +now) y -= 1;
+  return y;
+};
 
 const REPORTS = {
   /* ---------------- Life Path: the thorough natal report ---------------- */
@@ -152,5 +170,123 @@ const REPORTS = {
     }
   }
 };
+/* ---------------- W3: forecasts ---------------- */
+Object.assign(REPORTS, {
+  solarreturn: {
+    title: 'Solar return', kicker: 'The year ahead, birthday to birthday', card: 'major-19', caption: 'the card of the Sun&rsquo;s return', needs: 'now', group: 'time',
+    lede: 'The year from your last birthday to your next, read from the chart of the exact moment the Sun returned to its birth degree, cast for where you are.',
+    gv: 'Solar Return, Poppe Solar Return',
+    method: 'The solar return is the moment the Sun comes back to its exact birth longitude, found to the second, and the chart is cast for the place you name as where you are (solar returns are read for where you spend the birthday). Placidus houses. The year in force is the one that began at your most recent birthday. The overlay places the return Ascendant in your natal houses.',
+    render(ctx, H){
+      const { c, T } = ctx, out = [], y = sinceBirthday(c), here = herePlace(ctx, 'now');
+      const sr = NS.tools.solarReturn(c, y, here, 'placidus'), asc = S(sr.angles.asc), mc = S(sr.angles.mc), sun = P(sr, 'Sun'), moon = P(sr, 'Moon');
+      const ovl = c.angles ? NS.houseOf(sr.angles.asc, c.angles.asc, c.system, c.cusps) : null;
+      out.push(H.chapter(1, `The tone of the year: ${y} to ${y + 1}`, `Return on ${sr.utc.toISOString().slice(0, 16).replace('T', ' ')} UTC, cast for ${H.esc(placeName(here))}.`),
+        `<div class="grid g2" style="align-items:start">${H.block(`Rising sign of the year: ${asc}`, H.para(T['sr-asc:' + asc]))}
+          ${H.block(`The year&rsquo;s aim: Midheaven in ${mc}`, H.para(T['sr-mc:' + mc]))}</div>`,
+        ovl ? H.block(`Where the year starts from: the return Ascendant in your natal ${H.ordinal(ovl)} house`, H.para(T['sr-overlay:' + ovl])) : '');
+      out.push(H.chapter(2, 'The focus and the mood', 'The Sun&rsquo;s house is where the year&rsquo;s energy goes; the Moon sets its emotional tone.'),
+        `<div class="grid g2" style="align-items:start">${H.block(`The focus: Sun in the ${H.ordinal(sun.house)} house`, H.para(T['sr-sun:' + sun.house]))}
+          ${H.block(`The mood: Moon in ${S(moon.lon)}, ${H.ordinal(moon.house)} house`, H.para(T['sr-moon:' + S(moon.lon)]) + H.para(T['sr-moonh:' + moon.house]))}</div>`);
+      const ang = angular(sr).filter((x, i, a) => a.findIndex(z => z.key === x.key) === i);
+      out.push(H.chapter(3, 'Loud planets this year', 'Planets within 8&deg; of an angle of the return chart.'),
+        H.items('On the angles', ang.map(x => `<h4>${H.glyph(x.key)} ${x.key} ${ANGLE_NAME[x.angle]} &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T['sr-ang:' + x.key])}`), '<p class="note">No planet sits on an angle of this year&rsquo;s chart.</p>'));
+      out.push(H.chapter(4, 'Love, effort, growth and work', 'Venus, Mars, Jupiter and Saturn in the houses of the return chart.'),
+        H.items('Four planets', ['Venus', 'Mars', 'Jupiter', 'Saturn'].map(k => `<h4>${H.glyph(k)} ${k} in the ${H.ordinal(P(sr, k).house)} house</h4>${H.para(T[`sr-ph:${k}:${P(sr, k).house}`])}`)),
+        `<details class="more res"><summary>About solar returns</summary>${H.para(T['return:Solar'])}</details>`, H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  lunarreturn: {
+    title: 'Lunar return', kicker: 'The month ahead', card: 'major-18', caption: 'the card of the Moon', needs: 'now', group: 'time',
+    lede: 'The month from your most recent lunar return to the next: the moment the Moon comes back to its birth degree, about every 27 days, read for where you are.',
+    gv: 'Lunar Return',
+    method: 'The lunar return is the moment the Moon returns to its exact birth longitude (about every 27.3 days), found to the minute and cast for where you are now. Placidus houses. The return in force is the most recent one before today; the next one is given. With no birth time the Moon&rsquo;s birth degree is uncertain by up to about 7&deg;, so the date can be off by up to half a day.',
+    render(ctx, H){
+      const { c, T } = ctx, out = [], here = herePlace(ctx, 'now'), now = Date.now();
+      const t = NS.tools.lunarReturn(c, new Date(now - 28 * DAYMS)), next = t && NS.tools.lunarReturn(c, new Date(+t + 2 * DAYMS));
+      const cur = next && +next <= now ? next : t, nxt = cur === next ? NS.tools.lunarReturn(c, new Date(+next + 2 * DAYMS)) : next;
+      const lr = NS.chart({ utc: +cur, lat: here.lat, lon: here.lon, tz: here.tz, system: 'placidus' }), asc = S(lr.angles.asc), moon = P(lr, 'Moon');
+      out.push(H.chapter(1, `The month from ${fmtDate(cur)} to ${fmtDate(nxt)}`, `Cast for ${H.esc(placeName(here))}.${c.timeKnown ? '' : ' No birth time: the dates can be off by up to half a day.'}`),
+        `<div class="grid g2" style="align-items:start">${H.block(`Rising sign of the month: ${asc}`, H.para(T['lr-asc:' + asc]))}
+          ${H.block(`Where feelings gather: Moon in the ${H.ordinal(moon.house)} house`, H.para(T['lr-moon:' + moon.house]))}</div>`);
+      const ang = angular(lr).filter((x, i, a) => a.findIndex(z => z.key === x.key) === i);
+      out.push(H.chapter(2, 'Loud planets this month', 'Planets within 8&deg; of an angle of the lunar-return chart.'),
+        H.items('On the angles', ang.map(x => `<h4>${H.glyph(x.key)} ${x.key} ${ANGLE_NAME[x.angle]} &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T['lr-ang:' + x.key])}`), '<p class="note">No planet sits on an angle of this month&rsquo;s chart.</p>'),
+        `<details class="more res"><summary>About lunar returns</summary>${H.para(T['return:Lunar'])}</details>`, H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  progressions: {
+    title: 'Progressed chart', kicker: 'The chapters of your life', card: 'major-09', caption: 'the card of slow inner growth', group: 'time',
+    lede: 'Your chart moved forward by the secondary progressions, a day after birth for each year of life: the chapter you are in now, your developing self, and the themes building over the next years.',
+    gv: 'Secondary Progressed',
+    method: 'Secondary progressions: the planets one day after birth for each year of life. Progressed Ascendant and Midheaven by solar arc (the natal angles moved by as much as the progressed Sun). Progressed Moon house in your natal houses. Progressed Sun aspects to natal points with a 1&deg; orb, which is about two years either side of exact.',
+    render(ctx, H){
+      const { c, T } = ctx, out = [], now = new Date(), pr = NS.tools.progressions(c, now);
+      const age = ((+now - +c.utc) / YEARMS).toFixed(1), psun = S(pr.planets[0].lon), pmoon = pr.moonSign.sign;
+      const pmh = c.angles ? NS.houseOf(pr.planets[1].lon, c.angles.asc, c.system, c.cusps) : null;
+      out.push(H.chapter(1, `Your developing self, at ${age}`, 'The progressed Sun moves about one degree a year and changes sign about every thirty years.'),
+        H.block(`Progressed Sun in ${psun}`, H.para(T['prog-sun:' + psun])));
+      out.push(H.chapter(2, 'The emotional chapter you are in', 'The progressed Moon changes sign about every two and a half years.'),
+        `<div class="grid g2" style="align-items:start">${H.block(`Progressed Moon in ${pmoon}`, `<p class="note">${pr.moonSign.from ? fmtDate(pr.moonSign.from) : '?'} to ${pr.moonSign.to ? fmtDate(pr.moonSign.to) : '?'}</p>` + H.para(T['prog-moon:' + pmoon]))}
+          ${pmh ? H.block(`In your natal ${H.ordinal(pmh)} house`, H.para(T['prog-moonh:' + pmh])) : H.block('The house', needTime('The progressed Moon&rsquo;s house'))}</div>`,
+        H.block(`Progressed lunar phase: ${pr.phase.name}`, `<p class="note">${pr.phase.from ? fmtDate(pr.phase.from) : '?'} to ${pr.phase.to ? fmtDate(pr.phase.to) : '?'}</p>` + H.para(T['prog-phase:' + pr.phase.name])));
+      out.push(H.chapter(3, 'How you meet the world now', 'The progressed Ascendant and Midheaven, by solar arc.'),
+        pr.asc != null ? `<div class="grid g2" style="align-items:start">${H.block(`Progressed Ascendant in ${S(pr.asc)}`, H.para(T['prog-asc:' + S(pr.asc)]))}${H.block(`Progressed Midheaven in ${S(pr.mc)}`, H.para(T['prog-mc:' + S(pr.mc)]))}</div>`
+          : H.block('', needTime('The progressed angles')));
+      const NAT = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'].map(k => [k, P(c, k).lon]).concat(c.angles ? [['Ascendant', c.angles.asc], ['Midheaven', c.angles.mc]] : []);
+      const hits = [];
+      NAT.forEach(([k, l]) => { if (k === 'Moon' && !c.timeKnown) return; const sep = NS.separation(pr.planets[0].lon, l);
+        [[0, 'conjunction'], [60, 'easy'], [120, 'easy'], [90, 'hard'], [180, 'hard']].forEach(([a, t]) => { if (k !== 'Sun' && Math.abs(sep - a) <= 1) hits.push({ k, t, orb: Math.abs(sep - a) }); }); });
+      out.push(H.chapter(4, 'Themes building now', 'The progressed Sun within 1&deg; of an aspect to a natal point: a theme that builds for about two years, peaks and fades.'),
+        H.items('Progressed Sun aspects', hits.map(h => `<h4>Progressed Sun ${h.t === 'conjunction' ? 'conjunct' : h.t === 'easy' ? 'in easy aspect to' : 'in hard aspect to'} natal ${h.k} &middot; ${h.orb.toFixed(2)}&deg;</h4>${H.para(T[`prog-asp:${h.k}:${h.t}`])}`),
+          '<p class="note">The progressed Sun makes no exact aspect to a natal point right now; this is a quieter in-between chapter.</p>'), H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  saturn: {
+    title: 'Saturn cycle', kicker: 'Saturn&rsquo;s promise across a lifetime', card: 'major-21', caption: 'the card of completion', group: 'time',
+    lede: 'Every stage of Saturn&rsquo;s 29-year cycle to its own birth place, from childhood to old age: the squares, the oppositions and the Saturn returns, with their dates and where you are now.',
+    gv: 'Saturn Return&rsquo;s Promise',
+    method: 'Every date when transiting Saturn reaches 90&deg;, 180&deg;, 270&deg; or 360&deg; past its birth longitude, from birth to age 95. Saturn&rsquo;s retrograde loops can make it cross the same point up to three times; all passes are listed. Saturn returns match the Tools page&rsquo;s search to the day.',
+    render(ctx, H){
+      const { c, T } = ctx, out = [], cyc = NS.factors.saturnCycle(c), now = Date.now(), sat = P(c, 'Saturn');
+      const NAME = { wax: 'Waxing square', opp: 'Opposition', wane: 'Waning square', return: 'Saturn return' };
+      const curIdx = cyc.reduce((acc, x, i) => x.passes[0] <= now ? i : acc, -1), cur = cyc[curIdx], nxt = cyc[curIdx + 1];
+      out.push(H.chapter(1, 'Your natal Saturn', 'Where the cycle starts: Saturn&rsquo;s sign and house at birth.'),
+        H.block(`${H.glyph('Saturn')} Saturn in ${S(sat.lon)}${sat.house ? `, ${H.ordinal(sat.house)} house` : ''}`, H.para(T['sign:Saturn:' + S(sat.lon)]) + (sat.house ? `<h4>In the ${H.ordinal(sat.house)} house</h4>${H.para(T['house:Saturn:' + sat.house])}` : '')));
+      out.push(H.chapter(2, 'Where you are in the cycle now', cur ? `Since ${fmtDate(cur.passes[0])}, age ${cur.age.toFixed(1)}: ${NAME[cur.kind].toLowerCase()}.${nxt ? ` Next: ${NAME[nxt.kind].toLowerCase()} from ${fmtDate(nxt.passes[0])}.` : ''}` : 'Before the first waxing square.'),
+        cur ? H.block(NAME[cur.kind], H.para(T[cur.textKey])) : '', nxt ? H.block(`Next: ${NAME[nxt.kind]}, age ${nxt.age.toFixed(1)}`, H.para(T[nxt.textKey])) : '');
+      out.push(H.chapter(3, 'The whole cycle, birth to 95', 'Every stage with its dates. Dates in bold are past.'),
+        H.block('Timeline', `<table class="conv"><tr><th>Stage</th><th>Age</th><th>Dates (each pass)</th></tr>${cyc.map(x => `<tr><td>${x.passes[0] <= now ? '<b>' + NAME[x.kind] + '</b>' : NAME[x.kind]}</td><td>${x.age.toFixed(1)}</td><td>${x.passes.map(fmtDate).join(', ')}</td></tr>`).join('')}</table>`),
+        H.items('The stages', ['sat:wax', 'sat:opp', 'sat:wane', 'sat:return1', 'sat:return2', 'sat:return3'].map(k => `<h4>${{ 'sat:wax': 'Waxing square', 'sat:opp': 'Opposition', 'sat:wane': 'Waning square', 'sat:return1': 'First Saturn return', 'sat:return2': 'Second Saturn return', 'sat:return3': 'Third Saturn return' }[k]}</h4>${H.para(T[k])}`)),
+        H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  relocation: {
+    title: 'Relocation', kicker: 'Your chart in another place', card: 'major-07', caption: 'the card of the journey', needs: 'reloc', group: 'time',
+    lede: 'Your birth chart recast for another city: the rising sign and life direction you would carry there, the planets that become loud on its angles, and where your planets fall in its houses.',
+    gv: 'Poppe Relocation Information',
+    method: 'Relocation keeps the birth moment and recasts the houses and angles for the new place (Placidus). Planets within 8&deg; of a relocated angle are read with the astrocartography line texts, since they are the same thing seen from one city. A birth time is needed. For the world map of every line, see Astrocartography.',
+    render(ctx, H){
+      const { c, T } = ctx, out = [];
+      if (!c.timeKnown) return H.chapter(1, 'A birth time is needed', '') + H.block('', '<p class="note">Relocation moves the houses and angles, which come from the birth time. Add a birth time to read it.</p>');
+      const there = herePlace(ctx, 'reloc'), rc = NS.chart({ utc: +c.utc, lat: there.lat, lon: there.lon, tz: there.tz, system: 'placidus' });
+      const ra = S(rc.angles.asc), rm = S(rc.angles.mc);
+      out.push(H.chapter(1, `You in ${H.esc(placeName(there))}`, `Birth rising sign ${S(c.angles.asc)}; relocated rising sign ${ra}. Birth Midheaven ${S(c.angles.mc)}; relocated ${rm}.`),
+        `<div class="grid g2" style="align-items:start">${H.block(`Relocated rising sign: ${ra}`, H.para(T['rising:' + ra]))}${H.block(`Relocated Midheaven: ${rm}`, H.para(T['voc:mc:' + rm]))}</div>`);
+      const ang = angular(rc);
+      out.push(H.chapter(2, 'Planets on the angles there', 'Within 8&deg; of the relocated Ascendant, Descendant, Midheaven or IC: these planets are loud in that place.'),
+        H.items('Loud planets', ang.map(x => `<h4>${H.glyph(x.key)} ${x.key} ${ANGLE_NAME[x.angle]} &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[`acg:${x.key}:${x.angle}`])}`), '<p class="note">No planet sits on an angle there; the place is neutral ground for your chart.</p>'));
+      const moved = ['Sun', 'Moon', 'Venus', 'Mars', 'Jupiter', 'Saturn'].map(k => ({ k, from: P(c, k).house, to: P(rc, k).house })).filter(x => x.from !== x.to);
+      out.push(H.chapter(3, 'Where your planets land there', 'Planets that change house when you move: the life area they colour shifts.'),
+        H.items('Planets in new houses', moved.map(x => `<h4>${H.glyph(x.k)} ${x.k}: from the ${H.ordinal(x.from)} to the ${H.ordinal(x.to)} house</h4>${H.para(T[`house:${x.k}:${x.to}`])}`), '<p class="note">Your main planets stay in the same houses there.</p>'),
+        '<p class="note" style="margin-top:12px">See every planet line on the world map on the <a href="astromap.html">Astrocartography</a> page.</p>', H.disclaimerPlain);
+      return out.join('');
+    }
+  }
+});
 NS.REPORTS = REPORTS;
 })(window.TD);
