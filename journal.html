@@ -60,7 +60,7 @@ TD.chrome('journal.html');
 const J = TD.journal, $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
-const SPN = id => (TD.SPREADS.find(s => s.id === id) || { name: id }).name;
+const SPN = (id, e) => { const s = TD.SPREADS.find(x => x.id === id); return s ? s.name : (e && e.name) || 'A spread since deleted'; };
 const FOC = { general: '', love: 'Love', work: 'Work and money' };
 const thumb = c => TD.faceHTML({ card: TD.DECK[c.i], reversed: !!c.r }, { caption: false });
 const cssId = s => String(s).replace(/[^a-z0-9-]/gi, '');
@@ -115,12 +115,12 @@ function renderStats(all){
 /* ---------- the list ---------- */
 let armed = null;                                    // delete needs a second tap on the same entry
 function entryHTML(e){
-  const sp = TD.spreadById(e.spread), known = sp.id === e.spread, id = cssId(e.id);
+  const sp = TD.spreadById(e.spread), known = sp.id === e.spread && !(sp.custom && e.pos.length), id = cssId(e.id);
   const thumbs = e.cards.slice(0, 5).map(thumb).join('') + (e.cards.length > 5 ? `<span class="more">+${e.cards.length - 5}</span>` : '');
   const sub = e.question ? esc(e.question) : e.cards.map(c => esc(TD.DECK[c.i].name) + (c.r ? ' (reversed)' : '')).join(', ');
   const cards = e.cards.map((c, k) => {
     const card = TD.DECK[c.i], R = TD.READINGS[card.id] || {};
-    const pos = known && sp.pos[k] ? sp.pos[k].name : 'Card ' + (k + 1);
+    const pos = known && sp.pos[k] ? sp.pos[k].name : e.pos[k] || 'Card ' + (k + 1);
     const txt = { general: c.r ? R.rev : R.up, love: c.r ? R.loveRev : R.loveUp, work: c.r ? R.workRev : R.workUp }[e.focus] || (c.r ? R.rev : R.up) || '';
     return `<div><div class="jcard">${thumb(c)}<p><span class="pos">${e.cards.length > 1 ? (k + 1) + '. ' : ''}${esc(pos)}</span>
       <b>${esc(card.name)}${c.r ? ', reversed' : ''}</b>${esc(c.r ? card.rev : card.up)}</p></div>
@@ -130,7 +130,7 @@ function entryHTML(e){
   const sig = e.sig != null ? `<p class="note" style="margin-bottom:12px">Significator: <b>${esc(TD.DECK[e.sig].name)}</b></p>` : '';
   return `<details class="jentry" data-id="${id}"><summary>
       <div class="jthumbs">${thumbs}</div>
-      <div class="jsum"><b>${esc(SPN(e.spread))}${FOC[e.focus] && sp.focus !== e.focus ? ' &middot; ' + FOC[e.focus] : ''}</b><span>${sub}</span></div>
+      <div class="jsum"><b>${esc(SPN(e.spread, e))}${FOC[e.focus] && sp.focus !== e.focus ? ' &middot; ' + FOC[e.focus] : ''}</b><span>${sub}</span></div>
       <div class="jwhen">${when(e.at)}${e.note ? '<br>Has a note' : ''}</div></summary>
     <div class="jbody">
       ${e.question ? `<p style="font-size:14px;margin-bottom:14px"><span class="note">Your question:</span> ${esc(e.question)}</p>` : ''}
@@ -144,7 +144,7 @@ function entryHTML(e){
 function matches(e, q, sp){
   if (sp && e.spread !== sp) return false;
   if (!q) return true;
-  const hay = [e.question, e.note, SPN(e.spread)].concat(e.cards.map(c => TD.DECK[c.i].name)).join(' ').toLowerCase();
+  const hay = [e.question, e.note, SPN(e.spread, e)].concat(e.cards.map(c => TD.DECK[c.i].name)).join(' ').toLowerCase();
   return q.split(/\s+/).every(w => hay.includes(w));
 }
 function render(){

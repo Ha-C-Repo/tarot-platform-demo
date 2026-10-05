@@ -109,18 +109,18 @@ async function deliver(blob, filename, text){
 /* Everything the image needs for one reading. cards = [{i, r}] as the deck and the journal store them. */
 function fromReading(spreadId, cards, opts = {}){
   const sp = NS.spreadById(spreadId), entries = cards.map(c => ({ card: NS.DECK[c.i], reversed: !!c.r }));
-  const known = sp.id === spreadId, when = new Date(opts.at || Date.now());
+  const own = opts.pos && opts.pos.length, known = sp.id === spreadId && !own, when = new Date(opts.at || Date.now());
   const focus = { love: 'about love', work: 'about work and money' }[opts.focus];
   const lines = [];
   if (NS.reading && known) {
     const s = NS.reading.story(sp, entries); if (s) lines.push(s.t);
     else NS.reading.compose(sp, entries).walk.forEach(w => lines.push(w.lead + ': ' + w.kw));
-  } else entries.forEach((e, k) => lines.push((known && sp.pos[k] ? sp.pos[k].name : 'Card ' + (k + 1)) + ': ' + (e.reversed ? e.card.rev : e.card.up)));
+  } else entries.forEach((e, k) => lines.push((known && sp.pos[k] ? sp.pos[k].name : (own && opts.pos[k]) || 'Card ' + (k + 1)) + ': ' + (e.reversed ? e.card.rev : e.card.up)));
   const brand = (NS.brand && NS.brand.name) || '';
-  return { eyebrow: brand, title: known ? sp.name : 'A reading',
+  return { eyebrow: brand, title: known ? sp.name : opts.name || 'A reading',
     sub: when.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + (focus ? ' · ' + focus : ''),
     question: opts.question || '',
-    cards: entries.map((entry, k) => ({ entry, pos: known && sp.pos[k] ? sp.pos[k].name : 'Card ' + (k + 1) })),
+    cards: entries.map((entry, k) => ({ entry, pos: known && sp.pos[k] ? sp.pos[k].name : (own && opts.pos[k]) || 'Card ' + (k + 1) })),
     lines, footer: (brand ? brand + ' · ' : '') + 'Rider-Waite-Smith cards, 1909, Pamela Colman Smith. For entertainment only.' };
 }
 async function saveReading(spreadId, cards, opts, statusEl){

@@ -43,7 +43,9 @@ const ROLE_LEAD = {
   carry: 'What to carry forward', aim: 'What you are reaching for', foundation: 'What is already underneath it',
   environment: 'What is around you', hopes: 'Your hopes or fears'
 };
-function roleOf(sp, k){ return (ROLES[sp.id] || [])[k] || (sp.id === 'zodiac' ? 'house' : 'card'); }
+/* A spread the visitor made can tag its positions with the same roles (sp.roles); untagged positions read by name. */
+const rolesOf = sp => sp.roles || ROLES[sp.id] || [];
+function roleOf(sp, k){ return rolesOf(sp)[k] || (sp.id === 'zodiac' ? 'house' : 'card'); }
 
 /* The card's own keywords, first two phrases, for the orientation it came up in. */
 function kw(e){ return (e.reversed ? e.card.rev : e.card.up).split(',').slice(0, 2).map(s => s.trim()).join(', '); }
@@ -72,7 +74,7 @@ const STORY = {
   celtic: r => `At the heart is ${r.present}, crossed by ${r.obstacle}, with ${r.aim} as what you are reaching for. Underneath lies ${r.foundation}; passing away behind you is ${r.past}; coming in is ${r.future}. You meet it as ${r.self}, surrounded by ${r.environment}, with ${r.hopes} as your hope or fear. It points toward ${r.outcome}.`
 };
 function story(sp, entries){
-  const roles = ROLES[sp.id], make = STORY[sp.id];
+  const roles = ROLES[sp.id], make = STORY[sp.id];      // stories exist only for the built-in spreads
   if (!roles || !make || entries.length < roles.length) return null;
   const r = {}; roles.forEach((role, k) => r[role] = ref(entries[k]));
   return { why: 'The story', t: make(r) };
@@ -90,7 +92,7 @@ function bridges(sp, entries, table){
 
 /* Rules that belong to one spread. Wording is our own; conventions commonly taught today. */
 function spreadRules(sp, entries){
-  const out = [], at = role => entries[(ROLES[sp.id] || []).indexOf(role)];
+  const out = [], at = role => entries[rolesOf(sp).indexOf(role)];
   if (sp.id === 'zodiac') {
     const maj = entries.map((e, k) => [e, k]).filter(([e]) => e.card.arcana === 'major');
     if (maj.length && maj.length < entries.length)
@@ -208,7 +210,7 @@ function thread(sp, entries, bridgeTable){
     out.push({ why: 'No opposing elements', t: 'Every pair of cards read together is on friendly elemental terms, so the cards support one another rather than pulling apart.' });
 
   // Movement through time: numbers rising or falling, orientation turning.
-  const R = ROLES[sp.id] || [], ip = R.indexOf('past'), inow = R.indexOf('present'), ifut = R.indexOf('future');
+  const R = rolesOf(sp), ip = R.indexOf('past'), inow = R.indexOf('present'), ifut = R.indexOf('future');
   if (ip >= 0 && ifut >= 0 && entries[ip] && entries[ifut]) {
     const seq = [ip, inow, ifut].filter(k => k >= 0 && entries[k]).map(k => entries[k]);
     const nums = seq.map(e => e.card.number);
@@ -251,5 +253,5 @@ function compose(sp, entries, bridgeTable){
   return { walk, thread: thread(sp, entries, bridgeTable), angel: angelNumbers(entries), total: spreadTotal(entries) };
 }
 
-NS.reading = { ROLES, ROLE_LEAD, ANGEL, STORY, roleOf, compose, thread, story, bridges, spreadRules, angelNumbers, spreadTotal };
+NS.reading = { ROLES, rolesOf, ROLE_LEAD, ANGEL, STORY, roleOf, compose, thread, story, bridges, spreadRules, angelNumbers, spreadTotal };
 })(window.TD);

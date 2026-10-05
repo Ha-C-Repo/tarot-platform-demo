@@ -36,6 +36,7 @@ function clean(e){
   return { id: str(e.id, 40), at: +e.at, spread: str(e.spread, 20), focus: FOCI.includes(e.focus) ? e.focus : 'general',
     question: str(e.question, 300), note: str(e.note, 4000),
     sig: Number.isInteger(e.sig) && e.sig >= 0 && e.sig < 78 ? e.sig : null,
+    name: str(e.name, 40), pos: Array.isArray(e.pos) ? e.pos.slice(0, 12).map(p => str(p, 30)) : [],   // a spread the visitor made
     cards: e.cards.map(c => ({ i: c.i, r: !!c.r })) };
 }
 function newId(){

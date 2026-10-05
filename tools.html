@@ -37,7 +37,7 @@ section.tool{scroll-margin-top:80px}
   <p class="lede">Your solar return, progressions and returns, the eclipses that touch your chart, the void-of-course
     Moon and planetary hours, all worked out from your own birth details.</p>
   <div class="jump"><a href="#solar-return">Solar return</a><a href="#progressions">Progressions</a><a href="#returns">Returns</a>
-    <a href="#eclipses">Eclipses</a><a href="#void-moon">Void-of-course Moon</a><a href="#hours">Planetary hours</a>
+    <a href="#eclipses">Eclipses</a><a href="#void-moon">Void-of-course Moon</a><a href="#hours">Planetary hours</a><a href="#good-days">Good days</a>
     <a href="vedic.html">Vedic chart &rarr;</a><a href="astromap.html">Astrocartography &rarr;</a></div>
 
   <div class="card pad" style="margin-top:18px">
@@ -70,6 +70,18 @@ section.tool{scroll-margin-top:80px}
       solar return&rsquo;s houses and the planetary hours; it starts as your birthplace.</p>
   </div>
   <div id="out"></div>
+  <section class="tool" id="good-days"><div class="eyebrow" style="margin-top:28px">Good days, the next 30 days</div>
+    <div class="res">
+      <div class="row2"><div><label class="f" for="gdact">Good days for</label><select id="gdact"></select></div>
+        <div style="align-self:end"><label class="check"><input type="checkbox" id="gdme" checked> Use my birth chart above</label></div></div>
+      <div id="gdout" style="margin-top:14px"></div>
+      <div class="warn"><span class="k">Rules, published</span><p>Each day is judged at local noon. The Moon in one of the signs that suit the
+        activity adds 2. A waxing Moon for things you start, or a waning one for things you end or rest from, adds 2 (the wrong phase takes 1).
+        Mercury retrograde takes 3 for talk, travel and contracts; Venus retrograde takes 3 for love and money. A Moon void of course for half
+        the waking hours (08:00 to 22:00) takes 2. With your birth chart, the Moon within 6&deg; of a conjunction, sextile or trine to the
+        planets that matter for the activity adds 2; a square or opposition takes 1. Traditional electional rules of thumb, the same for
+        everyone without a chart, and never random.</p></div>
+    </div></section>
   <div class="warn"><span class="k">Method</span>
     <p>Positions from Astronomy Engine. Solar return: the moment the Sun returns to its exact birth longitude, cast for where
     you are. Progressions: secondary (one day after birth for each year of life); progressed angles by solar arc. Returns:
@@ -81,7 +93,7 @@ section.tool{scroll-margin-top:80px}
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
 <script src="js/vendor/astronomy.browser.min.js"></script><script src="js/vendor/astrochart.js"></script><script src="js/data/chiron.js"></script>
-<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/transits.js"></script><script src="js/tools.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/transits.js"></script><script src="js/tools.js"></script><script src="js/gooddays.js"></script>
 <script src="js/wheel.js"></script><script src="js/places.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
@@ -226,12 +238,29 @@ function hoursHTML(p){
     <div class="scrollx"><table class="ctab cal"><tbody>${rows}</tbody></table></div></div></section>`;
 }
 
+/* Good days (js/gooddays.js): worked out on its own, so changing the activity does not redo the other tools. */
+$('gdact').innerHTML = Object.entries(TD.goodDays.ACTIVITIES).map(([k, a]) => `<option value="${k}">${a.name}</option>`).join('');
+let gdChart = null;
+function goodDays(){
+  const r = TD.goodDays.find($('gdact').value, { natal: $('gdme').checked ? gdChart : null });
+  const dl = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  const tag = s => s >= 4 ? 'ok' : s <= -1 ? 'warn' : '';
+  const best = r.best.map(d => `<div class="ev"><div class="evh"><b>${dl(d.date)}</b><span class="pill ${tag(d.score)}">score ${d.score > 0 ? '+' : ''}${d.score}</span></div>
+    <p>${d.reasons.length ? d.reasons.map(x => `${esc(x.text)} (${x.points > 0 ? '+' : ''}${x.points})`).join('; ') + '.' : 'Nothing for or against: a neutral day.'}</p></div>`).join('');
+  const strip = r.days.map(d => `<span class="gd ${d.score >= 4 ? 'g3' : d.score >= 2 ? 'g2' : d.score >= 0 ? 'g1' : 'g0'}" title="${dl(d.date)}: ${d.score}">${d.date.getDate()}</span>`).join('');
+  $('gdout').innerHTML = `<h3 style="font-size:18px">The best five</h3>${best}
+    <h3 style="font-size:16px;margin-top:16px">The whole month</h3><div class="gdstrip">${strip}</div>
+    <p class="note" style="margin-top:6px">Brighter is better. Hover or long-press a day for its score.</p>`;
+}
+$('gdact').onchange = goodDays; $('gdme').onchange = goodDays;
+
 let runId = 0;
 function go(){
   const p = read();
   if (!p) { $('out').innerHTML = '<div class="res"><p class="note">Pick a birth place from the list to work things out.</p></div>'; return; }
   texts();
   const c = TD.chart(p.input), id = ++runId;
+  gdChart = c; setTimeout(goodDays, 0);
   const [y, m, d] = $('day').value.split('-').map(Number), now = new Date();
   const when = iso(now) === $('day').value ? now : new Date(y, m - 1, d, 12, 0);
   const parts = [];

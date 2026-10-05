@@ -74,8 +74,12 @@ function positions(date){
 /* Chiron from the JPL table in js/data/chiron.js (TD.CHIRON, load it first; without it Chiron is left out).
    Cubic interpolation of the heliocentric J2000 vector, minus the Earth's heliocentric vector, corrected for
    light time, then turned into the true ecliptic of date like the planets. null outside 1900-2100. */
-function chironLon(date){
-  const C = NS.CHIRON; if (!C) return null;
+/* Geocentric longitude of a small body from a table of heliocentric J2000 vectors (Chiron, the asteroids). */
+function chironLon(date){ return tableLon(NS.CHIRON, date); }
+const ASTEROID_NAMES = [['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta']];
+function asteroidLon(name, date){ return tableLon(NS.ASTEROIDS && NS.ASTEROIDS[name], date); }
+function tableLon(C, date){
+  if (!C) return null;
   const at = tdbJD => {
     const f = (tdbJD - C.jd0) / C.step, i = Math.floor(f), u = f - i;
     if (i < 1 || i + 2 >= C.n) return null;
@@ -237,6 +241,15 @@ function chart(p){
     if (sp > 180) sp -= 360; if (sp < -180) sp += 360;
     out.chiron = { lon: ch, speed: sp, retro: sp < 0 };
   }
+  /* Ceres, Pallas, Juno, Vesta when the page has loaded js/data/asteroids.js (TD.ASTEROIDS). */
+  if (NS.ASTEROIDS) {
+    out.asteroids = ASTEROID_NAMES.map(([key, name]) => {
+      const l = asteroidLon(key, when); if (l == null) return null;
+      let sp = asteroidLon(key, new Date(when.getTime() + 43200e3)) - asteroidLon(key, new Date(when.getTime() - 43200e3));
+      if (sp > 180) sp -= 360; if (sp < -180) sp += 360;
+      return { key: name, lon: l, speed: sp, retro: sp < 0 };
+    }).filter(Boolean);
+  }
   if (out.timeKnown) {
     out.angles = angles(when, p.lat, p.lon);
     out.cusps = houseCusps(out.angles.asc, system, out.angles);
@@ -321,6 +334,8 @@ NS.eclLon = eclLon;
 NS.meanNode = meanNode;
 NS.meanLilith = meanLilith;
 NS.chironLon = chironLon;
+NS.asteroidLon = asteroidLon;
+NS.tableLon = tableLon;
 NS.ascFor = ascFor;
 NS.porphyry = porphyry;
 NS.QUADRANT = QUADRANT;

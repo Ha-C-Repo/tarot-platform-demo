@@ -74,7 +74,7 @@
   <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
 </div>
 <script src="js/vendor/astronomy.browser.min.js"></script><script src="js/vendor/astrochart.js"></script>
-<script src="js/data/chiron.js"></script>
+<script src="js/data/chiron.js"></script><script src="js/data/asteroids.js"></script><script src="js/data/astro-extra-text.js"></script>
 <script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/natal.js"></script><script src="js/wheel.js"></script><script src="js/places.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
@@ -154,6 +154,8 @@ function positionsHTML(c){
     <td>${c.angles ? TD.houseOf(lon, c.angles.asc, c.system, c.cusps) : '&mdash;'}</td><td></td><td></td></tr>`;
   if (c.chiron) rows.push(`<tr><td class="g">&#9911;</td><td>Chiron</td><td>${TD.fmtLon(c.chiron.lon)}</td>
     <td>${c.angles ? TD.houseOf(c.chiron.lon, c.angles.asc, c.system, c.cusps) : '&mdash;'}</td><td>${c.chiron.retro ? 'R' : ''}</td><td></td></tr>`);
+  (c.asteroids || []).forEach(a => rows.push(`<tr><td class="g">${AST_GLYPH[a.key]}</td><td>${a.key}</td><td>${TD.fmtLon(a.lon)}</td>
+    <td>${c.angles ? TD.houseOf(a.lon, c.angles.asc, c.system, c.cusps) : '&mdash;'}</td><td>${a.retro ? 'R' : ''}</td><td></td></tr>`));
   rows.push(pt('&#9738;', 'North node (mean)', c.node), pt('&#9739;', 'South node', (c.node + 180) % 360), pt('&#9790;', 'Black Moon Lilith (mean)', c.lilith));
   if (c.fortune != null) rows.push(pt('&#8855;', `Part of Fortune (${c.dayBirth ? 'day' : 'night'} birth)`, c.fortune));
   return `<div class="res"><h3>Positions</h3>
@@ -198,6 +200,7 @@ function aspectsHTML(c){
 }
 /* ---------- the written reading (js/data/natal-text.js, loaded the first time a chart is drawn) ---------- */
 let textState = null;                                     // null: not asked yet, 'loading', 'failed', or loaded
+const AST_GLYPH = { Ceres: '&#9907;&#xFE0E;', Pallas: '&#9908;&#xFE0E;', Juno: '&#9909;&#xFE0E;', Vesta: '&#9910;&#xFE0E;' };   // forced to text, never emoji
 function natalText(){                                    // natal-text.js, then tools-text.js (Chiron)
   if (TD.NATAL_TEXT && TD.TOOLS_TEXT) return Object.assign({}, TD.TOOLS_TEXT, TD.NATAL_TEXT);
   if (!textState) {
@@ -238,6 +241,14 @@ function readingHTML(p, c){
     const sg = signOf(c.chiron.lon), h = c.angles ? TD.houseOf(c.chiron.lon, c.angles.asc, c.system, c.cusps) : null;
     blocks.push(`<div class="res"><h3>&#9911; Chiron in ${sg}${h ? ` &middot; ${ordinal(h)} house` : ''}${c.chiron.retro ? ' <span class="pill">retrograde</span>' : ''}</h3>
       ${para(T['chiron-sign:' + sg])}${h ? `<h4>In the ${ordinal(h)} house</h4>${para(T['chiron-house:' + h])}` : ''}</div>`);
+  }
+  if (c.asteroids && c.asteroids.length) {
+    const X = TD.ASTRO_EXTRA;
+    blocks.push(`<details class="more res"><summary>The asteroids: Ceres, Pallas, Juno and Vesta</summary>${c.asteroids.map(a => {
+      const sg = signOf(a.lon), h = c.angles ? TD.houseOf(a.lon, c.angles.asc, c.system, c.cusps) : null;
+      return `<h4>${AST_GLYPH[a.key]} ${a.key} in ${sg}${h ? ` &middot; ${ordinal(h)} house` : ''}${a.retro ? ' <span class="pill">retrograde</span>' : ''}</h4>
+        <p class="note" style="font-size:12.5px">${X.asteroid[a.key]}</p>${para(X.asteroidSign[a.key + ':' + sg])}`; }).join('')}
+      <p class="note" style="margin-top:10px">Positions from NASA JPL Horizons orbits, within about half an arcminute of JPL.</p></details>`);
   }
   const asp = N.aspects(c).filter(a => ORDER.includes(a.a) && ORDER.includes(a.b) && !a.uncertain).map(a => {
     const [x, y] = ORDER.indexOf(a.a) < ORDER.indexOf(a.b) ? [a.a, a.b] : [a.b, a.a];

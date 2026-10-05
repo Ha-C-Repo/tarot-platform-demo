@@ -4,7 +4,7 @@ window.TD = window.TD || {};
 'use strict';
 /* site.js — shared brand config, chrome, the demo control panel and the Free/Subscriber view. */
 const DEF = { name:'Your Practice Name', role:'Tarot Reader & Astrologer', city:'Your City',
-              theme:'default', rate:'85', tier:'sub' };
+              theme:'default', rate:'85', tier:'sub', deck:'rws' };
 const KEY = 'tarotdemo.brand';
 let stored = {};
 try { stored = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
@@ -17,11 +17,12 @@ const NAV = [
   ['chinese.html','Chinese'], ['maya.html','Maya'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
   /* Phone menu only (the desktop bar fits 13 links on one line from 1180 px); on desktop these are linked from the pages. */
-  ['journal.html','Your journal',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 
 function chrome(current){
   document.documentElement.dataset.theme = brand.theme;
+  document.documentElement.dataset.deck = NS.deckId || 'rws';
   document.documentElement.dataset.tier = brand.tier;
   const band = `<div class="demoband">Demo build &mdash; <b>every name, price and reading below is placeholder.</b>
       Viewing as <b data-tier-label>${brand.tier === 'free' ? 'a free visitor' : 'a subscriber'}</b>.
@@ -43,7 +44,7 @@ function chrome(current){
         <span class="note">For entertainment purposes only. Not medical, legal or financial advice.</span></div>
       <div class="note" style="max-width:52ch">Demo site. Nothing you type here leaves your browser &mdash;
         it is stored in this browser only and cleared by the Reset button.<br>
-        Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.<br>
+        ${NS.DECKS ? NS.DECKS[NS.deckId].credit : 'Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.'}<br>
         Traditional card meanings: A.E. Waite, <i>The Pictorial Key to the Tarot</i>, 1911. Public domain.<br>
         Place data: <a href="https://www.geonames.org/" rel="noopener" style="text-decoration:underline">GeoNames</a>,
         licensed CC BY 4.0. Planet positions: Astronomy Engine by Don Cross, MIT licence. Chart wheel: AstroChart by Matheus Alves, MIT licence. World map: Natural Earth, public domain.
@@ -73,7 +74,7 @@ function printable(current){
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function panel(){
-  const themes = [['default','Prism'],['ember','Ember'],['sage','Sage'],['ink','Ink']];
+  const themes = [['default','Prism'],['ember','Ember'],['sage','Sage'],['ink','Ink'],['light','Daylight']];
   return `<div id="demobar"><div id="demopanel">
     <h4>Make it yours</h4>
     <p class="note">Type a name and pick a palette. The whole site updates. This is what a client sees on day one.</p>
@@ -84,6 +85,9 @@ function panel(){
     <div class="row"><label class="f">Palette</label><div class="swatches">${themes.map(([v,t])=>
       `<button class="sw" data-theme="${v}" title="${t}" aria-label="${t} palette" aria-pressed="${brand.theme===v}"
         style="background:${swatch(v)}"></button>`).join('')}</div></div>
+    <div class="row"><label class="f" for="ddeck">Card deck</label><select id="ddeck">
+      <option value="rws"${brand.deck !== 'marseille' ? ' selected' : ''}>Rider-Waite-Smith, 1909</option>
+      <option value="marseille"${brand.deck === 'marseille' ? ' selected' : ''}>Tarot de Marseille, early 1800s</option></select></div>
     <div class="row" id="tierrow"><label class="f">Viewing as</label>
       <div class="seg" role="group" aria-label="Viewing as">
         <button type="button" data-tier="free" aria-pressed="${brand.tier==='free'}">Free visitor</button>
@@ -101,7 +105,8 @@ const swatch = v => ({
   default:'linear-gradient(100deg,#FF2E88,#A855F7,#22D3EE,#B6F04A)',
   ember:'linear-gradient(100deg,#FF6B35,#E8153F,#FFC857)',
   sage:'linear-gradient(100deg,#7BC47F,#3E8E7E,#D4C2A8)',
-  ink:'linear-gradient(100deg,#C9A227,#8B93A7,#D8DCE6)'}[v]);
+  ink:'linear-gradient(100deg,#C9A227,#8B93A7,#D8DCE6)',
+  light:'linear-gradient(100deg,#FBF8F4 0 45%,#D6246E 45% 60%,#7C3AED 60% 80%,#0E7F96 80%)'}[v]);
 
 function apply(){
   document.documentElement.dataset.theme = brand.theme;
@@ -141,6 +146,7 @@ function wire(){
   const syncInstall = () => { const st = install.state(); di.style.display = st === 'installed' ? 'none' : ''; dn.textContent = st === 'ready' ? '' : install.help(); di.disabled = st !== 'ready'; };
   di.onclick = () => install.prompt().then(syncInstall);
   document.addEventListener('installready', syncInstall); syncInstall();
+  document.getElementById('ddeck').onchange = e => { brand.deck = e.target.value; save(); location.reload(); };
   document.getElementById('dtour').onclick = () => { openPanel(false); if (NS.tour) NS.tour.start(); };
   // mobile nav
   const bg = document.getElementById('burger'), nl = document.getElementById('navlinks');

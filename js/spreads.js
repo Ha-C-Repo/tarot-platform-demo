@@ -98,6 +98,48 @@ NS.SPREADS = [
       P('What will come', 'The TENTH is what will come, the final result, the culmination which is brought about by the influences shewn by the other cards that have been turned up in the divination.')
     ] }
 ];
+/* ---------- spreads the visitor makes (pull.html builder) ----------
+   Kept in this browser's localStorage. Each one: a name, 1 to 10 positions, each with a name, an optional
+   short note and an optional role from the list below, so Reading it through can read it like the built-in
+   spreads. Laid out in a row up to five cards, a grid beyond that. Ids start "my-" so they never clash. */
+const CKEY = 'tarotdemo.spreads', MAXPOS = 10;
+const ROLE_CHOICES = [['', 'Any (read by its name)'], ['past', 'The past'], ['present', 'The present'], ['future', 'The future'],
+  ['obstacle', 'An obstacle'], ['advice', 'Advice'], ['self', 'You'], ['other', 'The other person'], ['connection', 'What is between you'],
+  ['outcome', 'The outcome'], ['foundation', 'What is underneath'], ['hopes', 'Hopes or fears']];
+const cstr = (x, n) => typeof x === 'string' ? x.trim().slice(0, n) : '';
+function cleanDef(d){
+  if (!d || typeof d.id !== 'string' || !/^my-[a-z0-9]{1,20}$/.test(d.id) || !Array.isArray(d.pos)) return null;
+  const roles = ROLE_CHOICES.map(r => r[0]);
+  const pos = d.pos.slice(0, MAXPOS).map((p, k) => ({ name: cstr(p && p.name, 30) || 'Card ' + (k + 1), note: cstr(p && p.note, 140),
+    role: roles.includes(p && p.role) ? p.role : '' }));
+  if (!pos.length) return null;
+  return { id: d.id, name: cstr(d.name, 40) || 'My spread', pos };
+}
+function readDefs(){ try { const a = JSON.parse(localStorage.getItem(CKEY) || '[]'); return Array.isArray(a) ? a.map(cleanDef).filter(Boolean) : []; } catch (e) { return []; } }
+function writeDefs(a){ try { localStorage.setItem(CKEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+function toSpread(d){
+  const n = d.pos.length;
+  return { id: d.id, name: d.name, n, custom: true, layout: n <= 5 ? 'row' : 'grid',
+    blurb: `Your own spread: ${n} card${n === 1 ? '' : 's'}.`,
+    pos: d.pos.map(p => P(p.name, p.note || (p.role ? ROLE_CHOICES.find(r => r[0] === p.role)[1] + '.' : 'A position you named.'))),
+    roles: d.pos.some(p => p.role) ? d.pos.map(p => p.role) : null };
+}
+const BUILT_IN = NS.SPREADS.slice();
+function refresh(){ NS.SPREADS = BUILT_IN.concat(readDefs().map(toSpread)); return NS.SPREADS; }
+NS.customSpreads = {
+  KEY: CKEY, MAXPOS, ROLE_CHOICES, clean: cleanDef, toSpread, refresh,
+  list: readDefs,
+  get: id => readDefs().find(d => d.id === id) || null,
+  save(def){
+    const d = cleanDef(Object.assign({}, def, { id: def && def.id ? def.id : 'my-' + Date.now().toString(36) })); if (!d) return null;
+    const all = readDefs().filter(x => x.id !== d.id); all.push(d);
+    if (!writeDefs(all.slice(-20))) return null;
+    refresh(); return d;
+  },
+  remove(id){ writeDefs(readDefs().filter(x => x.id !== id)); refresh(); }
+};
+refresh();
+
 NS.spreadById = id => NS.SPREADS.find(s => s.id === id) || NS.SPREADS[0];
 /* Which pairs of positions get a "cards together" reading. A spread can name its own meaningful
    pairs; otherwise every pair when there are two or three cards, and neighbours when there are more. */

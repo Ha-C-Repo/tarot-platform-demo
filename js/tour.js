@@ -20,21 +20,27 @@ const STEPS = [
   { page: 'index.html', sel: '#getapp', title: 'An app, without an app store',
     body: 'Visitors can install the site on their phone: its own icon, full screen, and it opens offline once visited. No store listing and no review queue.' },
   { page: 'pull.html', sel: '#deckzone', title: 'A real deck, shuffled for real',
-    body: 'Pick a spread: one card, yes or no, love, the full moon, the zodiac houses or Waite’s own Celtic Cross. Shuffle puts the deck in a new random order that stays until the next shuffle. Pull deals from the top, and a finished reading is saved to the visitor’s journal.' },
+    body: 'Pick a spread: one card, yes or no, love, the full moon, the zodiac houses or Waite’s own Celtic Cross. Shuffle puts the deck in a new random order that stays until the next shuffle. Pull deals from the top, and a finished reading is saved to the visitor’s journal. Visitors can also make and save spreads of their own.' },
   { page: 'pull.html', sel: '#howdeck', title: 'Meanings for both orientations',
     body: 'Every card carries its traditional upright and reversed meaning, from Waite’s 1911 book, and the spread is read as a whole. A finished reading can be saved as an image to share, or printed. On a live site the reader’s own writing replaces the sample text.' },
   { page: 'journal.html', sel: '#jlist', title: 'Every reading, kept',
     body: 'The journal keeps each reading with its question and the visitor’s notes, and shows the cards that keep coming back. It lives in the visitor’s browser and backs up to a file.' },
+  { page: 'learn.html', sel: '#stage', title: 'Learning the cards',
+    body: 'Flashcards and a quiz on all 78 cards: names, meanings both ways up, and the astrology. The cards a visitor misses come back more often until they stick.' },
   { page: 'moon.html', sel: '#calcard', title: 'The page people bookmark',
     body: 'A month of moon phases, day by day, with the maths stated underneath and a reading for the phase and sign tonight. It is the free tool that brings people back.' },
   { page: 'signs.html', sel: '#signpick', title: 'Horoscopes for every sign, written by the sky',
     body: 'Today, the week, the month and the year for all twelve signs, matched to where the planets really are. Nobody has to write a daily column for it to stay current.' },
+  { page: 'tools.html', sel: '#good-days', title: 'Good days for anything',
+    body: 'Pick an activity, a date, a contract, a trip, and see the best days of the next month, scored by published rules and, with a birth chart, by the visitor’s own planets.' },
   { page: 'compatibility.html', sel: '#fullform', title: 'Compatibility with birth time and place',
     body: 'Both people’s time and place give the rising sign, the houses and a ten-by-ten grid of real planetary aspects, each strong contact read in words. Historical daylight saving is handled, and an unknown time is said out loud, not guessed.' },
   { page: 'compatibility.html', sel: '#weighting', title: 'The score shows its working',
     body: 'The number is a rule of thumb, and the rule is printed next to it. Nobody has to take a score on trust.' },
   { page: 'chinese.html', sel: '#boundary', title: 'The detail most sites get wrong',
     body: 'The Chinese zodiac year does not start on 1 January, and there are two boundaries in use. This page shows both, and the Four Pillars from the exact birth moment.' },
+  { page: 'oracle.html', sel: '#otabs', title: 'The I Ching and the runes',
+    body: 'Two more oracles: the Book of Changes cast with three coins, in James Legge’s 1882 translation, and the 24 runes of the Elder Futhark, drawn as line art.' },
   { page: 'handbook.html', sel: '#vault', title: 'The members’ Vault',
     body: 'What a subscriber gets: the long-form practice pieces and a recorded reading every month. Switch the view to Free visitor in Customise and watch it lock.' },
   { page: 'pricing.html', sel: '#tiers', title: 'Four ways in',
@@ -44,7 +50,7 @@ const STEPS = [
   { page: 'account.html', sel: '#hello', title: 'The client’s own page',
     body: 'Plan, sessions, saved chart and journal in one place. Here a first name is enough to look around; on a live site visitors sign in with a link sent to their email.' },
   { page: '*', sel: '#demopanel', open: true, title: 'Now make it theirs',
-    body: 'Type a practice name, pick a palette, switch between Free and Subscriber. The whole site changes as you type. That is the pitch.' }
+    body: 'Type a practice name, pick a palette (one of them light), choose the 1909 deck or the Marseille one, switch between Free and Subscriber. The whole site changes as you type. That is the pitch.' }
 ];
 let ui = null, cur = -1, curPage = '';
 
@@ -117,6 +123,13 @@ function show(i){
   if (!fixed) el.scrollIntoView({ block: 'center', behavior: 'auto' });
   requestAnimationFrame(() => { place(); ui.tip.querySelector('[data-t="next"]').focus({ preventScroll: true }); });
   setTimeout(place, 250);
+  /* Pages that fill in after load (the tools) can push the target down: bring it back into view while that settles. */
+  [900, 2000, 3500, 5000].forEach(ms => setTimeout(() => {
+    if (cur !== i || !ui) return;
+    const r = el.getBoundingClientRect();
+    if (!fixed && (r.top < 0 || r.top > innerHeight - 60)) el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    place();
+  }, ms));
 }
 function go(i, d = 1){
   if (i < 0) return;

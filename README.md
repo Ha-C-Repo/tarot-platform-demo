@@ -18,7 +18,7 @@ so it works at any depth on the published site, and is not meant to be opened fr
 |---|---|
 | **Customise** (bottom right) | Practice name, role, city, reading price, one of four palettes: the whole site rebrands live. |
 | **Viewing as** (in Customise) | *Subscriber* (default): no ads, everything unlocked, unlimited readings. *Free visitor*: ad slots and the members' Vault locked. Card readings are unlimited in both views, so a prospect can try every spread. Flip it in front of a prospect. |
-| **Take the tour** (home page, and in Customise) | 18-step guided tour across the pages (booking, the journal, horoscopes by sign and the account page included), ending on Customise. A step whose target is hidden (the install panel once installed) is skipped in the direction of travel. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
+| **Take the tour** (home page, and in Customise) | 21-step guided tour across the pages (booking, the journal, learning the cards, horoscopes by sign, good days, the I Ching and runes, and the account page included), ending on Customise. A step whose target is hidden (the install panel once installed) is skipped in the direction of travel. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
 
 Everything is stored in that browser only, and cleared by **Reset demo data**.
 
@@ -50,6 +50,13 @@ this code; the checks are committed in `tests/` (see Tests below).
 | Reading journal | `journal.html` + `js/journal.js`: every finished card reading saved automatically with its question, notes, stats (most frequent cards, suits, reversals, spreads), search, and backup to and from a JSON file. localStorage only. | Round-trip, merge and junk-file tests (tests/journal.test.js) |
 | Share and print | `js/share.js`: a finished reading drawn to a PNG in the current palette, handed to the phone's share sheet or downloaded (pull page and journal). Print stylesheet: any page prints as a light report; report pages get a Print button. | Checked in Chrome 2026-10-04 |
 | Installable app | `manifest.webmanifest`, `sw.js`, `assets/app/` icons. Network first for everything, the stored copy offline; 71 files stored on install, big files stored on first use. | Chrome: no installability errors, four pages open offline (2026-10-04); tests/app.test.js |
+| Learn the cards | `learn.html` + `js/learn.js`: flashcards and a four-choice quiz (names, upright and reversed keywords, Golden Dawn correspondences) for any set (all, Majors, a suit, courts, the ones you miss). Weak cards come up more; three right in a row counts as learned. localStorage only. | tests/learn.test.js |
+| Your own spreads | Card pull "Make your own": a name and 1 to 10 positions, each with an optional note and role (past, obstacle, advice...), so Reading it through reads them like the built-in spreads (`js/spreads.js` TD.customSpreads, `js/reading.js` rolesOf). Row up to five cards, grid beyond. The journal keeps the spread's name and positions. | tests/custom.test.js |
+| Asteroids | Ceres, Pallas, Juno and Vesta on the birth chart, from NASA JPL Horizons heliocentric vectors every 40 days, 1899-2101 (`js/data/asteroids.js`, 173 KB), interpolated like Chiron, with a reading for each in its sign (`js/data/astro-extra-text.js`). | JPL Horizons apparent longitudes at 175 dates each: worst 0.56' (tests/extras.test.js; fixture asteroids-horizons.json) |
+| Good days | Tools page: the next 30 days scored for one of eight activities by published electional rules (Moon sign and phase, void-of-course Moon, Mercury and Venus retrograde, optionally the Moon's aspects to the visitor's natal planets), best five with reasons and a month strip (`js/gooddays.js`). | Mercury retrograde Oct-Nov 2026 rule, score sums (tests/extras.test.js) |
+| Composite readings | Compatibility: the composite Sun, Moon, Venus and Mars read by sign. | Text coverage (tests/extras.test.js) |
+| Second deck | Customise "Card deck": Tarot de Marseille on the Nicolas Conver model, early 19th century, BnF Gallica btv1b10539497f via Wikimedia Commons (`assets/cards/marseille/`, 78 cards, 3.8 MB). Images are filed by card identity: Justice (VIII in that deck) and Strength (XI) keep their meanings. **Licence note:** Commons tags the scans public domain; the BnF's own terms ask for a licence for commercial reuse of Gallica images, so check before a paying client site uses this deck. | tests/decks.test.js |
+| I Ching and runes | `oracle.html` + `js/oracle.js`: the three-coin method (crypto random, true 1:3:3:1 odds), changing lines and the relating hexagram, look-up of all 64. Texts: James Legge, The Yî King, SBE XVI (1882), public domain; 1-32 from Wikisource, 33-64 from the 1882 scan (archive.org wg916) corrected by hand for OCR errors only (`js/data/iching.js`; the build checks every line text names the right kind of line). 24 Elder Futhark runes drawn as SVG, one or three, nine symmetrical runes never reversed (`js/data/runes.js`). | Coin odds chi-square, King Wen figures, rune fairness (tests/oracle.test.js) |
 | Compatibility, quick | Two dates only: sun element, Chinese triad, life path, modality. Weighting published. | Heuristic, and labelled as one |
 | Birth time → UTC | Browser IANA time-zone data, two-pass inversion. The repeated hour when clocks go back is flagged (first occurrence used); the skipped hour is flagged. "Time unknown" mode drops houses and the Ascendant and flags the Moon if it changes sign that day. | Sydney 1974, New York 1985 (EST and EDT), London 1968 (British Standard Time), Denver 2026, Honolulu 1961, NY 2021 fold and gap |
 | Birth places | 34,146 GeoNames cities (population > 15,000 or capitals) with their IANA zone, searchable offline, loaded only on pages that ask for a place. | GeoNames cities15000, CC BY 4.0 |
@@ -118,14 +125,14 @@ node tests/run.js
 Plain Node, no dependencies. `tests/chart.test.js` (ephemeris, angles, time zones, houses at -34° and
 +70°, time-unknown mode, aspects, midpoints), `tests/calendars.test.js` (numerology, Maya, Chinese New Year,
 Four Pillars, moon phases, tarot birth cards), `tests/tools.test.js` (Chiron against JPL, solar return, progressions, returns, eclipses against NASA, void Moon, planetary hours, Davison, text coverage), `tests/handbook.test.js` (Handbook structure, sanitised book HTML, footnotes, sources, and a site-wide scan that fails on any emoji), `tests/vedic.test.js` (Lahiri positions and Lagna against Swiss Ephemeris, nakshatras, Navamsa, dashas, Panchang, Manglik, Sade Sati, text coverage), `tests/acg.test.js` (lines through Astronomy Engine's horizon code, distances, map data), `tests/transits.test.js` (stations against Swiss Ephemeris, exact hits, transits in effect, Moon and Sun by house, text coverage), `tests/natal.test.js` (dignities, balance, chart ruler, aspects, Big Three, coverage of all 477 reading texts), `tests/reading.test.js` (correspondences against the Golden Dawn table, numbers, dignities, angel numbers, the spread's total, reading it through), `tests/deck.test.js` (uniformity, persistence, Significator,
-spreads, spread analysis), `tests/journal.test.js` (journal save, notes, stats, backup round-trip, junk files, blocked storage), `tests/members.test.js` (mock-up prices, calendar rules, demo holds and sign-in), `tests/signs.test.js` (solar houses, ingresses, sky aspects, Moon path, text coverage), `tests/app.test.js` (manifest, icons, the service worker stores every page and script). The emoji scan also catches JavaScript `\u{...}` and surrogate escapes since 2026-10-04.
+spreads, spread analysis), `tests/journal.test.js` (journal save, notes, stats, backup round-trip, junk files, blocked storage), `tests/members.test.js` (mock-up prices, calendar rules, demo holds and sign-in), `tests/signs.test.js` (solar houses, ingresses, sky aspects, Moon path, text coverage), `tests/app.test.js` (manifest, icons, the service worker stores every page and script), `tests/learn.test.js`, `tests/custom.test.js`, `tests/extras.test.js`, `tests/decks.test.js`, `tests/oracle.test.js`. The emoji scan also catches JavaScript `\u{...}` and surrogate escapes since 2026-10-04.
 Reference data: `tests/fixtures/lunar-javascript-reference.json`, `tests/fixtures/stations-2026-swisseph.json`, `tests/fixtures/houses-swisseph.json`, `tests/fixtures/vedic-swisseph.json` (house cusps, stations and Lahiri positions from Swiss Ephemeris 2.10.03, numbers only; the library itself is not part of the site).
 
 ## Files
 
 ```
 index.html  pull.html  moon.html  birthchart.html  vedic.html  astromap.html  horoscope.html  tools.html  compatibility.html  numerology.html  chinese.html  maya.html
-handbook.html  pricing.html  404.html  journal.html  signs.html  book.html  checkout.html  live.html  account.html
+handbook.html  pricing.html  404.html  journal.html  signs.html  book.html  checkout.html  live.html  account.html  learn.html  oracle.html
 sw.js  manifest.webmanifest  assets/app/  the service worker, app manifest and app icons
 css/base.css          design system, four palettes, all components
 js/site.js            brand config, nav, footer, Customise panel, Free/Subscriber view, demo modal
@@ -158,6 +165,14 @@ js/signs.js           horoscopes by sign: solar houses, ingresses, Moon path, sk
 js/data/signs-text.js the texts for horoscopes by sign
 js/share.js           a finished reading as a PNG, shared or downloaded
 js/data/extra-text.js sample texts for the Moon, numerology, birth cards, Chinese, Maya, compatibility
+js/learn.js           flashcards and quiz logic (localStorage tarotdemo.learn)
+js/gooddays.js        good days for an activity, by published rules
+js/oracle.js          I Ching coins and rune draws, hexagram and rune drawings
+js/data/asteroids.js  Ceres, Pallas, Juno, Vesta from NASA JPL Horizons
+js/data/astro-extra-text.js  asteroid-in-sign and composite texts
+js/data/iching.js     the 64 hexagrams with Legge's 1882 text
+js/data/runes.js      the 24 Elder Futhark runes
+assets/cards/marseille/  the second deck (BnF scan, see Second deck above)
 js/deck.js            the persistent deck, Significator, spread analysis, card back
 js/reading.js         reading it through: positions, elements, dignities, movement, repeated numbers, the spread's total
 js/spreads.js         the eight spreads; Celtic Cross positions in Waite's words
@@ -188,7 +203,7 @@ Any card without a file falls back to a drawn design, so a partial or different 
 
 ## Known gaps
 
-1. **All four palettes are dark.** A light theme is a new set of tokens at the top of `css/base.css`.
+1. ~~All four palettes are dark.~~ Closed 2026-10-05: the Daylight palette (`[data-theme="light"]` in `css/base.css`) overrides every hard-coded dark colour.
 2. **Firefox from a file** is untested: served, it behaves like any static site.
 3. **The Handbook is assembled in the browser.** Its chapters load by script, which suits reading but not search
    engines (and the demo is `noindex` anyway). For a live site that wants search traffic from the books, generate one

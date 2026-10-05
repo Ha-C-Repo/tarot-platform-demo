@@ -103,7 +103,7 @@
 <script src="js/vendor/astronomy.browser.min.js"></script>
 <script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/tools.js"></script><script src="js/places.js"></script>
 <script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/data/extra-text.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/data/extra-text.js"></script><script src="js/data/astro-extra-text.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('compatibility.html');
 const $ = id => document.getElementById(id);
@@ -215,7 +215,7 @@ function gridHTML(A, B, s, pa, pb){
     Each cell shows the aspect and its orb in degrees.</p>
     <div class="scrollx"><table class="sgrid">${head}${rows}</table></div>
     <div class="legend"><span>&#9651; trine</span><span>&#9913; sextile</span><span>&#9740; conjunction</span><span>&#9633; square</span><span>&#9741; opposition</span>
-      <span style="color:var(--a4)">green: adds to the score</span><span style="color:#FF6B81">red: subtracts</span><span><i>faded: no birth time, not scored</i></span></div></div>`;
+      <span style="color:var(--a4)">green: adds to the score</span><span style="color:var(--neg)">red: subtracts</span><span><i>faded: no birth time, not scored</i></span></div></div>`;
 }
 function contactsHTML(s, pa, pb){
   const top = s.contacts.slice(0, 8);
@@ -223,11 +223,18 @@ function contactsHTML(s, pa, pb){
   return `<div class="res"><h3>The strongest contacts</h3>
     <div class="scrollx"><table class="ctab"><tbody>${top.map(c => `<tr><td>${esc(poss(pa.name))} ${G(c.a)} ${c.a}</td><td>${c.glyph} ${c.type}</td>
       <td>${esc(poss(pb.name, true))} ${G(c.b)} ${c.b}</td><td>orb ${c.orb.toFixed(1)}&deg;</td>
-      <td style="color:${c.points > 0 ? 'var(--a4)' : '#FF6B81'}">${c.points > 0 ? '+' : '\u2212'}${Math.abs(c.points).toFixed(2)}</td></tr>`).join('')}</tbody></table></div>
+      <td style="color:${c.points > 0 ? 'var(--a4)' : 'var(--neg)'}">${c.points > 0 ? '+' : '\u2212'}${Math.abs(c.points).toFixed(2)}</td></tr>`).join('')}</tbody></table></div>
     <div style="margin-top:12px">${top.slice(0, 5).map(c => { const R = TD.EXTRA.compatRole, K = TD.EXTRA.compatKind;
       return `<p style="font-size:13px;line-height:1.55;margin-top:8px"><b>${esc(poss(pa.name))} ${c.a}</b> (${R[c.a] || c.a}) and
         <b>${esc(poss(pb.name, true))} ${c.b}</b> (${R[c.b] || c.b}), ${c.type}. ${K[c.type] || ''}</p>`; }).join('')}
       <p class="note" style="margin-top:10px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p></div></div>`;
+}
+function compositeReading(cp){
+  const X = TD.ASTRO_EXTRA.composite;
+  return ['Sun', 'Moon', 'Venus', 'Mars'].map(k => { const p = cp.planets.find(q => q.key === k); if (!p) return '';
+    const sg = TD.SIGNS[Math.floor(((p.lon % 360) + 360) % 360 / 30)];
+    return `<p style="font-size:13px;line-height:1.55;margin-top:8px"><b>${p.glyph} Composite ${k} in ${sg}.</b> ${X[k + ':' + sg] || ''}</p>`; }).join('') +
+    `<p class="note" style="margin-top:8px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p>`;
 }
 function compositeHTML(A, B, pa, pb){
   const cp = TD.composite(A, B);
@@ -237,7 +244,8 @@ function compositeHTML(A, B, pa, pb){
     <p class="note">The relationship as a chart of its own: the midpoint of each pair of planets, always taken the short way
     round the zodiac.${cp.asc == null ? ' Composite Ascendant and houses need both birth times.' : ' Whole Sign houses from the composite Ascendant.'}
     ${!A.timeKnown || !B.timeKnown ? ' The composite Moon is approximate without both birth times.' : ''}</p>
-    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th></tr></thead><tbody>${ang}${rows}</tbody></table></div></div>`;
+    <div class="scrollx"><table class="ctab"><thead><tr><th></th><th>Body</th><th>Position</th><th>House</th></tr></thead><tbody>${ang}${rows}</tbody></table></div>
+    ${compositeReading(cp)}</div>`;
 }
 function davisonHTML(A, B){
   const D = TD.tools.davison(A, B, $('hsys').value);

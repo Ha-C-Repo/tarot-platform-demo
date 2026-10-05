@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Learn the cards — tarot platform demo</title>
+<meta name="description" content="Flashcards and a quiz on all 78 cards: names, meanings upright and reversed, and the astrology behind each one. The ones you miss come back more often.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/learn.html">
+<meta property="og:title" content="Learn the cards — tarot platform demo">
+<meta property="og:description" content="Flashcards and a quiz on all 78 cards: names, meanings upright and reversed, and the astrology behind each one. The ones you miss come back more often.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free &middot; learn the 78 cards</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Learn<br><span class="prism">the cards</span></h1>
+  <p class="lede">Flashcards and a quick quiz on the names, the meanings upright and reversed, and the astrology
+    behind each card. The cards you get wrong come back more often until they stick.</p>
+
+  <div class="ltools">
+    <div class="seg" id="mode" role="group" aria-label="Mode"><button type="button" data-m="flash">Flashcards</button><button type="button" data-m="quiz">Quiz</button></div>
+    <select id="filter" aria-label="Which cards"></select>
+    <select id="kind" aria-label="Quiz questions"><option value="mixed">Mixed questions</option><option value="name">Card names</option>
+      <option value="meaning">Upright meanings</option><option value="reversed">Reversed meanings</option><option value="astro">Astrology</option></select>
+  </div>
+  <div class="lstat" id="lstat" aria-live="polite"></div>
+
+  <div class="lstage" id="stage" aria-live="polite"></div>
+
+  <div class="warn col" style="margin-top:28px"><span class="k">How it picks the next card</span>
+    <p>Every card keeps a score in this browser. A right answer adds to its run; a wrong one starts the run again and
+    counts against it. The next card is chosen at random, weighted towards the ones you miss, and never the same card twice
+    in a row. Three right in a row and a card counts as learned. Meanings are the short keywords used across this site;
+    the astrology is the Golden Dawn system the 1909 deck was drawn in.</p></div>
+  <p class="note col" style="margin-top:12px"><button class="btn" type="button" id="lreset" style="font-size:12.5px;padding:8px 14px">Start my progress again</button></p>
+</div>
+<script src="js/cards.js"></script><script src="js/data/correspondences.js"></script><script src="js/learn.js"></script>
+<script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('learn.html');
+const L = TD.learn, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S = L.load(), mode = 'flash', card = null, q = null, answered = false, flipped = false;
+const PKEY = 'tarotdemo.learnprefs';
+try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (p.mode) mode = p.mode; if (p.filter) $('filter').dataset.v = p.filter; if (p.kind) $('kind').value = p.kind; } catch (e) {}
+$('filter').innerHTML = Object.entries(L.FILTERS).map(([k, f]) => `<option value="${k}">${f.name}</option>`).join('');
+$('filter').value = $('filter').dataset.v || 'all';
+const prefs = () => { try { localStorage.setItem(PKEY, JSON.stringify({ mode, filter: $('filter').value, kind: $('kind').value })); } catch (e) {} };
+const face = (c, rev) => TD.faceHTML({ card: c, reversed: !!rev }, { caption: false });
+
+function renderStat(){
+  const st = L.stats(S, L.pool('all', S)), here = L.stats(S, L.pool($('filter').value, S));
+  $('lstat').innerHTML = `<b>${st.learned}</b> of 78 learned &middot; ${st.seen} seen &middot; ${st.right} right, ${st.wrong} wrong
+    ${$('filter').value !== 'all' ? ` &middot; this set: ${here.learned} of ${here.total} learned` : ''}`;
+}
+function pick(){
+  const cards = L.pool($('filter').value, S);
+  if (!cards.length) { card = null; return; }
+  card = L.next(cards, S);
+}
+function cardInfo(c){
+  return `<h3 style="font-size:24px">${esc(c.name)}</h3>
+    <p class="kw" style="margin-top:8px"><b>Upright:</b> ${esc(c.up)}</p>
+    <p class="kw"><b>Reversed:</b> ${esc(c.rev)}</p>
+    ${c.astro ? `<p class="note" style="margin-top:8px;font-size:12.5px">${esc(c.astro.label)}${c.number != null ? ' &middot; Number ' + c.number : ''}</p>` : ''}`;
+}
+function renderFlash(){
+  $('kind').style.display = 'none';
+  if (!card) return $('stage').innerHTML = emptyHTML();
+  $('stage').innerHTML = `<div class="lcard">${face(card)}</div>
+    <div class="lside">${flipped ? cardInfo(card) + `<div class="jact"><button class="btn primary" type="button" data-a="knew">I knew it</button>
+        <button class="btn" type="button" data-a="notyet">Not yet</button></div>`
+      : `<p class="note" style="font-size:13.5px">Name the card and say what it means, upright and reversed. Then check.</p>
+        <div class="jact"><button class="btn primary" type="button" data-a="flip">Show the meaning</button></div>`}</div>`;
+}
+function renderQuiz(){
+  $('kind').style.display = '';
+  if (!card) return $('stage').innerHTML = emptyHTML();
+  if (!q) {
+    const kinds = ['name', 'meaning', 'reversed', 'astro'], k = $('kind').value;
+    q = L.question(card, k === 'mixed' ? kinds[Math.floor(Math.random() * kinds.length)] : k);
+  }
+  const showCard = q.kind === 'name' || q.kind === 'astro';
+  $('stage').innerHTML = `<div class="lcard${showCard ? '' : ' hidden'}">${showCard ? face(card) : `<div class="lprompt">&ldquo;${esc(q.prompt)}&rdquo;</div>`}</div>
+    <div class="lside"><div class="eyebrow">${esc(q.ask)}</div>
+      <div class="lchoices">${q.choices.map(c => `<button type="button" class="lchoice${answered ? (c === q.answer ? ' right' : c === answered ? ' wrong' : '') : ''}"
+        data-c="${esc(c)}"${answered ? ' disabled' : ''}>${esc(c)}</button>`).join('')}</div>
+      ${answered ? `<div class="lfeed">${answered === q.answer ? '<b class="ok">Right.</b>' : `<b class="no">Not this time.</b> It is <b>${esc(q.answer)}</b>.`}
+        <div style="margin-top:10px">${showCard ? cardInfo(card) : `<div class="lmini">${face(card)}</div>` + cardInfo(card)}</div>
+        <div class="jact"><button class="btn primary" type="button" data-a="next">Next card</button></div></div>` : ''}</div>`;
+}
+function emptyHTML(){
+  return `<div class="card pad col"><p class="note" style="font-size:13.5px">${$('filter').value === 'missed'
+    ? 'Nothing to review: no card you have missed is still waiting. Pick another set.' : 'No cards in this set.'}</p></div>`;
+}
+function render(){
+  document.querySelectorAll('#mode [data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
+  renderStat();
+  mode === 'flash' ? renderFlash() : renderQuiz();
+}
+function advance(){ q = null; answered = false; flipped = false; pick(); render(); }
+$('stage').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.a === 'flip') { flipped = true; render(); }
+  else if (b.dataset.a === 'knew' || b.dataset.a === 'notyet') { L.record(S, card.id, b.dataset.a === 'knew'); advance(); }
+  else if (b.dataset.a === 'next') advance();
+  else if (b.dataset.c && !answered) { answered = b.dataset.c; L.record(S, card.id, answered === q.answer); render(); }
+});
+document.querySelectorAll('#mode [data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; prefs(); advance(); });
+$('filter').onchange = () => { prefs(); advance(); };
+$('kind').onchange = () => { prefs(); q = null; answered = false; render(); };
+let armed = false;
+$('lreset').onclick = () => {
+  if (!armed) { armed = true; $('lreset').textContent = 'Tap again to clear your progress'; return; }
+  armed = false; L.reset(); S = L.load(); $('lreset').textContent = 'Start my progress again'; advance();
+};
+advance();
+</script></body></html>

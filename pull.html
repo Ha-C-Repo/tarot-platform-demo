@@ -36,6 +36,16 @@
       <input id="question" maxlength="300" placeholder="Optional. Kept with this reading in your journal" autocomplete="off"></div>
     <div class="spreadpick" id="spreadpick" role="group" aria-label="Spread"></div>
     <p id="spreadblurb" aria-live="polite"></p>
+    <div class="builder hide" id="builder">
+      <div class="eyebrow" id="bhead">Make your own spread</div>
+      <div class="row2"><div><label class="f" for="bname">Name</label><input id="bname" maxlength="40" placeholder="My Sunday spread"></div>
+        <div><label class="f" for="bcount">Cards</label><select id="bcount"></select></div></div>
+      <div id="bpos" class="bpos"></div>
+      <div class="jact"><button class="btn primary" type="button" id="bsave">Save and use it</button>
+        <button class="btn" type="button" id="bcancel">Cancel</button><span class="note" id="bmsg" aria-live="polite"></span></div>
+      <p class="note" style="margin-top:8px">Give each position a name, and if it plays a familiar part (the past, an obstacle, advice)
+        say so: Reading it through then reads it that way. Saved in this browser only.</p>
+    </div>
     <div class="sigrow hide" id="sigrow">
       <label class="f" for="sigsel">Significator</label>
       <select id="sigsel"></select>
@@ -62,6 +72,7 @@
     </div>
   </div>
 
+  <p class="note col hide" id="decknote" style="margin-top:10px"></p>
   <div class="reading col" id="reading" aria-live="polite"></div>
   <div class="col" id="jslot"></div>
 
@@ -93,6 +104,7 @@
 <script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('pull.html');
+if (TD.DECKS[TD.deckId].note) { const n = document.getElementById('decknote'); n.textContent = TD.DECKS[TD.deckId].note; n.classList.remove('hide'); }
 const D = TD.deck;
 let st = D.state(), busy = false;
 const J = TD.journal, JCUR = 'tarotdemo.journal.current';
@@ -157,12 +169,24 @@ function comboTable(f){
 function renderPicker(){
   const cur = SP(), n = st.table.length;
   $('spreadpick').innerHTML = TD.SPREADS.map(s =>
-    `<button type="button" data-sp="${s.id}" aria-pressed="${s.id === cur.id}"${busy ? ' disabled' : ''}>${esc(s.name)}</button>`).join('');
-  $('spreadpick').querySelectorAll('button').forEach(b => b.onclick = () => chooseSpread(b.dataset.sp));
+    `<button type="button" data-sp="${s.id}" aria-pressed="${s.id === cur.id}"${busy ? ' disabled' : ''}${s.custom ? ' class="mine"' : ''}>${esc(s.name)}</button>`).join('') +
+    `<button type="button" class="mk" data-new="1"${busy ? ' disabled' : ''}>Make your own</button>`;
+  $('spreadpick').querySelectorAll('button[data-sp]').forEach(b => b.onclick = () => chooseSpread(b.dataset.sp));
+  $('spreadpick').querySelector('[data-new]').onclick = () => openBuilder(null);
   let blurb = esc(cur.blurb);
+  if (cur.custom) blurb += ` <button type="button" class="linkbtn" id="bedit">Edit</button> <button type="button" class="linkbtn" id="bdel">${delArmed ? 'Tap again to delete' : 'Delete'}</button>`;
   if (cur.moon) blurb += ' ' + moonLine();
   if (cur.yesno) blurb += ' <b>' + cur.rule.replace(/’/g, '&rsquo;') + '</b>';
   $('spreadblurb').innerHTML = blurb;
+  if (cur.custom) {
+    $('bedit').onclick = () => openBuilder(TD.customSpreads.get(cur.id));
+    $('bdel').onclick = () => {
+      if (!delArmed) { delArmed = true; renderPicker(); return; }
+      delArmed = false; const id = cur.id;
+      if (st.table.length) st = D.gather(st);
+      TD.customSpreads.remove(id); D.setSpread(st, 'ppf'); renderAll();
+    };
+  }
   $('spreadlock').classList.toggle('hide', !n);
   $('sigrow').classList.toggle('hide', !cur.significator);
   if (cur.significator) renderSigSelect();
@@ -190,6 +214,42 @@ $('sigsel').onchange = e => {
   if (st.table.length) return;
   D.setSig(st, e.target.value === '' ? null : +e.target.value);
   renderAll();
+};
+
+/* ---------- making your own spread (js/spreads.js TD.customSpreads) ---------- */
+let delArmed = false, editing = null;
+$('bcount').innerHTML = Array.from({ length: TD.customSpreads.MAXPOS }, (_, k) => `<option value="${k + 1}">${k + 1}</option>`).join('');
+function posRows(n, keep){
+  const roles = TD.customSpreads.ROLE_CHOICES;
+  $('bpos').innerHTML = Array.from({ length: n }, (_, k) => { const p = keep[k] || {};
+    return `<div class="bp"><span class="num">${k + 1}</span>
+      <input data-k="${k}" data-f="name" maxlength="30" placeholder="Position ${k + 1}" value="${esc(p.name || '')}" aria-label="Position ${k + 1} name">
+      <select data-k="${k}" data-f="role" aria-label="Position ${k + 1} part">${roles.map(([v, t]) => `<option value="${v}"${(p.role || '') === v ? ' selected' : ''}>${t}</option>`).join('')}</select>
+      <input data-k="${k}" data-f="note" maxlength="140" placeholder="What it means (optional)" value="${esc(p.note || '')}" aria-label="Position ${k + 1} meaning"></div>`; }).join('');
+}
+function readRows(){
+  const out = [];
+  $('bpos').querySelectorAll('[data-k]').forEach(el => { const k = +el.dataset.k; (out[k] = out[k] || {})[el.dataset.f] = el.value; });
+  return out;
+}
+function openBuilder(def){
+  editing = def;
+  $('bhead').textContent = def ? 'Edit your spread' : 'Make your own spread';
+  $('bname').value = def ? def.name : '';
+  const n = def ? def.pos.length : 3;
+  $('bcount').value = String(n); posRows(n, def ? def.pos : []);
+  $('bmsg').textContent = ''; $('builder').classList.remove('hide');
+  $('bname').focus();
+}
+$('bcount').onchange = () => posRows(+$('bcount').value, readRows());
+$('bcancel').onclick = () => { $('builder').classList.add('hide'); editing = null; };
+$('bsave').onclick = () => {
+  const d = TD.customSpreads.save({ id: editing ? editing.id : undefined, name: $('bname').value, pos: readRows() });
+  if (!d) { $('bmsg').textContent = 'This browser would not save it (storage is blocked or full).'; return; }
+  $('builder').classList.add('hide'); editing = null;
+  if (st.spread === d.id && st.table.length) st = D.gather(st);
+  if (st.spread === d.id) { renderAll(); return; }
+  chooseSpread(d.id);
 };
 
 /* ---------- the deck ---------- */
@@ -224,7 +284,7 @@ function wheelPos(k){                                   // house k+1: first hous
 function renderSlots(){
   const sp = SP(), small = sp.layout === 'celtic' || sp.layout === 'wheel';
   const el = $('slots');
-  el.className = 'slots l-' + sp.layout + (sp.layout === 'row' ? ' n' + sp.n : '');
+  el.className = 'slots l-' + sp.layout + (sp.layout === 'row' || sp.layout === 'grid' ? ' n' + sp.n : '');
   el.style.setProperty('--n', sp.n);
   let html = sp.pos.map((p, k) => {
     const style = sp.layout === 'wheel' ? ` style="${wheelPos(k)}"` : '';
@@ -406,6 +466,7 @@ let jid = null;
 function setCur(id){ jid = id; try { id ? localStorage.setItem(JCUR, JSON.stringify({ id, sig: tableSig() })) : localStorage.removeItem(JCUR); } catch (e) {} }
 function saveReading(){
   const e = J.add({ spread: st.spread, focus: FOCUS(), question: $('question').value.trim(),
+    name: SP().custom ? SP().name : '', pos: SP().custom ? SP().pos.map(p => p.name) : [],
     sig: SP().significator && st.sig ? st.sig.i : null, cards: st.table });
   setCur(e ? e.id : null);
   if (!e) jfail = true;
@@ -424,7 +485,7 @@ function journalHTML(){
 }
 function renderJournal(){ $('jslot').innerHTML = st.table.length === SP().n ? journalHTML() : ''; }
 document.addEventListener('click', ev => {
-  if (ev.target.id === 'jimg') TD.share.saveReading(st.spread, st.table, { focus: FOCUS(), question: $('question').value.trim(), at: jid && J.get(jid) ? J.get(jid).at : Date.now() }, $('jimgst'));
+  if (ev.target.id === 'jimg') TD.share.saveReading(st.spread, st.table, { focus: FOCUS(), name: SP().custom ? SP().name : '', pos: SP().custom ? SP().pos.map(p => p.name) : [], question: $('question').value.trim(), at: jid && J.get(jid) ? J.get(jid).at : Date.now() }, $('jimgst'));
   if (ev.target.id === 'jprint') window.print();
 });
 let jt = 0;
