@@ -112,6 +112,33 @@ module.exports = [
     assert(!miss.length, 'missing: ' + miss.join(', '));
     return Object.keys(TD.REPORT_TEXT).length + ' report texts';
   }],
+  ['Out-of-bounds declinations match Swiss Ephemeris', () => {
+    const fx = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/declination-swisseph.json'), 'utf8'));
+    let worst = 0;
+    fx.rows.forEach(r => Object.entries(r.dec).forEach(([k, v]) => { worst = Math.max(worst, Math.abs(F.declination(k, new Date(r.utc)) - v) * 60); }));
+    assert(worst < 0.2, `worst ${worst.toFixed(3)}'`);
+    const c = TD.chart({ y: 2006, mo: 3, d: 14, h: 18, mi: 0, timeKnown: true, lat: 39.7392, lon: -104.9903, tz: 'America/Denver', system: 'placidus' });
+    assert(F.outOfBounds(c).map(x => x.key).join() === 'Mars', 'Mars out of bounds in March 2006 (dec 24.1)');
+    return `worst ${worst.toFixed(3)}'`;
+  }],
+  ['House rulers: twelve, each pointing to the house its ruler occupies', () => {
+    const c = TD.chart(CHARTS[0][2]), hr = F.houseRulers(c);
+    assert(hr.length === 12 && hr.map(x => x.textKey).join(' ') === 'ruler:1:7 ruler:2:11 ruler:3:4 ruler:4:4 ruler:5:11 ruler:6:7 ruler:7:9 ruler:8:10 ruler:9:2 ruler:10:9 ruler:11:10 ruler:12:9', hr.map(x => x.textKey).join(' '));
+    assert(F.houseRulers(TD.chart(CHARTS[1][2])) === null, 'no time, no rulers');
+  }],
+  ['report.html: all five reports render every test chart with all their texts', () => {
+    const ctx = load(FILES.concat(['js/reportpage.js', 'js/reports.js']), { document: { getElementById: () => null } });
+    const R = ctx.TD.REPORTS, H = ctx.TD.reportHelpers;
+    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras', Object.keys(R).join());
+    let n = 0;
+    Object.entries(R).forEach(([id, rep]) => CHARTS.forEach(([label, name, input]) => {
+      const html = rep.render(ctx.TD.reportContext({ name, place: { name: label }, input }, 'fagan'), H); n++;
+      assert(!/undefined|NaN|\[object/.test(html), `${id} ${label}: ${(html.match(/.{60}(undefined|NaN|\[object).{20}/) || [''])[0]}`);
+      assert(!/<p class="interp"><\/p>|<p class="affirm"[^>]*><\/p>/.test(html), `${id} ${label}: empty text`);
+      assert((html.match(/class="eyebrow rchead"/g) || []).length >= 3, `${id} ${label}: chapters`);
+    }));
+    return n + ' renders';
+  }],
   ...['pastlife.html', 'karmic.html'].map(page => [`${page} renders every test chart with all its texts`, () => {
     const { render, ctx } = renderer(page);
     assert(typeof render === 'function', 'render captured');

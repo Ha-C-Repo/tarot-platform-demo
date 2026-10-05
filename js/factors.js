@@ -156,5 +156,27 @@ function convergence(c, v, num, karmic, soj, st = strength(c)){
   return { votes: all, core: all.filter(x => x.systems.length >= 2).slice(0, 3), numbers: numbers.filter(x => !seen.has(x.textKey) && seen.add(x.textKey)) };
 }
 
-NS.factors = { PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
+/* ---------- house cusps and house rulers (traditional rulers, as the Birth chart page's chart ruler) ---------- */
+const cuspSign = (c, n) => c.cusps ? signIdx(c.cusps[n - 1]) : null;
+function houseRulers(c){
+  if (!c.cusps) return null;
+  return Array.from({ length: 12 }, (_, i) => {
+    const s = cuspSign(c, i + 1), key = NS.natal.RULER[s], p = c.planets.find(x => x.key === key);
+    return { house: i + 1, sign: s, ruler: key, in: p.house, textKey: `ruler:${i + 1}:${p.house}` };
+  });
+}
+/* ---------- out of bounds: declination beyond the Sun's greatest (the true obliquity of the date) ----------
+   Geocentric apparent declination of date from Astronomy Engine (GeoVector, J2000 -> equator of date). */
+function declination(key, date){
+  const A = window.Astronomy, t = A.MakeTime(date);
+  const v = A.RotateVector(A.Rotation_EQJ_EQD(t), A.GeoVector(A.Body[key], t, true));
+  return A.EquatorFromVector(v).dec;
+}
+function outOfBounds(c){
+  const A = window.Astronomy, limit = A.e_tilt(A.MakeTime(c.utc)).tobl;
+  return c.planets.filter(p => p.key !== 'Sun' && !(p.key === 'Moon' && !c.timeKnown)).map(p => ({ key: p.key, dec: declination(p.key, c.utc) }))
+    .filter(x => Math.abs(x.dec) > limit).map(x => Object.assign(x, { limit, textKey: 'oob:' + x.key }));
+}
+
+NS.factors = { cuspSign, houseRulers, declination, outOfBounds, PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
 })(window.TD);

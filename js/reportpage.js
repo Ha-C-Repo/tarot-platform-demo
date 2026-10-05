@@ -67,6 +67,7 @@ const H = {
     const card = NS.DECK.find(c => c.id === id);
     return `<div class="bc">${NS.faceHTML({ card, reversed: false }, { caption: false, eager: true })}<b>${card.name}</b><span>${role}</span></div>`;
   },
+  disclaimerPlain: '<p class="note" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Astrology describes tendencies, never certainties, and is no substitute for professional advice.</p>',
   disclaimer: '<p class="note" style="margin-top:22px">For reflection and entertainment. Sample text written for this demo, the same for everyone with the same placement; a live site uses the reader&rsquo;s own words. Past-life readings are a spiritual tradition, not a historical record.</p>'
 };
 
