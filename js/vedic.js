@@ -18,12 +18,15 @@ const NAK_SPAN = 40 / 3;                          // 13 deg 20'
 /* ---------- ayanamsa ---------- */
 const LAHIRI_T0 = (2435553.5 - 2451545.0) / 36525, LAHIRI_A0 = 23.245524743;
 const precession = T => (5028.796195 * T + 1.1054348 * T * T + 0.00007964 * T * T * T - 0.000023857 * T * T * T * T) / 3600;
-function ayanamsa(date){
+/* Fagan-Bradley, the Western sidereal standard (used by the past-life reports): Swiss Ephemeris carries it on
+   the same precession, a constant 0.8832076 deg above Lahiri (measured with sweph 2.10.3-4 at 1900-2080, 2026-10-05). */
+const FAGAN_OFFSET = 0.8832076;
+function ayanamsa(date, mode){
   const time = AE().MakeTime(date), T = time.tt / 36525;
-  const mean = LAHIRI_A0 + precession(T) - precession(LAHIRI_T0);
+  const mean = LAHIRI_A0 + precession(T) - precession(LAHIRI_T0) + (mode === 'fagan' ? FAGAN_OFFSET : 0);
   return { mean, true: mean + AE().e_tilt(time).dpsi / 3600 };
 }
-const sidereal = (lon, date) => norm(lon - ayanamsa(date).true);
+const sidereal = (lon, date, mode) => norm(lon - ayanamsa(date, mode).true);
 
 /* ---------- names ---------- */
 const RASHI = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya', 'Tula', 'Vrishchika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'];

@@ -1,0 +1,192 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Past lives — tarot platform demo</title>
+<meta name="description" content="A past-life report from birth date, time and place: Cayce-style interlife sojourns from the sidereal decanates, past-life settings and roles from the lunar nodes, the main aspects, karmic numerology and the tarot, combined into one reading.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/pastlife.html">
+<meta property="og:title" content="Past lives — tarot platform demo">
+<meta property="og:description" content="A past-life report that combines the Cayce-style sojourns, the lunar nodes, Vedic astrology, numerology and the tarot.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.rh2{font-size:clamp(22px,3.4vw,28px);margin:2px 0 4px}
+#out .interp{font-size:15px;line-height:1.65;color:var(--text);margin-top:8px}
+#out h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--dim);margin-top:14px}
+.conv{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.conv th,.conv td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.conv th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.story p{font-size:15.5px;line-height:1.7;margin-top:9px}
+.affirm{font-style:italic;font-size:15px;color:var(--a3);margin-top:8px}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Report &middot; the one people pay for elsewhere</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Past lives</h1>
+  <p class="lede">A past-life reading from your birth chart, in the tradition of Edgar Cayce&rsquo;s planetary sojourns, joined with
+    the lunar nodes, Vedic astrology, numerology and the tarot. Where two systems agree, the report says so first.</p>
+
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card pad" id="form">
+      <div class="row2">
+        <div><label class="f" for="nm">Full birth name</label><input id="nm" value="You"></div>
+        <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+        <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      <div class="row" style="margin-top:12px"><label class="f" for="ayan">Sidereal zodiac for the sojourns</label>
+        <select id="ayan">
+          <option value="fagan">Fagan-Bradley (default, Western sidereal)</option>
+          <option value="lahiri">Lahiri (Vedic standard)</option>
+        </select></div>
+      <button class="btn primary wide" id="go" style="margin-top:16px">Write the report</button>
+      <div class="warn"><span class="k">Method, stated</span>
+        <p><b>Interlife sojourns:</b> Edgar Cayce taught that souls spend time in planetary realms between earth lives.
+        Following the past-life astrology built on his readings, the sidereal Sun and Moon are each placed in a
+        decanate (a 10&deg; third of a sign; the three decanates of a sign are that sign and the next two of its element), and
+        the decanate&rsquo;s ruling planet is read as the realm of the sojourn. Sidereal zodiac: Fagan-Bradley by default,
+        Lahiri on request, both as Swiss Ephemeris defines them.</p>
+        <p style="margin-top:8px"><b>Settings and roles:</b> the South Node&rsquo;s sign (setting) and house (role), the
+        Vedic Ketu, and the major aspects. <b>Numbers:</b> Pythagorean, with karmic debt numbers (13, 14, 16, 19 on the way to
+        a core number) and karmic lessons (digits missing from the full birth name). Leave the name as &ldquo;You&rdquo; to skip
+        the name numbers.</p>
+        <p style="margin-top:8px"><b>How the systems are combined:</b> each system votes for planets. Numbers vote through the
+        Chaldean planet of each number (1 Sun, 2 Moon, 3 Jupiter, 4 Uranus, 5 Mercury, 6 Venus, 7 Neptune, 8 Saturn, 9 Mars);
+        the birth chart through its three strongest planets (angular, dignified, conjunct a light, well aspected); the
+        sojourns, the Vedic soul indicator (Atmakaraka) and the ruler of the South Node vote too. A planet backed by two or
+        more systems is a core theme. Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+    </div>
+    <div class="res" id="covers" style="margin-top:0">
+      <h3>What this report covers</h3>
+      <p class="note">Chapter 1, the story in brief and where the systems agree. Chapter 2, between lives: your planetary
+        sojourns. Chapter 3, where you have been: settings and roles. Chapter 4, talents and tests carried in: the main
+        aspects. Chapter 5, the numbers and the cards. Chapter 6, for reflection: stones, colours, affirmations and chakras.</p>
+      <p class="note" style="margin-top:8px">The companion <a href="karmic.html">Karmic path</a> report covers the nodes, Saturn,
+        Jupiter, the twelfth house and retrograde planets in depth.</p>
+      <button class="btn wide printbtn" onclick="print()" style="margin-top:12px">Print or save as PDF</button>
+    </div>
+  </div>
+  <div id="out"></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script><script src="js/data/chiron.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/natal.js"></script><script src="js/vedic.js"></script>
+<script src="js/numerology.js"></script><script src="js/factors.js"></script><script src="js/places.js"></script>
+<script src="js/cards.js"></script><script src="js/data/correspondences.js"></script><script src="js/data/extra-text.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script><script src="js/reportpage.js"></script>
+<script>
+const THEME = { Sun: 'leadership, confidence and being seen', Moon: 'feeling, care and memory', Mercury: 'mind, words and learning',
+  Venus: 'love, beauty and harmony', Mars: 'courage, drive and action', Jupiter: 'wisdom, faith and generosity',
+  Saturn: 'duty, patience and mastery', Uranus: 'originality, intuition and change', Neptune: 'spirit, imagination and compassion',
+  Pluto: 'depth, power and renewal' };
+const SETTING = { Aries: 'the frontier and the warrior', Taurus: 'the land and the builders', Gemini: 'trade and writing',
+  Cancer: 'clan and hearth', Leo: 'royal courts and the stage', Virgo: 'healing, craft and the cloister', Libra: 'art and diplomacy',
+  Scorpio: 'the mystery schools', Sagittarius: 'pilgrimage and teaching', Capricorn: 'empire and administration',
+  Aquarius: 'invention and reform, Cayce&rsquo;s Atlantis among the possibilities', Pisces: 'faith and the spirit, the Holy Land among the possibilities' };
+const ROLE = ['the self-reliant pioneer', 'the landholder or merchant', 'the messenger or scribe', 'the elder who kept the household',
+  'the performer or noble', 'the healer or craftsperson', 'the counsellor or partner', 'the keeper of mysteries and secrets',
+  'the pilgrim or scholar', 'the ruler or official', 'the reformer or guild member', 'the monk, hermit or hospital worker'];
+const SYS = { numerology: 'your numbers', chart: 'your birth chart', cayce: 'your sojourn', vedic: 'the Vedic soul indicator', karmic: 'your South Node' };
+const listOf = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const NUMF = { lifePath: 'Life Path', expression: 'Expression', soulUrge: 'Soul Urge', birthday: 'Birthday' };
+
+function render(ctx, H){
+  const { c, T, soj, nodes, conv, num, karmic } = ctx, S = H.signOf, out = [];
+  const sn = TD.SIGNS[nodes.sn.sign], snHouse = nodes.sn.house;
+  const ketuSign = TD.SIGNS[ctx.v.grahas.find(g => g.key === 'Ketu').sign];
+
+  /* ---- Chapter 1: the story in brief ---- */
+  const core = conv.core.length ? conv.core : conv.votes.slice(0, 2);
+  const story = [], the = k => /^(Sun|Moon)$/.test(k) ? 'the ' + k : k, cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const realms = soj.planets.map(the);
+  const realmLine = soj.moon.alternatives ? `the realm of <b>${realms[0]}</b>, the ruler of your sidereal Sun&rsquo;s decanate`
+    : realms.length > 1 ? `the realms of <b>${listOf(realms)}</b>, the rulers of your sidereal Sun and Moon decanates`
+    : `the realm of <b>${realms[0]}</b>, which rules both your sidereal Sun and Moon decanates`;
+  story.push(`<p>Read from your South Node in ${sn}, your past-life setting is the world of <b>${SETTING[sn]}</b>${snHouse ? `, where you may have been <b>${ROLE[snHouse - 1]}</b>` : ''}.
+    Between lives, the Cayce tradition would place you in ${realmLine}.</p>`);
+  if (conv.core.length) story.push(`<p>Your strongest signature is <b>${the(conv.core[0].key)}</b>: ${THEME[conv.core[0].key]}. ${cap(listOf(conv.core[0].systems.map(s => SYS[s])))} point to it independently.${conv.core[1] ? ` <b>${cap(the(conv.core[1].key))}</b> is confirmed too, by ${listOf(conv.core[1].systems.map(s => SYS[s]))}: ${THEME[conv.core[1].key]}.` : ''}</p>`);
+  else story.push(`<p>No single planet is backed by two systems at once, so your themes are spread out. The strongest is <b>${the(core[0].key)}</b> (${THEME[core[0].key]}).</p>`);
+  if (karmic.debts.length) story.push(`<p>Your numbers carry the karmic number${karmic.debts.length > 1 ? 's' : ''} <b>${listOf([...new Set(karmic.debts.map(d => d.n))].map(String))}</b>, read in Chapter 5.</p>`);
+  const row = x => `<tr><td><b>${H.glyph(x.key)} ${x.key}</b></td><td>${x.systems.length}</td><td>${x.why.join(', ')}</td></tr>`;
+  out.push(H.chapter(1, 'The story in brief', 'Built from every chapter below. Where two or more systems agree, a theme is called confirmed.'),
+    `<div class="res story">${story.join('')}</div>`,
+    H.block('How the systems agree', `<table class="conv"><tr><th>Planet</th><th>Systems</th><th>Why</th></tr>${conv.votes.map(row).join('')}</table>
+      <p class="note" style="margin-top:8px">The method box at the top says how each system votes.</p>`));
+
+  /* ---- Chapter 2: sojourns ---- */
+  const sojBlock = (d, body) => {
+    const alt = d.alternatives;
+    if (alt) return H.block(`${H.glyph('Moon')} Moon decanate: depends on the birth time`, `<p class="note">With no birth time the Moon can sit in the ${TD.SIGNS[alt[0].decanSign]} or ${TD.SIGNS[alt[1].decanSign]} decanate,
+      giving ${alt[0].ruler} or ${alt[1].ruler}. Add a birth time to settle it.</p>`);
+    return H.block(`${H.glyph(body)} ${body}: ${d.decan === 1 ? 'first' : d.decan === 2 ? 'second' : 'third'} decanate of sidereal ${TD.SIGNS[d.sign]} &rarr; ${TD.SIGNS[d.decanSign]}, ruled by ${d.ruler}`,
+      `<p class="note">Sidereal ${body} at ${TD.fmtLon(d.lon)} (${ctx.mode === 'fagan' ? 'Fagan-Bradley' : 'Lahiri'}).</p>${H.para(T['sojourn:' + d.ruler])}`);
+  };
+  const sameRealm = !soj.moon.alternatives && soj.sun.ruler === soj.moon.ruler;
+  out.push(H.chapter(2, 'Between lives: your planetary sojourns', 'The realm your soul is said to have rested in between earth lives, and what you brought back from it.'),
+    `<div class="grid g2" style="align-items:start">${sojBlock(soj.sun, 'Sun')}${sameRealm ? H.block(`${H.glyph('Moon')} Moon: the same realm, ${soj.moon.ruler}`, '<p class="note">Your Sun and Moon point to the same realm, which the tradition reads as a strong, single theme.</p>') : sojBlock(soj.moon, 'Moon')}</div>`);
+
+  /* ---- Chapter 3: settings and roles ---- */
+  const zod = [['Sun', c.planets[0].lon], ...(c.planets[1].signUncertain ? [] : [['Moon', c.planets[1].lon]]), ...(c.angles ? [['Ascendant', c.angles.asc]] : [])]
+    .map(([k, lon]) => { const z = TD.factors.bothZodiacs(lon, c.utc, ctx.mode); return `<tr><td><b>${H.glyph(k)} ${k}</b></td><td>${z.tropical}</td><td>${z.sidereal}</td><td>${z.differ ? 'differ' : 'same'}</td></tr>`; }).join('');
+  out.push(H.chapter(3, 'Where you have been: settings and roles', 'From the South Node, the point astrologers read as the familiar past, and from the sidereal zodiac the Cayce tradition also used.'),
+    `<div class="grid g2" style="align-items:start">${H.block(`The setting: South Node in ${sn}`, H.para(T['era:' + sn]))}
+      ${snHouse ? H.block(`The role: South Node in the ${H.ordinal(snHouse)} house`, H.para(T['pastrole:' + snHouse])) : H.block('The role', '<p class="note">The role comes from the South Node&rsquo;s house, which needs a birth time.</p>')}</div>`,
+    ketuSign !== sn ? `<details class="more res"><summary>The Vedic view: Ketu in sidereal ${ketuSign}</summary><p class="note">Vedic astrology calls the South Node Ketu and reads it in the sidereal zodiac, where yours falls in ${ketuSign}. That adds a second possible setting.</p>${H.para(T['era:' + ketuSign])}</details>`
+      : H.block(`The Vedic view agrees: Ketu in sidereal ${ketuSign}`, '<p class="note">Vedic astrology reads the South Node (Ketu) in the sidereal zodiac; yours stays in the same sign, so both traditions tell the same story.</p>'),
+    H.block('Tropical and sidereal signs', `<table class="conv"><tr><th>Point</th><th>Tropical</th><th>Sidereal</th><th></th></tr>${zod}</table>
+      <p class="note" style="margin-top:8px">The tropical zodiac follows the seasons; the sidereal follows the stars, about ${Math.round(soj.ayanamsa)}&deg; behind today. The Cayce-style reading looks at both: a sign that differs is read as a second layer of your past.</p>`));
+
+  /* ---- Chapter 4: the main aspects ---- */
+  const asp = H.aspects(ctx).filter(a => T[a.textKey]).slice(0, 8), echoed = new Set();
+  out.push(H.chapter(4, 'Talents and tests carried in: the main aspects', 'Your eight closest aspects. Each opens with what earlier lives may have trained, then reads the aspect as it shows today.'),
+    asp.map(a => { const e = echoed.has(a.x) ? '' : (echoed.add(a.x), `<p class="affirm" style="color:var(--a2)">${H.esc(T['echo:' + a.x] || '')}</p>`);
+      return H.block(`${H.glyph(a.x)} ${a.x} ${a.glyph} ${a.type} ${H.glyph(a.y)} ${a.y} <span class="pill">orb ${a.orb.toFixed(1)}&deg;</span>`, e + H.para(T[a.textKey])); }).join('')
+      + (c.timeKnown ? '' : '<p class="note">No birth time: the Moon&rsquo;s aspects are left out.</p>'));
+
+  /* ---- Chapter 5: numbers and cards ---- */
+  const nums = [];
+  if (karmic.debts.length) [...new Map(karmic.debts.map(d => [d.n, d])).values()].forEach(d =>
+    nums.push(H.block(`Karmic number ${d.n} <span class="pill">in your ${NUMF[d.where] || d.where.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>`, H.para(T['kdebt:' + d.n]))));
+  else nums.push(H.block('No karmic debt numbers', '<p class="note">None of 13, 14, 16 or 19 appears on the way to your core numbers.</p>'));
+  conv.numbers.forEach(x => nums.push(H.block(`${NUMF[x.field]} ${x.n} and ${listOf(x.planets)} <span class="pill ${x.backed ? 'ok' : 'warn'}">${x.backed ? 'confirmed by the chart' : 'asks for effort'}</span>`, H.para(T[x.textKey]))));
+  const lessons = !ctx.named ? '<p class="note">Enter your full birth name to see your karmic lessons.</p>'
+    : karmic.lessons.length ? karmic.lessons.map(n => `<h4>Lesson ${n}</h4>${H.para(T['klesson:' + n])}`).join('') : '<p class="note">Every number from 1 to 9 appears in your name: no karmic lessons.</p>';
+  const bc = TD.birthCards(ctx.iso), trop = TD.factors.decanCard(c.planets[0].lon), sid = TD.factors.decanCard(soj.sun.lon);
+  const cards = [...bc.ids.map((id, k) => H.card(id, bc.nums.length === 2 ? ['Personality', 'Soul'][k] : 'Birth card')),
+    H.card(trop.id, 'Sun decan'), ...(sid.id !== trop.id ? [H.card(sid.id, 'Sidereal Sun decan')] : [])].join('');
+  const lp = TD.EXTRA && TD.EXTRA.lifePath && TD.EXTRA.lifePath[num.lifePath];
+  out.push(H.chapter(5, 'The numbers and the cards', 'Karmic numerology, how your numbers agree with the chart, and the tarot cards your birth date and Sun fall on.'),
+    `<div class="grid g2" style="align-items:start">${nums.join('')}</div>`,
+    H.block('Karmic lessons from your name', lessons),
+    H.block(`Life Path ${num.lifePath}`, H.para(lp)),
+    H.block('Your cards', `<div class="bcards">${cards}</div><p class="note" style="margin-top:10px">Birth cards by Mary K. Greer&rsquo;s method.
+      The decan cards follow the Golden Dawn: your tropical Sun sits in the decan of ${trop.planet} in ${trop.sign}${sid.id !== trop.id ? `, your sidereal Sun in that of ${sid.planet} in ${sid.sign}` : ''}.</p>`));
+
+  /* ---- Chapter 6: for reflection ---- */
+  const leaders = [...new Set([...soj.planets, ...conv.core.map(x => x.key)])].slice(0, 3);
+  const aff = [...leaders.map(k => [k, T['affirm:' + k]]), ['Sun in ' + S(c.planets[0].lon), T['affirm:' + S(c.planets[0].lon)]]];
+  const ch = ctx.chakras.filter(r => r.state !== 'balanced');
+  out.push(H.chapter(6, 'For reflection: stones, colours, affirmations and chakras', 'Traditional correspondences for the planets that lead your report, offered as focus points for reflection, never as treatment.'),
+    `<div class="grid g2" style="align-items:start">${leaders.map(k => H.block(`${H.glyph(k)} ${k}`, H.para(T['gem:' + k]))).join('')}</div>`,
+    H.block('Affirmations', aff.map(([k, t]) => `<h4>${k}</h4><p class="affirm">${H.esc(t || '')}</p>`).join('')),
+    H.block('Chakras, strongest and quietest', ch.map(r => `<h4>${r.name} &middot; ${r.state} &middot; ${r.planets.join(', ')}</h4>${H.para(T[r.textKey])}`).join('')
+      + '<p class="note" style="margin-top:8px">One common modern Western mapping of planets to chakras; traditions differ.</p>'),
+    H.disclaimer);
+  return out.join('');
+}
+TD.reportPage({ page: 'pastlife.html', render });
+</script></body></html>

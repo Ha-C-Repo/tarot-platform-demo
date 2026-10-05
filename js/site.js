@@ -17,7 +17,7 @@ const NAV = [
   ['chinese.html','Chinese'], ['maya.html','Maya'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
   /* Phone menu only (the desktop bar fits 13 links on one line from 1180 px); on desktop these are linked from the pages. */
-  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['pastlife.html','Past lives',1], ['karmic.html','Karmic path',1], ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 
 function chrome(current){

@@ -33,6 +33,8 @@ const STEPS = [
     body: 'Today, the week, the month and the year for all twelve signs, matched to where the planets really are. Nobody has to write a daily column for it to stay current.' },
   { page: 'tools.html', sel: '#good-days', title: 'Good days for anything',
     body: 'Pick an activity, a date, a contract, a trip, and see the best days of the next month, scored by published rules and, with a birth chart, by the visitor’s own planets.' },
+  { page: 'pastlife.html', sel: '#covers', title: 'Past lives, from five systems at once',
+    body: 'A full past-life report: Cayce-style planetary sojourns, past-life settings and roles from the lunar nodes, the Vedic Ketu, karmic numerology and the decan card. Where two systems agree, the report says so first. A companion Karmic path report reads the nodes, Saturn and Jupiter in depth.' },
   { page: 'compatibility.html', sel: '#fullform', title: 'Compatibility with birth time and place',
     body: 'Both people’s time and place give the rising sign, the houses and a ten-by-ten grid of real planetary aspects, each strong contact read in words. Historical daylight saving is handled, and an unknown time is said out loud, not guessed.' },
   { page: 'compatibility.html', sel: '#weighting', title: 'The score shows its working',

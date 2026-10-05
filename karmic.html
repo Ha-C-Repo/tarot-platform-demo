@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Karmic path — tarot platform demo</title>
+<meta name="description" content="A karmic astrology report from birth date, time and place: the lunar nodes, Saturn's lessons, Jupiter's gifts, the twelfth house, retrograde planets, the Sun, Moon and Rising read for karma, and the Vedic Ketu and Atmakaraka.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/karmic.html">
+<meta property="og:title" content="Karmic path — tarot platform demo">
+<meta property="og:description" content="Karmic astrology: the lunar nodes, Saturn, Jupiter, the twelfth house, retrogrades and the Vedic Ketu, in one report.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.rh2{font-size:clamp(22px,3.4vw,28px);margin:2px 0 4px}
+#out .interp{font-size:15px;line-height:1.65;color:var(--text);margin-top:8px}
+#out h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--dim);margin-top:14px}
+.lead{font-size:14.5px;line-height:1.6;color:var(--a2);margin-top:6px}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Report &middot; the one people pay for elsewhere</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Karmic path</h1>
+  <p class="lede">What you arrived with and where you are headed: the lunar nodes, Saturn&rsquo;s lessons, Jupiter&rsquo;s gifts,
+    the twelfth house, retrograde planets and your Sun, Moon and Rising read for karma, with the Vedic Ketu and soul indicator.</p>
+
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card pad" id="form">
+      <div class="row2">
+        <div><label class="f" for="nm">Name</label><input id="nm" value="You"></div>
+        <div><label class="f" for="bd">Birth date</label><input id="bd" type="date" value="1992-07-11"></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label class="f" for="bt">Birth time</label><input id="bt" type="time" value="14:20"></div>
+        <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      <button class="btn primary wide" id="go" style="margin-top:16px">Write the report</button>
+      <div class="warn"><span class="k">Method, stated</span>
+        <p>Tropical zodiac and the house system last chosen on the Birth chart page (Placidus unless changed). Mean lunar
+        node: the South Node is the familiar past and default, the North Node the direction of growth. Planets within 8&deg;
+        of either node are read with it. Saturn shows the lesson, Jupiter the gift already earned, the twelfth house what
+        works out of sight, retrograde planets what is done inwardly or on a second pass. The Vedic part uses the Lahiri
+        sidereal zodiac: Ketu (the South Node) by nakshatra, and the Atmakaraka, Jaimini&rsquo;s soul indicator, the planet
+        furthest through its sign. Everything is calculated in your browser; nothing is sent anywhere.</p></div>
+    </div>
+    <div class="res" id="covers" style="margin-top:0">
+      <h3>What this report covers</h3>
+      <p class="note">Chapter 1, the nodes: the road behind and the road ahead. Chapter 2, Saturn: the lesson. Chapter 3,
+        Jupiter: the gift. Chapter 4, the twelfth house and retrograde planets. Chapter 5, Sun, Moon and Rising, and the
+        aspects as lessons and gifts. Chapter 6, the Vedic view. Chapter 7, the balance of your chart.</p>
+      <p class="note" style="margin-top:8px">The companion <a href="pastlife.html">Past lives</a> report reads the Cayce-style
+        sojourns, past-life settings, numerology and the tarot.</p>
+      <button class="btn wide printbtn" onclick="print()" style="margin-top:12px">Print or save as PDF</button>
+    </div>
+  </div>
+  <div id="out"></div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script><script src="js/data/chiron.js"></script>
+<script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/natal.js"></script><script src="js/vedic.js"></script>
+<script src="js/numerology.js"></script><script src="js/factors.js"></script><script src="js/places.js"></script>
+<script src="js/cards.js"></script><script src="js/data/correspondences.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script><script src="js/reportpage.js"></script>
+<script>
+function render(ctx, H){
+  const { c, T, nodes, v } = ctx, S = H.signOf, out = [], P = k => c.planets.find(p => p.key === k);
+  const placed = k => { const p = P(k), h = p.house ? ` &middot; ${H.ordinal(p.house)} house` : ''; return `${H.glyph(k)} ${k} in ${S(p.lon)}${h}${p.retro ? ' <span class="pill">retrograde</span>' : ''}`; };
+  const signAndHouse = k => { const p = P(k); return H.para(T[`sign:${k}:${S(p.lon)}`]) + (p.house ? `<h4>In the ${H.ordinal(p.house)} house</h4>${H.para(T[`house:${k}:${p.house}`])}` : ''); };
+  const asp = H.aspects(ctx).filter(a => T[a.textKey]);
+  const aspOf = (k, f) => asp.filter(a => (a.x === k || a.y === k) && f(a));
+  const aspHTML = a => `<h4>${H.glyph(a.x)} ${a.x} ${a.glyph} ${a.type} ${H.glyph(a.y)} ${a.y} &middot; orb ${a.orb.toFixed(1)}&deg;</h4>${H.para(T[a.textKey])}`;
+  const lead = k => `<p class="lead">${H.esc(T['karma:' + k] || '')}</p>`;
+  const sn = TD.SIGNS[nodes.sn.sign], nn = TD.SIGNS[nodes.nn.sign];
+
+  /* ---- 1: nodes ---- */
+  out.push(H.chapter(1, 'The nodes: the road behind and the road ahead', `South Node in ${sn}${nodes.sn.house ? `, ${H.ordinal(nodes.sn.house)} house` : ''}; North Node in ${nn}${nodes.nn.house ? `, ${H.ordinal(nodes.nn.house)} house` : ''}.`),
+    `<div class="grid g2" style="align-items:start">${H.block(`By sign: from ${sn} toward ${nn}`, H.para(T[nodes.signKey]))}
+      ${nodes.houseKey ? H.block(`By house: from the ${H.ordinal(nodes.sn.house)} toward the ${H.ordinal(nodes.nn.house)}`, H.para(T[nodes.houseKey])) : H.block('By house', '<p class="note">The nodes&rsquo; houses need a birth time.</p>')}</div>`,
+    ctx.onNodes.length ? H.block('Planets on the nodes', ctx.onNodes.map(x => `<h4>${H.glyph(x.key)} ${x.key} on the ${x.end === 'nn' ? 'North' : 'South'} Node &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[x.textKey])}`).join(''))
+      : H.block('Planets on the nodes', '<p class="note">No planet sits within 8&deg; of either node.</p>'));
+
+  /* ---- 2: Saturn, 3: Jupiter ---- */
+  const planetChapter = (n, k, title, intro) => {
+    const hard = aspOf(k, a => a.hard), soft = aspOf(k, a => a.soft || a.type === 'conjunction');
+    return H.chapter(n, title, intro) + H.block(placed(k), lead(k) + signAndHouse(k))
+      + (hard.length || soft.length ? H.block(`${k}&rsquo;s aspects`, hard.map(aspHTML).join('') + soft.map(aspHTML).join('')) : '');
+  };
+  out.push(planetChapter(2, 'Saturn', 'Saturn: the lesson', 'In karmic astrology Saturn marks the work this life asks for, the place where effort turns into mastery.'),
+    planetChapter(3, 'Jupiter', 'Jupiter: the gift', 'Jupiter marks what you arrived already good at, the place where faith and generosity open doors.'));
+
+  /* ---- 4: twelfth house and retrogrades ---- */
+  const twelfth = c.timeKnown ? c.planets.filter(p => p.house === 12) : null;
+  out.push(H.chapter(4, 'The twelfth house and retrograde planets', 'What works out of sight, and what is done inwardly or on a second pass.'),
+    H.block('The twelfth house', twelfth === null ? '<p class="note">Houses need a birth time.</p>'
+      : twelfth.length ? twelfth.map(p => `<h4>${H.glyph(p.key)} ${p.key} in the twelfth</h4>${H.para(T[`house:${p.key}:12`])}`).join('')
+      : `<p class="note">No planet in your twelfth house. Its ruler, ${TD.natal.RULER[Math.floor((((c.cusps ? c.cusps[11] : c.angles.asc + 330) % 360) + 360) % 360 / 30)]}, carries its themes instead.</p>`),
+    H.block('Retrograde at birth', ctx.retro.length ? ctx.retro.map(r => `<h4>${H.glyph(r.key)} ${r.key}</h4>${H.para(T[r.textKey])}`).join('') : '<p class="note">No planet was retrograde when you were born.</p>'));
+
+  /* ---- 5: Sun, Moon, Rising + aspects as lessons and gifts ---- */
+  const moon = P('Moon');
+  const lum = [H.block(placed('Sun'), lead('Sun') + signAndHouse('Sun')),
+    moon.signUncertain ? H.block(`${H.glyph('Moon')} Moon in ${S(moon.range[0])} or ${S(moon.range[1])}`, lead('Moon') + `<p class="note">The Moon changed sign on your birthday; both readings follow.</p>${H.para(T['sign:Moon:' + S(moon.range[0])])}${H.para(T['sign:Moon:' + S(moon.range[1])])}`)
+      : H.block(placed('Moon'), lead('Moon') + signAndHouse('Moon')),
+    c.angles ? H.block(`Rising sign: ${S(c.angles.asc)}`, H.para(T['rising:' + S(c.angles.asc)])) : ''];
+  const PERS = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'];
+  const hardP = asp.filter(a => a.hard && PERS.includes(a.x)).slice(0, 6), softP = asp.filter(a => a.soft && PERS.includes(a.x)).slice(0, 6);
+  out.push(H.chapter(5, 'Sun, Moon and Rising, and the aspects as lessons and gifts', 'Hard aspects (squares, oppositions) read as lessons still in progress; easy ones (trines, sextiles) as gifts already earned.'),
+    `<div class="grid g2" style="align-items:start">${lum.join('')}</div>`,
+    `<div class="grid g2" style="align-items:start">${H.block('Lessons in progress', hardP.length ? hardP.map(aspHTML).join('') : '<p class="note">No hard aspects between your personal planets and the rest.</p>')}
+      ${H.block('Gifts already earned', softP.length ? softP.map(aspHTML).join('') : '<p class="note">No easy aspects from your personal planets.</p>')}</div>`);
+
+  /* ---- 6: Vedic ---- */
+  const ketu = v.grahas.find(g => g.key === 'Ketu');
+  out.push(H.chapter(6, 'The Vedic view', `Lahiri sidereal zodiac. Ketu in ${TD.vedic.RASHI[ketu.sign]} (${TD.SIGNS[ketu.sign]}), nakshatra ${ketu.nak.name}; Atmakaraka ${ctx.ak.key}.`),
+    `<div class="grid g2" style="align-items:start">${H.block(`Atmakaraka: ${H.glyph(ctx.ak.key)} ${ctx.ak.key} at ${ctx.ak.deg.toFixed(1)}&deg; of its sign`, H.para(T[ctx.ak.textKey]))}
+      ${H.block(`Ketu in ${ketu.nak.name}`, '<p class="note">Ketu, the South Node, marks what the soul already knows. Its nakshatra (lunar mansion) colours that knowing:</p>' + H.para(T['nak:' + ketu.nak.name]))}</div>`,
+    `<details class="more res"><summary>When the Ketu period comes: the seven-year Ketu Mahadasha</summary>${H.para(T['md:Ketu'])}<p class="note">Your dates are on the <a href="vedic.html">Vedic chart</a> page.</p></details>`);
+
+  /* ---- 7: balance ---- */
+  const em = ctx.emphasis;
+  out.push(H.chapter(7, 'The balance of your chart', `Fire ${em.el.Fire}, Earth ${em.el.Earth}, Air ${em.el.Air}, Water ${em.el.Water}; Cardinal ${em.mod.Cardinal}, Fixed ${em.mod.Fixed}, Mutable ${em.mod.Mutable} (of ten planets).`),
+    em.keys.length ? `<div class="grid g2" style="align-items:start">${em.keys.map(k => { const [kind, name, lvl] = k.split(':');
+      return H.block(kind === 'hemi' ? `Most planets in the ${name.toLowerCase()} half` : `${lvl === 'high' ? 'Strong' : 'Little'} ${name}`, H.para(T[k])); }).join('')}</div>`
+      : H.block('', '<p class="note">An even spread: no element or modality is unusually strong or missing.</p>'),
+    H.disclaimer);
+  return out.join('');
+}
+TD.reportPage({ page: 'karmic.html', render });
+</script></body></html>

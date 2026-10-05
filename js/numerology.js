@@ -36,6 +36,35 @@ NS.numerology = function(name, iso){
     birthday: reduce(digits(d)), personalYear: py, calendarYear: now.getFullYear()
   };
 };
+/* Karmic numbers. Debt: 13, 14, 16 or 19 appearing as a step on the way to a core number (Life Path from
+   its reduced components, the birth day itself, Expression / Soul Urge / Personality from the raw letter
+   sums). Lessons: the digits 1-9 that no letter of the full name carries. Name is optional. */
+const DEBT = [13, 14, 16, 19];
+function chain(n){ const s = [n]; while (n > 9) { n = digits(n); s.push(n); } return s; }
+function rawLetters(name, filter){
+  let t = 0;
+  for (const ch of String(name || '').toLowerCase().replace(/[^a-z]/g, '')) {
+    const isV = VOWELS.includes(ch);
+    if ((filter === 'v' && !isV) || (filter === 'c' && isV)) continue;
+    t += VAL[ch];
+  }
+  return t;
+}
+NS.karmicNumbers = function(name, iso){
+  const [y, m, d] = iso.split('-').map(Number);
+  const sources = { lifePath: chain(reduce(m) + reduce(digits(d)) + reduce(digits(y))), birthday: chain(d) };
+  const letters = String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (letters) Object.assign(sources, { expression: chain(rawLetters(name)), soulUrge: chain(rawLetters(name, 'v')), personality: chain(rawLetters(name, 'c')) });
+  const debts = [];
+  Object.entries(sources).forEach(([where, steps]) => steps.forEach(n => { if (DEBT.includes(n)) debts.push({ n, where }); }));
+  const have = new Set([...letters].map(ch => VAL[ch]));
+  return { debts, lessons: letters ? [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !have.has(n)) : null, hasName: !!letters };
+};
+/* Chaldean (Cheiro) planet for each number, the bridge the past-life reports use between the two systems. */
+NS.NUMBER_PLANET = { 1: ['Sun'], 2: ['Moon'], 3: ['Jupiter'], 4: ['Uranus'], 5: ['Mercury'], 6: ['Venus'], 7: ['Neptune'], 8: ['Saturn'], 9: ['Mars'],
+  11: ['Moon', 'Uranus'], 22: ['Uranus', 'Saturn'], 33: ['Venus', 'Neptune'] };
+NS.DEBT_PLANET = { 13: ['Saturn'], 14: ['Mercury', 'Uranus'], 16: ['Pluto', 'Neptune'], 19: ['Sun'] };
+
 /* Tarot birth cards, Mary K. Greer's method (Tarot for Your Self, 1984).
    Month + day + year as whole numbers, then add the digits; while the total is above 22, add its
    digits again. That number is the Personality card. Adding its digits gives the Soul card.
