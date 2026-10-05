@@ -13,7 +13,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'],
-  ['birthchart.html','Birth chart'], ['vedic.html','Vedic'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
+  ['birthchart.html','Birth chart'], ['vedic.html','Vedic'], ['astromap.html','Astrocartography'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
   ['chinese.html','Chinese'], ['maya.html','Maya'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
   /* Phone menu only (the desktop bar fits 13 links on one line from 1180 px); on desktop these are linked from the pages. */
@@ -85,9 +85,8 @@ function panel(){
     <div class="row"><label class="f">Palette</label><div class="swatches">${themes.map(([v,t])=>
       `<button class="sw" data-theme="${v}" title="${t}" aria-label="${t} palette" aria-pressed="${brand.theme===v}"
         style="background:${swatch(v)}"></button>`).join('')}</div></div>
-    <div class="row"><label class="f" for="ddeck">Card deck</label><select id="ddeck">
-      <option value="rws"${brand.deck !== 'marseille' ? ' selected' : ''}>Rider-Waite-Smith, 1909</option>
-      <option value="marseille"${brand.deck === 'marseille' ? ' selected' : ''}>Tarot de Marseille, early 1800s</option></select></div>
+${NS.DECKS && Object.keys(NS.DECKS).length > 1 ? `<div class="row"><label class="f" for="ddeck">Card deck</label><select id="ddeck">${Object.entries(NS.DECKS).map(([k, d]) =>
+      `<option value="${k}"${(NS.deckId || 'rws') === k ? ' selected' : ''}>${esc(d.name)}</option>`).join('')}</select></div>` : ''}
     <div class="row" id="tierrow"><label class="f">Viewing as</label>
       <div class="seg" role="group" aria-label="Viewing as">
         <button type="button" data-tier="free" aria-pressed="${brand.tier==='free'}">Free visitor</button>
@@ -146,7 +145,7 @@ function wire(){
   const syncInstall = () => { const st = install.state(); di.style.display = st === 'installed' ? 'none' : ''; dn.textContent = st === 'ready' ? '' : install.help(); di.disabled = st !== 'ready'; };
   di.onclick = () => install.prompt().then(syncInstall);
   document.addEventListener('installready', syncInstall); syncInstall();
-  document.getElementById('ddeck').onchange = e => { brand.deck = e.target.value; save(); location.reload(); };
+  const dd = document.getElementById('ddeck'); if (dd) dd.onchange = e => { brand.deck = e.target.value; save(); location.reload(); };
   document.getElementById('dtour').onclick = () => { openPanel(false); if (NS.tour) NS.tour.start(); };
   // mobile nav
   const bg = document.getElementById('burger'), nl = document.getElementById('navlinks');

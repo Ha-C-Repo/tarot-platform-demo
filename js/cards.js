@@ -99,15 +99,10 @@ Object.entries(PIPS).forEach(([suit,list])=>{
 });
 function slug(s){ return s.toLowerCase().replace(/^the /,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
-/* Two decks. The reader picks one in Customise (stored with the brand settings); every page shows that deck's
-   pictures, while names, meanings and correspondences stay the card's own. The Marseille scans are filed by the
-   card they are, so Justice (VIII in that deck) and Strength (XI) carry the right meanings. */
+/* One deck: the 1909 Rider-Waite-Smith pictures (Amanda, 2026-10-05: only free-to-use public-domain cards, no second deck option). */
 const DECKS = {
   rws: { name: 'Rider-Waite-Smith (1909)',
-    credit: 'Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.' },
-  marseille: { name: 'Tarot de Marseille (Conver model, early 19th century)', folder: 'assets/cards/marseille/',
-    credit: 'Tarot card imagery: Tarot de Marseille on the Nicolas Conver model, early 19th century, Biblioth\u00e8que nationale de France (Gallica btv1b10539497f), via Wikimedia Commons. Public domain.',
-    note: 'Marseille pip cards show the suit symbols only, not scenes: read them by suit and number. In this deck Justice is numbered VIII and Strength XI, the reverse of the 1909 deck; the meanings follow the card, not the number.' }
+    credit: 'Tarot card imagery: Rider-Waite-Smith, 1909, illustrations by Pamela Colman Smith. Public domain.' }
 };
 let deckId = 'rws';
 try { const b = JSON.parse(localStorage.getItem('tarotdemo.brand') || '{}'); if (b && DECKS[b.deck]) deckId = b.deck; } catch (e) {}

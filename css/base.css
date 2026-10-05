@@ -686,7 +686,6 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 .gd.g2{background:rgba(168,85,247,.28);color:var(--text)}
 .gd.g3{background:var(--a2);color:#fff;border-color:transparent}
 .gd.g0{opacity:.55}
-[data-deck="marseille"] .tcface img{object-fit:fill}
 /* I Ching and runes (oracle.html) */
 .hexhead{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
 .hexfig{color:var(--a2)}
@@ -696,3 +695,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 .runecard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
 .runecard .pos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--a3)}
 .runestone{display:grid;place-items:center;width:84px;height:110px;margin:10px 0;border-radius:40% 40% 36% 36%;background:var(--raised);border:1px solid var(--line)}
+@media(min-width:861px){.navlinks{font-size:12px;gap:6px 7px}.brand b{font-size:14px}}
+/* the nav holds 14 links since Astrocartography joined it (2026-10-05): a little wider than the page column, tighter on laptops */
+.navin{max-width:1320px}
+@media(min-width:861px) and (max-width:1299px){.navin{gap:8px;padding-left:16px;padding-right:16px}.navlinks{font-size:11.4px;gap:5px 6px}.brand b{font-size:13px}.navcta{padding:8px 11px;font-size:12px}}

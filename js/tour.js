@@ -50,7 +50,7 @@ const STEPS = [
   { page: 'account.html', sel: '#hello', title: 'The client’s own page',
     body: 'Plan, sessions, saved chart and journal in one place. Here a first name is enough to look around; on a live site visitors sign in with a link sent to their email.' },
   { page: '*', sel: '#demopanel', open: true, title: 'Now make it theirs',
-    body: 'Type a practice name, pick a palette (one of them light), choose the 1909 deck or the Marseille one, switch between Free and Subscriber. The whole site changes as you type. That is the pitch.' }
+    body: 'Type a practice name, pick a palette (one of them light), switch between Free and Subscriber. The whole site changes as you type. That is the pitch.' }
 ];
 let ui = null, cur = -1, curPage = '';
 
