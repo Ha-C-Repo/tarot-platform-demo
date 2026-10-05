@@ -13,5 +13,5 @@ window.TD.COLLECTIVE = {
   card: 'major-17',
   reversed: false,
   posted: null,
-  message: ''
+  message: 'The Star for all of us today. Whatever the last stretch took out of you, this is the card of the breath after: rest, rinse off, and let something hopeful back in. Pour a little of what you have into someone who is running low. It comes back. (Sample message: the reader writes their own each morning.)'
 };

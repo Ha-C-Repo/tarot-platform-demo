@@ -54,16 +54,17 @@ module.exports = [
       const w = b.intro.split(/\s+/).length; assert(w >= 60 && w <= 140, `${id} intro ${w} words`);
       assert(!/—/.test(b.intro) && !/!/.test(b.intro), id + ' intro punctuation'); });
   }],
-  ['No emoji anywhere in the site\'s own pages, scripts and styles (literal, entity or CSS escape)', () => {
+  ['No emoji anywhere in the site\'s own pages, scripts and styles (literal, entity, CSS or JS escape)', () => {
     const files = [];
     (function walk(d){ fs.readdirSync(d).forEach(f => { const p = path.join(d, f);
       if (/vendor|node_modules|brochure|tests|[\\/]assets$|cities\.js$/.test(p)) return;   // the hosted books are scanned too
       if (fs.statSync(p).isDirectory()) walk(p); else if (/\.(html|js|css)$/.test(f)) files.push(p); }); })(ROOT);
     const pict = /\p{Extended_Pictographic}/u, bad = [];
-    const re = /(\p{Extended_Pictographic})(︎|️)?|&#(\d+);|&#x([0-9a-f]+);|\\(1F[0-9A-F]{3}|2[67][0-9A-F]{2})/giu;
+    const re = /(\p{Extended_Pictographic})(︎|️)?|&#(\d+);|&#x([0-9a-f]+);|\\(1F[0-9A-F]{3}|2[67][0-9A-F]{2})|\\u\{([0-9A-F]{4,6})\}|\\u(2[67][0-9A-F]{2})|\\u(D83[CDE])\\u(D[C-F][0-9A-F]{2})/giu;
     files.forEach(f => { const s = fs.readFileSync(f, 'utf8');
       for (const m of s.matchAll(re)) {
-        const cp = m[3] ? +m[3] : m[4] ? parseInt(m[4], 16) : m[5] ? parseInt(m[5], 16) : m[1].codePointAt(0);
+        const cp = m[3] ? +m[3] : m[4] ? parseInt(m[4], 16) : m[5] ? parseInt(m[5], 16) : m[6] ? parseInt(m[6], 16) : m[7] ? parseInt(m[7], 16)
+          : m[8] ? 0x10000 + ((parseInt(m[8], 16) - 0xD800) << 10) + (parseInt(m[9], 16) - 0xDC00) : m[1].codePointAt(0);
         if (!pict.test(String.fromCodePoint(cp))) continue;
         // allowed: a symbol forced to text presentation (U+FE0E written right after it, or appended in code)
         const after = s.slice(m.index + m[0].length, m.index + m[0].length + 12);

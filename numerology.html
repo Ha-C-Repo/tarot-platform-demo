@@ -6,6 +6,7 @@
 <meta name="description" content="Life path, expression, soul urge, personality and personal year. Pythagorean, method stated.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/numerology.html">
@@ -49,12 +50,12 @@
 </div>
 <script src="js/astro.js"></script><script src="js/cards.js"></script>
 <script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/data/extra-text.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('numerology.html');
 function go(){
   const n = TD.numerology(document.getElementById('nn').value, document.getElementById('nd').value);
-  const M = TD.numMeaning;
+  const M = TD.numMeaning, X = TD.EXTRA;
   document.getElementById('nout').innerHTML = `
     <div class="res"><h3>Life Path</h3>
       <div class="big prism">${n.lifePath}</div>
@@ -69,10 +70,10 @@ function go(){
       <div class="kv"><span>Personal year (${n.calendarYear})</span><span>${n.personalYear} &mdash; ${M[n.personalYear]||''}</span></div>
     </div>
     ${birthHTML()}
-    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-      <p>Around 65 short pieces cover every number in every position, and 22 more, one per Major Arcana card,
-      cover every tarot birth card. Written once, they serve this tool
-      forever. These one-line notes are a stand-in.</p></div>`;
+    <div class="res"><h3>What your numbers say</h3>
+      ${[[X.lifePath, n.lifePath], [X.expression, n.expression], [X.soulUrge, n.soulUrge], [X.personality, n.personality], [X.personalYear, n.personalYear]]
+        .map(([t, k]) => t[k] ? `<p style="font-size:13.5px;line-height:1.6;margin-top:8px">${t[k]}</p>` : '').join('')}
+      <p class="note" style="margin-top:10px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p></div>`;
 }
 function birthHTML(){
   const iso = document.getElementById('nd').value;
@@ -83,13 +84,14 @@ function birthHTML(){
     const card = TD.DECK.find(c => c.id === id);
     return `<div class="bc">${TD.faceHTML({ card, reversed: false }, { caption: false })}<b>${card.name}</b><span>${role[k]}</span></div>`;
   }).join('');
+  const why = b.ids.map(id => TD.EXTRA.birthCard[id]).filter(Boolean).map(t => `<p style="font-size:13.5px;line-height:1.6;margin-top:8px">${t}</p>`).join('');
   const chain = b.steps.slice(1).map((n, i) => `${String(b.steps[i]).split('').join('+')} = ${n}`).join(' &rarr; ');
   const tail = b.nums.length > 1 ? ` &rarr; ${b.nums.slice(1).map((n, i) => `${String(b.nums[i]).split('').join('+')} = ${n}`).join(' &rarr; ')}` : '';
   const same = b.nums.length === 1 ? ' A single digit, so your Personality and Soul card are the same card.' :
                b.nums.length === 3 ? ' 19 is the one total that gives three cards.' : '';
   return `<div class="res"><h3>Tarot birth cards</h3>
     <div class="bcards">${cards}</div>
-    <p class="note" style="margin-top:12px">Month ${b.month} + day ${b.day} + year ${b.year} = ${b.sum} &rarr; ${chain}${tail}.${same}</p></div>`;
+    <p class="note" style="margin-top:12px">Month ${b.month} + day ${b.day} + year ${b.year} = ${b.sum} &rarr; ${chain}${tail}.${same}</p>${why}</div>`;
 }
 document.getElementById('ngo').onclick = go;
 document.getElementById('nn').addEventListener('input', go);

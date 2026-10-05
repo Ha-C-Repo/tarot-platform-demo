@@ -90,9 +90,9 @@ h1,h2,h3,.dsp{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transfo
 
 label.f{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
   color:var(--dim);margin-bottom:7px}
-input,select{width:100%;background:#0D080F;border:1px solid var(--line);border-radius:11px;
+input,select,textarea{width:100%;background:#0D080F;border:1px solid var(--line);border-radius:11px;
   padding:12px 13px;font-size:14px;color:var(--text);font-family:inherit}
-input:focus,select:focus{outline:none;border-color:var(--a1)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--a1)}
 .row{display:grid;gap:13px}
 
 .adslot{border:1px dashed #45304F;border-radius:12px;min-height:90px;
@@ -212,7 +212,7 @@ footer .fin{max-width:var(--wrap);margin:0 auto;padding:0 22px;display:flex;gap:
 .skip{position:absolute;left:-9999px;top:0;z-index:100;background:var(--a1);color:#12060C;
   padding:10px 16px;border-radius:0 0 10px 0;font-weight:800;font-size:13px}
 .skip:focus{left:0}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
   outline:2px solid var(--a3);outline-offset:2px;border-radius:6px}
 
 /* --- mobile nav --- */
@@ -470,3 +470,142 @@ table.sgrid{border-collapse:collapse;font-size:12px;margin-top:8px}
 .tour-tip .tb .tskip{margin-left:auto;background:none;border:0;color:var(--dim);font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline}
 .tourbtn{background:linear-gradient(100deg,var(--a2),var(--a3));color:#0A0710;border:0}
 .play.inl{position:relative;left:auto;top:auto;margin:6px 0 0}
+
+/* reading journal (pull.html box, journal.html) */
+textarea{resize:vertical;min-height:84px;line-height:1.5}
+.qrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.qrow .f{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--dim)}
+.qrow input{flex:1;min-width:240px;max-width:520px;padding:10px 12px;font-size:13.5px}
+.jbox{border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px;background:var(--surface)}
+.jbox .jhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}
+.jbox .jhead b{font-size:13px}
+.jbox textarea{margin-top:10px;font-size:13.5px}
+.jbox .jsaved{font-size:11.5px;color:var(--dim);min-height:1.4em;margin-top:4px}
+.monly{display:none}
+@media(max-width:860px){.navlinks.open .monly{display:block}}
+.jtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.jtools input,.jtools select{width:auto;padding:9px 12px;font-size:13px}
+.jtools input[type=search]{flex:1;min-width:200px}
+.jlist{display:grid;gap:12px;margin-top:16px}
+.jentry{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.jentry>summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.jentry>summary::-webkit-details-marker{display:none}
+.jentry[open]>summary{border-bottom:1px solid var(--line)}
+.jthumbs{display:flex;gap:3px}
+.jthumbs .tc{width:26px}
+.jthumbs .tc figcaption{display:none}
+.jthumbs .more{font-size:11px;color:var(--dim);align-self:center;margin-left:3px}
+.jsum{min-width:0}
+.jsum b{display:block;font-size:14px}
+.jsum span{font-size:12px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jwhen{font-size:11.5px;color:var(--dim);text-align:right;white-space:nowrap}
+.jbody{padding:16px}
+.jcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.jcard{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
+.jcard .tc figcaption{display:none}
+.jcard p{font-size:12px;color:var(--muted);line-height:1.45}
+.jcard p b{display:block;color:var(--text);font-size:12.5px}
+.jcard .pos{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a3)}
+.jact{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.jact .btn{font-size:12.5px;padding:9px 14px}
+.jbars{display:grid;gap:8px;margin-top:10px}
+.jbar{display:grid;grid-template-columns:96px 1fr 44px;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.jbar i{display:block;height:8px;border-radius:4px;background:var(--raised);overflow:hidden}
+.jbar i b{display:block;height:100%;background:var(--prism);border-radius:4px}
+.jbar em{font-style:normal;text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+.toplist{display:grid;gap:10px;margin-top:10px}
+.toplist li{list-style:none;display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;font-size:13px}
+.toplist .tc figcaption{display:none}
+.stat{font-family:Anton,Impact,sans-serif;font-size:34px;line-height:1}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
+.statrow .note{margin-top:4px}
+@media(max-width:560px){.jentry>summary{grid-template-columns:1fr auto}.jthumbs{grid-column:1/-1}}
+
+/* business-flow mock-ups (account.html, book.html, checkout.html, live.html) */
+.mockflag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--a5);border:1px dashed var(--a5);border-radius:999px;padding:5px 12px;margin-bottom:14px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 18px;counter-reset:st}
+.steps span{font-size:11.5px;font-weight:700;color:var(--dim);padding:6px 12px;border:1px solid var(--line);border-radius:999px}
+.steps span.on{color:#0A0710;background:var(--a2);border-color:transparent}
+.steps span.done{color:var(--text);border-color:var(--a2)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.opt{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--text);font:inherit;cursor:pointer;display:grid;gap:6px}
+.opt:hover{border-color:var(--a2)}
+.opt[aria-pressed="true"]{border-color:var(--a1);box-shadow:0 0 30px -16px var(--a1)}
+.opt b{font-size:14.5px}.opt .pr{font-family:Anton,Impact,sans-serif;font-size:24px}
+.opt span{font-size:12.5px;color:var(--muted);line-height:1.45}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days button{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 2px;color:var(--text);font:inherit;cursor:pointer;display:grid;gap:1px;text-align:center}
+.days button small{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.days button b{font-size:16px}
+.days button:disabled{opacity:.3;cursor:default}
+.days button[aria-pressed="true"]{border-color:var(--a1);background:rgba(255,46,136,.10)}
+.times{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.times button{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 14px;color:var(--text);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.times button:disabled{opacity:.3;cursor:default;text-decoration:line-through}
+.times button[aria-pressed="true"]{border-color:var(--a1);background:var(--a1);color:#12060C}
+.sumrow{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.sumrow span:first-child{color:var(--muted)}
+.sumrow.total{font-weight:800;font-size:15px;border-bottom:0}
+.navacct{flex:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:9px;color:var(--text)}
+.navacct:hover,.navacct.on{border-color:var(--a2)}
+@media(max-width:860px){.navacct{margin-left:auto}.navin .burger{margin-left:0}}
+.room{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:24px}
+@media(max-width:860px){.room{grid-template-columns:1fr}}
+.stage{position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  background:radial-gradient(circle at 50% 40%,rgba(168,85,247,.18),transparent 60%),var(--surface);display:grid;place-items:center;text-align:center;padding:20px}
+.stage .who{font-family:Anton,Impact,sans-serif;font-size:22px;text-transform:uppercase}
+.stage .self{position:absolute;right:12px;bottom:12px;width:24%;aspect-ratio:4/3;border:1px solid var(--line);border-radius:10px;background:var(--raised);
+  display:grid;place-items:center;font-size:10.5px;color:var(--dim)}
+.meter{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin-top:12px}
+.meter .stat{font-size:28px}
+.chat{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;background:var(--surface);min-height:360px;max-height:520px}
+.chatlog{flex:1;overflow:auto;padding:14px;display:grid;gap:10px;align-content:start}
+.msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.45}
+.msg.me{justify-self:end;background:var(--a2);color:#0A0710}
+.msg.sys{justify-self:center;max-width:100%;background:none;border:1px dashed var(--line);color:var(--dim);font-size:12px;text-align:center}
+.chatin{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.chatin input{padding:10px 12px;font-size:13.5px}
+.chatin .btn{padding:10px 16px;font-size:13px}
+@media(min-width:861px){.navin{gap:10px}.navacct{width:34px;height:34px}.navlinks{gap:6px 8px}}
+/* horoscopes by sign (signs.html) */
+.signpick{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:24px}
+@media(max-width:880px){.signpick{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:480px){.signpick{grid-template-columns:repeat(3,1fr)}}
+.signpick button{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 6px;color:var(--text);font:inherit;cursor:pointer;display:grid;gap:2px;justify-items:center;text-align:center}
+.signpick button:hover{border-color:var(--a2)}
+.signpick button[aria-pressed="true"]{border-color:var(--a1);background:rgba(255,46,136,.10)}
+.signpick .gl{font-size:22px;line-height:1;color:var(--a3);font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif}
+.signpick b{font-size:12.5px}
+.signpick small{font-size:9.5px;color:var(--dim);white-space:nowrap}
+.ev{border-left:2px solid var(--a2);padding:4px 0 4px 14px;margin:12px 0}
+.evh{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.evh b{font-size:14px}
+.evh span{font-size:12px;color:var(--dim);white-space:nowrap}
+.ev p{font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:4px}
+.ev .you{color:var(--text)}
+
+/* print: any page prints as a light report (birth chart, Vedic chart, horoscopes, a reading, the journal).
+   Site furniture is hidden, the palette flips to ink on white, and cards and sections avoid page breaks. */
+.printbtn{font-size:12.5px;padding:9px 14px}
+@media print{
+  @page{margin:14mm}
+  :root,[data-theme]{--ink:#fff;--surface:#fff;--raised:#f3f0f5;--line:#cfc8d6;--text:#16111b;--muted:#3d3546;--dim:#5e5568}
+  html,body{background:#fff!important;color:#16111b}
+  .demoband,.nav,.skip,.grain,.aura,#demobar,.mwrap,.adslot,footer,.tour,.tourpop,.printbtn,.btn,.deckzone,.spreadbar,.jtools,#jmsg,.navacct,
+  .ph,.mockflag,.signpick,.tabs,#getapp,.reels,.vph{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .sect{padding-top:0;padding-bottom:12px}
+  .card,.rc,.ev,.jentry,.jcard,.tc,svg,figure,.sumrow,table,tr{break-inside:avoid;page-break-inside:avoid}
+  .card,.rc,.jentry{box-shadow:none!important;background:#fff!important;border-color:#cfc8d6!important}
+  .prism{background:none!important;-webkit-text-fill-color:#16111b;color:#16111b!important}
+  h1{font-size:30px!important}
+  .ph p,.warn p,.note,.lede{color:#3d3546!important}
+  .warn{background:#f6f9fa!important}
+  a{text-decoration:none!important}
+  details{display:block}
+  details>summary{list-style:none}
+  details:not([open])>*:not(summary){display:block}
+  input,select,textarea{border:0!important;background:none!important;padding:0!important;color:#16111b!important;resize:none}
+  .tc img{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}

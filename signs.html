@@ -1,0 +1,182 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Horoscopes by sign — tarot platform demo</title>
+<meta name="description" content="Today, this week, this month and the year ahead for all twelve signs, worked out from where the planets really are.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/signs.html">
+<meta property="og:title" content="Horoscopes by sign — tarot platform demo">
+<meta property="og:description" content="Today, this week, this month and the year ahead for all twelve signs, worked out from where the planets really are.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free &middot; for every sign &middot; worked out from today&rsquo;s sky</div>
+  <h1 style="font-size:clamp(34px,6vw,52px)">Horoscopes<br><span class="prism">by sign</span></h1>
+  <p class="lede">Pick your sign for today, the week, the month and the year ahead. Each one is worked out from where the
+    planets really are, not written once and reused. For a reading from your own birth chart, open
+    <a href="horoscope.html" style="text-decoration:underline">your personal horoscope</a>.</p>
+
+  <div class="signpick" id="signpick" role="group" aria-label="Your sign"></div>
+  <div class="tabs" id="ptabs" role="tablist" aria-label="Period">
+    <button type="button" role="tab" data-p="day">Today</button><button type="button" role="tab" data-p="week">This week</button>
+    <button type="button" role="tab" data-p="month">This month</button><button type="button" role="tab" data-p="year">This year</button></div>
+
+  <div id="out" class="col" style="max-width:820px;margin-top:22px" aria-live="polite"></div>
+
+  <div class="warn col" style="margin-top:28px"><span class="k">Method</span>
+    <p>Solar houses, the usual method of horoscope columns: your sign is the 1st house, the next sign the 2nd, and so
+    on round the zodiac, so a planet&rsquo;s house is the count from your sign to the sign it is in. Planet positions from
+    Astronomy Engine, worked out in your browser. Sign changes, exact aspects between the moving planets (conjunction,
+    sextile, square, trine, opposition), new and full moons and retrograde stations are found to the minute and shown in
+    your time zone. The sky events are the same for every sign; the house they land in is yours. A personal horoscope
+    from your birth time and place is more precise, because it uses your real houses.</p></div>
+  <div class="card pad col" style="margin-top:16px">
+    <div class="ph"><span class="k">For the reader looking at this demo</span>
+      <p>Nothing here needs writing each day: the texts are matched to the real sky automatically. On a live site you
+      can add your own line to any sign on any day, and it shows above the calculated reading.</p></div>
+  </div>
+  <div class="adslot col" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/vendor/astronomy.browser.min.js"></script><script src="js/astro.js"></script><script src="js/chart.js"></script>
+<script src="js/transits.js"></script><script src="js/signs.js"></script>
+<script src="js/data/signs-text.js"></script><script src="js/data/transit-text.js"></script>
+<script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('signs.html');
+const G = TD.signs, T = TD.SIGN_TEXT, TT = TD.TRANSIT_TEXT || {}, DAY = 864e5, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ORD = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+const RANGE = ['Mar 21 to Apr 19', 'Apr 20 to May 20', 'May 21 to Jun 20', 'Jun 21 to Jul 22', 'Jul 23 to Aug 22', 'Aug 23 to Sep 22',
+  'Sep 23 to Oct 22', 'Oct 23 to Nov 21', 'Nov 22 to Dec 21', 'Dec 22 to Jan 19', 'Jan 20 to Feb 18', 'Feb 19 to Mar 20'];
+const ASP = { conjunction: 'meets', sextile: 'sextile', square: 'square', trine: 'trine', opposition: 'opposite' };
+const KEY = 'tarotdemo.sign';
+const tfmt = (d, o) => new Date(d).toLocaleString(undefined, o);
+const hm = d => tfmt(d, { hour: 'numeric', minute: '2-digit' });
+const dshort = d => tfmt(d, { weekday: 'short', day: 'numeric', month: 'short' });
+const dlong = d => tfmt(d, { weekday: 'long', day: 'numeric', month: 'long' });
+const hOf = (signIdx, s) => ((signIdx - s + 12) % 12) + 1;
+const area = h => T['area:' + h];
+
+/* Which sign: the last one picked, else the Sun sign of the birth date saved on the birth chart page, else today's Sun sign. */
+let sign = null, period = 'day';
+try { const v = localStorage.getItem(KEY); if (v !== null && +v >= 0 && +v < 12) sign = +v; } catch (e) {}
+if (sign === null) {
+  try { const n = JSON.parse(localStorage.getItem('tarotdemo.natal') || 'null'); if (n && n.bd) sign = TD.SIGNS.indexOf(TD.sunSign(TD.toJD(new Date(n.bd + 'T12:00:00Z')))); } catch (e) {}
+}
+if (sign === null || sign < 0) sign = TD.SIGNS.indexOf(TD.sunSign(TD.toJD(new Date())));
+try { const q = new URLSearchParams(location.search), s = TD.SIGNS.indexOf(q.get('sign')); if (s >= 0) sign = s; if (['day', 'week', 'month', 'year'].includes(q.get('p'))) period = q.get('p'); } catch (e) {}
+
+function renderPicker(){
+  $('signpick').innerHTML = TD.SIGNS.map((n, i) => `<button type="button" data-s="${i}" aria-pressed="${i === sign}">
+    <span class="gl" aria-hidden="true">${TD.SIGN_GLYPH[i]}</span><b>${n}</b><small>${RANGE[i]}</small></button>`).join('');
+  document.querySelectorAll('#ptabs [data-p]').forEach(b => b.setAttribute('aria-selected', b.dataset.p === period));
+}
+$('signpick').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; sign = +b.dataset.s; try { localStorage.setItem(KEY, sign); } catch (x) {} render(); });
+$('ptabs').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return; period = b.dataset.p; render(); });
+
+/* ---------- pieces ---------- */
+function dayStart(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function aspectItem(x, s, long){
+  const h = G.house(x.lonA, s);
+  return { t: x.time, html: `<div class="ev"><div class="evh"><b>${x.a} ${ASP[x.type]} ${x.b}</b><span>${long ? dshort(x.time) + ', ' : ''}${hm(x.time)}</span></div>
+    <p>${esc(T[G.skyKey(x)] || '')} <span class="you">For you it lands in your ${ORD(h)} house: ${esc(area(h))}.</span></p></div>` };
+}
+function ingressItem(x, s, long){
+  const h = hOf(x.sign, s), body = x.key === 'Sun' ? TT['sunhouse:' + h] : T['pin:' + x.key + ':' + h];
+  return { t: x.time, html: `<div class="ev"><div class="evh"><b>${x.key} enters ${TD.SIGNS[x.sign]}${x.retro ? ' (moving backward)' : ''}: your ${ORD(h)} house</b>
+    <span>${long ? dshort(x.time) + ', ' : ''}${hm(x.time)}</span></div><p>${esc(body || '')}</p></div>` };
+}
+function stationItem(x, s, long){
+  const h = G.house(x.lon, s);
+  return { t: x.time, html: `<div class="ev"><div class="evh"><b>${x.planet} turns ${x.kind === 'retrograde' ? 'retrograde' : 'direct'} in your ${ORD(h)} house</b>
+    <span>${long ? dshort(x.time) + ', ' : ''}${hm(x.time)}</span></div>
+    <p>${x.kind === 'retrograde' ? esc(TT['retro:' + x.planet] || '') : `${x.planet} moves forward again. What stalled in the area of ${esc(area(h))} starts to move; put the review you did into practice.`}</p></div>` };
+}
+function lunationItem(x, s, long){
+  const h = G.house(x.lon, s);
+  return { t: x.time, html: `<div class="ev"><div class="evh"><b>${x.kind === 'new' ? 'New' : 'Full'} moon in ${TD.SIGNS[G.signIdx(x.lon)]}: your ${ORD(h)} house</b>
+    <span>${long ? dshort(x.time) + ', ' : ''}${hm(x.time)}</span></div><p>${esc(T[`lunation:${x.kind}:${h}`] || '')}</p></div>` };
+}
+function events(s, from, to, opts = {}){
+  const bodies = opts.bodies || G.BODIES, long = !!opts.long, items = [];
+  G.aspects(from, to, bodies).forEach(x => items.push(aspectItem(x, s, long)));
+  bodies.forEach(k => G.ingresses(k, from, to).forEach(x => items.push(ingressItem(x, s, long))));
+  if (!opts.noStations) TD.transits.stations(from, to).filter(x => bodies.includes(x.planet)).forEach(x => items.push(stationItem(x, s, long)));
+  if (!opts.noLunations) G.lunations(from, to).forEach(x => items.push(lunationItem(x, s, long)));
+  return items.sort((a, b) => a.t - b.t).map(i => i.html).join('');
+}
+function placeRow(p, s){
+  return `<div class="sumrow"><span>${p.key}${p.retro ? ' <span class="pill warn">Retrograde</span>' : ''}</span><span>${TD.SIGNS[p.sign]}, your ${ORD(p.house)} house</span></div>`;
+}
+const head = (title, sub) => `<div class="eyebrow">${TD.SIGN_GLYPH[sign]} ${TD.SIGNS[sign]} &middot; ${title}</div>${sub ? `<p class="note" style="margin:-6px 0 14px">${sub}</p>` : ''}`;
+
+/* ---------- the four periods ---------- */
+function renderDay(s){
+  const from = dayStart(new Date()), to = new Date(+from + DAY);
+  const moon = G.moonPath(s, from, to), main = moon.slice().sort((a, b) => (b.to - b.from) - (a.to - a.from))[0];
+  const moves = moon.length > 1 ? `The Moon moves into your ${ORD(moon[1].house)} house (${esc(area(moon[1].house))}) at ${hm(moon[1].from)}.` : `The Moon stays in your ${ORD(main.house)} house all day.`;
+  const ev = events(s, from, to, {});
+  return head('Today', dlong(from)) +
+    `<div class="card pad"><h3 style="font-size:20px">The mood of the day</h3>
+      <p class="note" style="margin-top:4px">The Moon in your ${ORD(main.house)} house: ${esc(area(main.house))}. ${moves}</p>
+      <p style="margin-top:10px;font-size:15px;line-height:1.6">${esc(TT['moonhouse:' + main.house] || '')}</p></div>
+    <div class="eyebrow" style="margin-top:22px">In the sky today</div>
+    ${ev || '<p class="note" style="font-size:13px">A quiet sky: no planet changes sign or makes an exact aspect today. Follow the Moon.</p>'}`;
+}
+function renderWeek(s){
+  const from = dayStart(new Date()), to = new Date(+from + 7 * DAY);
+  const moon = G.moonPath(s, from, to).map(m => `<div class="sumrow"><span>${dshort(m.from)}${+m.from === +from ? '' : ' ' + hm(m.from)}</span><span>Your ${ORD(m.house)} house: ${esc(area(m.house))}</span></div>`).join('');
+  const ev = events(s, from, to, { long: true });
+  return head('This week', `${dshort(from)} to ${dshort(new Date(+to - 1))}`) +
+    `<div class="card pad"><h3 style="font-size:20px">The Moon through your week</h3><p class="note" style="margin:4px 0 8px">Where your feelings and attention go, day by day.</p>${moon}</div>
+    <div class="eyebrow" style="margin-top:22px">The week&rsquo;s events</div>${ev || '<p class="note">No sign changes or exact aspects this week.</p>'}`;
+}
+function renderMonth(s){
+  const from = dayStart(new Date()), to = new Date(+from + 30 * DAY);
+  const P = G.placements(s, new Date()), sun = P.find(p => p.key === 'Sun');
+  const inner = ['Mercury', 'Venus', 'Mars'].map(k => P.find(p => p.key === k)).map(p => `<div class="ev"><div class="evh"><b>${p.key} in your ${ORD(p.house)} house${p.retro ? ', retrograde' : ''}</b><span>${TD.SIGNS[p.sign]}</span></div>
+    <p>${esc(T['pin:' + p.key + ':' + p.house] || '')}</p></div>`).join('');
+  const ev = events(s, from, to, { long: true, bodies: ['Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] });
+  return head('The month ahead', `${dshort(from)} to ${dshort(new Date(+to - 1))}`) +
+    `<div class="card pad"><h3 style="font-size:20px">The Sun in your ${ORD(sun.house)} house</h3><p class="note" style="margin-top:4px">${esc(area(sun.house))}</p>
+      <p style="margin-top:10px;font-size:15px;line-height:1.6">${esc(TT['sunhouse:' + sun.house] || '')}</p></div>
+    <div class="eyebrow" style="margin-top:22px">The quick planets now</div>${inner}
+    <div class="eyebrow" style="margin-top:22px">Dates this month</div>${ev}
+    <details class="card pad" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700">Where every planet is for you today</summary>
+      <div style="margin-top:10px">${P.map(p => placeRow(p, s)).join('')}</div></details>`;
+}
+function renderYear(s){
+  const from = dayStart(new Date()), to = new Date(+from + 365 * DAY), slow = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  const P = G.placements(s, new Date());
+  const now = slow.map(k => P.find(p => p.key === k)).map(p => `<div class="ev"><div class="evh"><b>${p.key} in your ${ORD(p.house)} house${p.retro ? ', retrograde' : ''}</b><span>${TD.SIGNS[p.sign]}</span></div>
+    <p>${esc(T['pin:' + p.key + ':' + p.house] || '')}</p></div>`).join('');
+  const ev = events(s, from, to, { long: true, bodies: slow, noLunations: true });
+  const retro = TD.transits.stations(from, to).filter(x => !slow.includes(x.planet))
+    .map(x => `<div class="sumrow"><span>${dshort(x.time)}</span><span>${x.planet} turns ${x.kind} in your ${ORD(G.house(x.lon, s))} house</span></div>`).join('');
+  return head('The year ahead', `${tfmt(from, { month: 'long', year: 'numeric' })} to ${tfmt(to, { month: 'long', year: 'numeric' })}`) +
+    `<div class="eyebrow">The slow planets, where they stand now</div>${now}
+    <div class="eyebrow" style="margin-top:22px">The big dates of the year</div>${ev || '<p class="note">No slow planet changes sign or makes an exact aspect in the next twelve months.</p>'}
+    <div class="card pad" style="margin-top:16px"><h3 style="font-size:20px">Retrograde calendar</h3><p class="note" style="margin:4px 0 8px">Mercury, Venus and Mars turning back and forward over the next twelve months, and the house where it happens for you.</p>${retro}</div>`;
+}
+const VIEWS = { day: renderDay, week: renderWeek, month: renderMonth, year: renderYear };
+let job = 0;
+function render(){
+  renderPicker();
+  const id = ++job;
+  $('out').innerHTML = `<p class="note" style="font-size:13px">Working out ${TD.SIGNS[sign]}&rsquo;s ${period === 'day' ? 'day' : period}&hellip;</p>`;
+  setTimeout(() => { if (id === job) $('out').innerHTML = VIEWS[period](sign); }, 20);
+}
+render();
+</script></body></html>

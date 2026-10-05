@@ -1,0 +1,146 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Book a session — tarot platform demo</title>
+<meta name="description" content="Book a live session or a recorded reading: choose the session, pick an open time in your own time zone and say what you want to look at.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/book.html">
+<meta property="og:title" content="Book a session — tarot platform demo">
+<meta property="og:description" content="Book a live session or a recorded reading: choose the session, pick an open time in your own time zone and say what you want to look at.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="mockflag">Demo flow &middot; nothing is sent or charged</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Book a<br><span class="prism">session</span></h1>
+  <p class="lede">Choose a live session or a recorded reading, pick a time that suits you, and say what you
+    want to look at. Times are shown in your own time zone (<b id="tzname"></b>).</p>
+
+  <div class="steps" id="steps" aria-hidden="true"><span>1 &middot; Session</span><span>2 &middot; Time</span><span>3 &middot; Your question</span><span>4 &middot; Confirm</span></div>
+
+  <section id="st1" class="col" style="max-width:900px">
+    <div class="opts" id="opts" role="group" aria-label="Session type"></div>
+  </section>
+
+  <section id="st2" class="col hide" style="max-width:700px">
+    <div class="eyebrow">Open days, the next two weeks</div>
+    <div class="days" id="days" role="group" aria-label="Day"></div>
+    <div class="times" id="times" role="group" aria-label="Start time"></div>
+    <p class="note" id="timenote" style="margin-top:10px"></p>
+  </section>
+
+  <section id="st3" class="col hide">
+    <div class="row">
+      <div><label class="f" for="bname">Your first name</label><input id="bname" maxlength="40" autocomplete="off" placeholder="So the reader knows what to call you"></div>
+      <div><label class="f" for="bq">What you want to look at (optional)</label>
+        <textarea id="bq" maxlength="300" placeholder="A decision, a relationship, the year ahead, your chart. A line or two is plenty."></textarea></div>
+      <label class="check" style="display:flex;gap:9px;align-items:center;font-size:13px;color:var(--muted)"><input type="checkbox" id="bchart"> Bring the birth chart saved in this browser</label>
+    </div>
+  </section>
+
+  <section id="st4" class="col hide">
+    <div class="card pad" id="summary"></div>
+    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; payment and calendar go here</span>
+      <p>On a live site <b>Pay and confirm</b> opens the payment provider&rsquo;s own secure checkout, then the booking
+      lands in the reader&rsquo;s calendar and both of you get a confirmation with the video link. This demo has no
+      payment or calendar account behind it and never shows a card field.</p></div>
+  </section>
+
+  <div class="jact" style="margin-top:22px" id="nav">
+    <button class="btn" type="button" id="back">Back</button>
+    <button class="btn primary" type="button" id="next">Continue</button>
+  </div>
+  <div class="warn col hide" id="held"><span class="k">Saved as a demo hold</span>
+    <p>Nothing was booked or charged, and nobody was told: the hold is stored in this browser only, so you can see how
+    it would look in <a href="account.html" style="text-decoration:underline">your account</a>.</p></div>
+
+  <p class="note col" style="margin-top:26px">Recorded or live? The monthly reading in the membership is recorded; a live
+    session is a separate booking where you can ask things back. <a href="pricing.html" style="text-decoration:underline">Pricing</a>
+    explains the difference. For a short question right now, try the <a href="live.html" style="text-decoration:underline">live reading room</a>.</p>
+</div>
+<script src="js/icons.js"></script><script src="js/members.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('book.html');
+const M = TD.members, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let step = 1, pick = null, day = null, at = null;
+try { $('tzname').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local time'; } catch (e) { $('tzname').textContent = 'local time'; }
+const acct = M.account(); if (acct) $('bname').value = acct.name;
+let hasChart = false; try { hasChart = !!JSON.parse(localStorage.getItem('tarotdemo.natal') || 'null'); } catch (e) {}
+$('bchart').checked = hasChart; $('bchart').disabled = !hasChart;
+if (!hasChart) $('bchart').parentNode.insertAdjacentHTML('beforeend', ' <span class="note">(none saved yet: <a href="birthchart.html" style="text-decoration:underline">make one</a>)</span>');
+const S = () => M.sessions(TD.brand.rate);
+const sess = () => S().find(s => s.id === pick);
+const dfmt = (t, o) => new Date(t).toLocaleString(undefined, o);
+
+function renderOpts(){
+  $('opts').innerHTML = S().map(s => `<button type="button" class="opt" data-id="${s.id}" aria-pressed="${s.id === pick}">
+    <b>${esc(s.name)}</b><div class="pr">${TD.money(s.price)}</div><span>${esc(s.blurb)}</span></button>`).join('');
+}
+$('opts').addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return; pick = b.dataset.id; at = null; renderOpts(); renderNav(); });
+
+function renderDays(){
+  const list = M.openDays();
+  if (!day) { const f = list.find(d => d.open); day = f && f.date; }
+  $('days').innerHTML = list.map(d => `<button type="button" data-t="${d.date.getTime()}" ${d.open ? '' : 'disabled'}
+      aria-pressed="${day && d.date.getTime() === day.getTime()}" aria-label="${d.date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}${d.open ? '' : ', closed'}">
+      <small>${d.date.toLocaleDateString(undefined, { weekday: 'short' })}</small><b>${d.date.getDate()}</b></button>`).join('');
+  const sl = day ? M.slots(day, sess().min) : [];
+  $('times').innerHTML = sl.map(s => `<button type="button" data-at="${s.at}" ${s.free ? '' : 'disabled'} aria-pressed="${s.at === at}">${dfmt(s.at, { hour: 'numeric', minute: '2-digit' })}</button>`).join('');
+  $('timenote').textContent = `Sample hours: Tuesday to Saturday, sessions start on the hour. Crossed-out times are taken. ${sess().min} minutes from the start time.`;
+}
+$('days').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; day = new Date(+b.dataset.t); at = null; renderDays(); renderNav(); });
+$('times').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; at = +b.dataset.at; renderDays(); renderNav(); });
+
+function renderSummary(){
+  const s = sess();
+  const when = s.live ? dfmt(at, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) : 'Delivered within 7 days';
+  $('summary').innerHTML = `<div class="eyebrow">Your booking</div>
+    <div class="sumrow"><span>Session</span><span>${esc(s.name)}</span></div>
+    <div class="sumrow"><span>With</span><span>${esc(TD.brand.name)}</span></div>
+    <div class="sumrow"><span>When</span><span>${esc(when)}</span></div>
+    <div class="sumrow"><span>For</span><span>${esc($('bname').value.trim() || 'not given')}</span></div>
+    ${$('bq').value.trim() ? `<div class="sumrow"><span>Question</span><span style="text-align:right">${esc($('bq').value.trim())}</span></div>` : ''}
+    ${$('bchart').checked ? '<div class="sumrow"><span>Birth chart</span><span>Included</span></div>' : ''}
+    <div class="sumrow total"><span>Total</span><span>${TD.money(s.price)}</span></div>`;
+}
+function renderNav(){
+  const s = sess(), seq = s && !s.live ? [1, 3, 4] : [1, 2, 3, 4];
+  [1, 2, 3, 4].forEach(k => $('st' + k).classList.toggle('hide', k !== step));
+  $('steps').querySelectorAll('span').forEach((el, k) => {
+    el.className = k + 1 === step ? 'on' : seq.indexOf(k + 1) >= 0 && seq.indexOf(k + 1) < seq.indexOf(step) ? 'done' : '';
+    el.style.display = seq.includes(k + 1) ? '' : 'none';
+  });
+  $('back').style.visibility = step === 1 ? 'hidden' : '';
+  $('next').textContent = step === 4 ? 'Pay and confirm' : 'Continue';
+  $('next').disabled = (step === 1 && !s) || (step === 2 && !at) || (step === 3 && !$('bname').value.trim());
+  if (step === 2) renderDays();
+  if (step === 4) renderSummary();
+  return seq;
+}
+$('bname').addEventListener('input', renderNav);
+$('next').onclick = () => {
+  const seq = renderNav(), k = seq.indexOf(step);
+  if (step === 4) {
+    const s = sess();
+    if (M.hold(s.id, s.live ? at : null, $('bq').value)) $('held').classList.remove('hide');
+    TD.openModal(); return;
+  }
+  step = seq[k + 1]; $('held').classList.add('hide'); renderNav();
+  $('steps').scrollIntoView({ block: 'nearest' });
+};
+$('back').onclick = () => { const seq = renderNav(), k = seq.indexOf(step); if (k > 0) { step = seq[k - 1]; $('held').classList.add('hide'); renderNav(); } };
+try { const want = new URLSearchParams(location.search).get('session'); if (S().some(s => s.id === want)) pick = want; } catch (e) {}
+renderOpts(); renderNav();
+</script></body></html>

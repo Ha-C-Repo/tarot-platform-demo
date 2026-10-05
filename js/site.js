@@ -15,7 +15,9 @@ const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'],
   ['birthchart.html','Birth chart'], ['vedic.html','Vedic'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
   ['chinese.html','Chinese'], ['maya.html','Maya'],
-  ['handbook.html','Handbook'], ['pricing.html','Pricing']
+  ['handbook.html','Handbook'], ['pricing.html','Pricing'],
+  /* Phone menu only (the desktop bar fits 13 links on one line from 1180 px); on desktop these are linked from the pages. */
+  ['journal.html','Your journal',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 
 function chrome(current){
@@ -27,10 +29,11 @@ function chrome(current){
   const nav = `<a class="skip" href="#main">Skip to content</a>
     <nav class="nav"><div class="navin">
       <a class="brand" href="index.html" aria-label="Home"><span class="mark" aria-hidden="true"></span><b data-brand-name>${esc(brand.name)}</b></a>
+      <div class="navlinks" id="navlinks">${NAV.map(([h,t,m])=>
+        `<a href="${h}"${m?' class="monly'+(h===current?' on':'')+'"':h===current?' class="on"':''}${h===current?' aria-current="page"':''}>${t}</a>`).join('')}</div>
+      <a class="navacct${current==='account.html'?' on':''}" href="account.html" aria-label="Your account" title="Your account"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8.2" r="3.8"/><path d="M4.5 20.2c.9-3.9 3.9-6.1 7.5-6.1s6.6 2.2 7.5 6.1"/></svg></a>
+      <a class="navcta" href="book.html">Book a reading</a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="navlinks">☰</button>
-      <div class="navlinks" id="navlinks">${NAV.map(([h,t])=>
-        `<a href="${h}"${h===current?' class="on" aria-current="page"':''}>${t}</a>`).join('')}</div>
-      <a class="navcta" href="pricing.html">Book a reading</a>
     </div></nav>`;
   document.body.insertAdjacentHTML('afterbegin', band + nav + '<div class="grain"></div>');
   const first = document.querySelector('.wrap'); if (first) first.id = first.id || 'main';
@@ -50,6 +53,22 @@ function chrome(current){
   wire();
   if (NS.fillIcons) NS.fillIcons();          // <i data-icon> placeholders -> the drawn symbols in js/icons.js
   if (NS.tour) NS.tour.boot(current);
+  printable(current);
+}
+/* Report pages get a Print button under the intro; printing opens every closed details section first
+   and closes them again afterwards, so the printed report carries the full reading. */
+const PRINTABLE = ['birthchart.html', 'vedic.html', 'horoscope.html', 'signs.html', 'journal.html', 'tools.html', 'compatibility.html', 'numerology.html'];
+function printable(current){
+  if (PRINTABLE.includes(current)) {
+    const lede = document.querySelector('.wrap .lede');
+    if (lede) {
+      lede.insertAdjacentHTML('afterend', '<button class="btn printbtn" type="button" data-print style="margin-top:14px">Print or save as PDF</button>');
+      lede.nextElementSibling.onclick = () => window.print();
+    }
+  }
+  let opened = [];
+  window.addEventListener('beforeprint', () => { opened = [...document.querySelectorAll('details:not([open])')]; opened.forEach(d => d.open = true); });
+  window.addEventListener('afterprint', () => { opened.forEach(d => d.open = false); opened = []; });
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -71,6 +90,8 @@ function panel(){
         <button type="button" data-tier="sub" aria-pressed="${brand.tier==='sub'}">Subscriber</button></div>
       <p class="note" style="margin:0">Free shows the ads and the members' lock. Card readings are unlimited in both views.
         Subscriber removes the ads and unlocks everything.</p></div>
+    <button class="btn wide" id="dinstall" style="font-size:13px;padding:10px;margin-bottom:8px">Install as an app</button>
+    <p class="note" id="dinstallnote" style="margin:-2px 0 8px"></p>
     <button class="btn wide" id="dtour" style="font-size:13px;padding:10px;margin-bottom:8px">Take the tour</button>
     <button class="btn wide" id="dreset" style="font-size:13px;padding:10px">Reset demo data</button>
   </div>
@@ -116,6 +137,10 @@ function wire(){
     apply();
   });
   p.querySelectorAll('.seg [data-tier]').forEach(b => b.onclick = () => setTier(b.dataset.tier));
+  const di = document.getElementById('dinstall'), dn = document.getElementById('dinstallnote');
+  const syncInstall = () => { const st = install.state(); di.style.display = st === 'installed' ? 'none' : ''; dn.textContent = st === 'ready' ? '' : install.help(); di.disabled = st !== 'ready'; };
+  di.onclick = () => install.prompt().then(syncInstall);
+  document.addEventListener('installready', syncInstall); syncInstall();
   document.getElementById('dtour').onclick = () => { openPanel(false); if (NS.tour) NS.tour.start(); };
   // mobile nav
   const bg = document.getElementById('burger'), nl = document.getElementById('navlinks');
@@ -127,7 +152,7 @@ function wire(){
   document.getElementById('mback').onclick = close;
   mw.addEventListener('click', e => { if (e.target === mw) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-  document.querySelectorAll('[data-demo], .navcta, .tier .btn, a[href="pricing.html"].btn').forEach(el => {
+  document.querySelectorAll('[data-demo], .navcta, .tier button.btn, a[href="pricing.html"].btn').forEach(el => {
     if (el.closest('#demopanel')) return;
     el.addEventListener('click', e => {
       if (el.classList.contains('navcta') && !el.dataset.demo) return;   // nav CTA still navigates
@@ -162,10 +187,39 @@ function modal(){
     </div></div>`;
 }
 
+/* ---------- installable app (manifest.webmanifest, sw.js) ----------
+   The service worker only runs over http(s), never from a file. Browsers that offer an install prompt
+   (Chrome, Edge, Android) fire beforeinstallprompt; we keep it for the Install buttons. iPhone and iPad
+   have no prompt, so the buttons explain Share, then Add to Home Screen. */
+let installEvt = null;
+const standalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; document.dispatchEvent(new CustomEvent('installready')); });
+  window.addEventListener('appinstalled', () => { installEvt = null; document.dispatchEvent(new CustomEvent('installready')); });
+  /* The manifest link is added here, over http(s) only: from a file the browser refuses to read it and logs an error. */
+  if (/^https?:$/.test(location.protocol) && document.head && !document.querySelector('link[rel="manifest"]')) {
+    const ln = document.createElement('link'); ln.rel = 'manifest'; ln.href = 'manifest.webmanifest'; document.head.appendChild(ln);
+  }
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+}
+const install = {
+  state(){ return standalone() ? 'installed' : installEvt ? 'ready' : isIOS() ? 'ios' : /^https?:$/.test(location.protocol) ? 'manual' : 'file'; },
+  prompt(){ if (!installEvt) return Promise.resolve(false); const e = installEvt; installEvt = null; e.prompt(); return e.userChoice.then(c => c.outcome === 'accepted').catch(() => false); },
+  help(){ return ({ installed: 'It is installed: you are using the app now.',
+    ready: 'Your browser can install it in one tap.',
+    ios: 'On iPhone or iPad: tap Share, then Add to Home Screen.',
+    manual: 'In your browser menu, choose Install app or Add to Home screen.',
+    file: 'Open the site from its web address to install it; a file opened from disk cannot install.' })[install.state()]; }
+};
+
 function money(n){ return '$' + Number(n).toLocaleString('en-US'); }
 NS.brand = brand;
 NS.chrome = chrome;
 NS.money = money;
+NS.install = install;
 NS.setTier = setTier;
 NS.openPanel = openPanel;
 NS.openModal = openModal;

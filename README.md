@@ -18,7 +18,7 @@ so it works at any depth on the published site, and is not meant to be opened fr
 |---|---|
 | **Customise** (bottom right) | Practice name, role, city, reading price, one of four palettes: the whole site rebrands live. |
 | **Viewing as** (in Customise) | *Subscriber* (default): no ads, everything unlocked, unlimited readings. *Free visitor*: ad slots and the members' Vault locked. Card readings are unlimited in both views, so a prospect can try every spread. Flip it in front of a prospect. |
-| **Take the tour** (home page, and in Customise) | 12-step guided tour across the pages, ending on Customise. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
+| **Take the tour** (home page, and in Customise) | 18-step guided tour across the pages (booking, the journal, horoscopes by sign and the account page included), ending on Customise. A step whose target is hidden (the install panel once installed) is skipped in the direction of travel. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
 
 Everything is stored in that browser only, and cleared by **Reset demo data**.
 
@@ -46,6 +46,10 @@ this code; the checks are committed in `tests/` (see Tests below).
 | The Handbook | `handbook.html`: six public-domain books bound into one book read like an ebook (`js/handbook.js`, `css/book.css`). Cover, contents by Part (The Cards, The Stars, The Moon, Stones and Talismans, Hands and Faces, Charms and Customs), a title page per book with an introduction written for the demo, chapters turned page by page (one page on a phone, a two-page spread on a wide screen; arrows, keys or swipe) or read as one scroll, three text sizes, footnotes as pop-up cards, the place remembered in this browser and in the address (`#handbook/<book>/<chapter>`). Books: Waite, *The Pictorial Key to the Tarot* (1910, 1922 printing, with its 78 plates); Ptolemy, *Tetrabiblos* (Ashmand's translation); Baughan, *The Influence of the Stars* (1889, 4th ed.); Olcott, *Star Lore of All Ages* (1911); Harley, *Moon Lore* (1885); W. T. and K. Pavitt, *The Book of Talismans, Amulets and Zodiacal Gems* (1914, 1922 ed.). Charms and Customs: six chapters chosen from those books, each with a framing note. Texts in `js/book/<id>.js`, loaded when a book is opened; details in `js/data/handbook.js`; figures in `assets/book/<id>/`. | Texts from Project Gutenberg (proofread) and Wikisource (proofread transcriptions), all public domain in the US (published before 1931) and the UK (authors and illustrator dead more than 70 years). Tests: every Part and selection points at a real chapter, chapter counts match, HTML sanitised (no scripts, styles, links out, licence boilerplate, remote images), all 824 footnote markers matched to their notes |
 | Personal horoscope | From the visitor's own chart (shared with the birth chart page): the Moon and the Sun by natal house with the time each leaves it, every transit in effect (Sun to Pluto on natal Sun to Saturn, Ascendant, Midheaven; orb 2°, 1.5° for Uranus to Pluto) with building/easing and every exact pass, the next 30 days of exact hits, the year's slow transits (Jupiter to Pluto) with all passes, and the retrograde calendar. Texts from `js/data/transit-text.js` (275, loaded on demand). Any date can be chosen. | Retrograde stations for 2026 match Swiss Ephemeris within 0.45 h (`tests/fixtures/stations-2026-swisseph.json`); every hit exact to 0.01°; house ingress moments tested; all 275 texts covered |
 | Compatibility, full | Both charts from date, time and place: ten bodies, mean node, Ascendant, MC, houses (Whole Sign default, Equal, Placidus, Koch), Davison chart (midpoint in time and place), 10×10 synastry grid, composite by midpoints, published heuristic score | Astrodienst chart of a Rodden-AA birth: all ten bodies within 13″, ASC and MC within 1″ |
+| Horoscopes by sign | `signs.html` + `js/signs.js`: today, this week, this month and the year ahead for all twelve signs, computed from the real sky with solar houses (the sign = 1st house). Moon by house with ingress times, sign changes of Sun to Pluto, exact aspects between the moving planets, new and full moons, retrograde stations, all to the minute in the visitor's time zone. 235 texts in `js/data/signs-text.js`; the Moon, Sun and retrograde texts are shared with the personal horoscope. | Equinox 2026 to 0.6 min; Saturn-Neptune conjunction 20 Feb 2026; every aspect exact to 0.01 deg (tests/signs.test.js) |
+| Reading journal | `journal.html` + `js/journal.js`: every finished card reading saved automatically with its question, notes, stats (most frequent cards, suits, reversals, spreads), search, and backup to and from a JSON file. localStorage only. | Round-trip, merge and junk-file tests (tests/journal.test.js) |
+| Share and print | `js/share.js`: a finished reading drawn to a PNG in the current palette, handed to the phone's share sheet or downloaded (pull page and journal). Print stylesheet: any page prints as a light report; report pages get a Print button. | Checked in Chrome 2026-10-04 |
+| Installable app | `manifest.webmanifest`, `sw.js`, `assets/app/` icons. Network first for everything, the stored copy offline; 71 files stored on install, big files stored on first use. | Chrome: no installability errors, four pages open offline (2026-10-04); tests/app.test.js |
 | Compatibility, quick | Two dates only: sun element, Chinese triad, life path, modality. Weighting published. | Heuristic, and labelled as one |
 | Birth time → UTC | Browser IANA time-zone data, two-pass inversion. The repeated hour when clocks go back is flagged (first occurrence used); the skipped hour is flagged. "Time unknown" mode drops houses and the Ascendant and flags the Moon if it changes sign that day. | Sydney 1974, New York 1985 (EST and EDT), London 1968 (British Standard Time), Denver 2026, Honolulu 1961, NY 2021 fold and gap |
 | Birth places | 34,146 GeoNames cities (population > 15,000 or capitals) with their IANA zone, searchable offline, loaded only on pages that ask for a place. | GeoNames cities15000, CC BY 4.0 |
@@ -62,17 +66,22 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
   sample text drafted with AI assistance for this demo, against the traditional Rider-Waite-Smith meanings
   with Waite's 1911 text as the reference, under one style guide, and machine-checked for coverage, length,
   repeated openings and sensitive wording. They are not copied from any site or book. They are generic:
-  the same for everyone who draws the same cards. Moon, compatibility, numerology, Chinese and Maya
-  interpretations are still marked **"Placeholder — your writing goes here"**. On a live site the reader's
+  the same for everyone who draws the same cards. The Moon, numerology and tarot birth cards, Chinese,
+  Maya and both compatibility modes now carry sample text too (`js/data/extra-text.js`, written 2026-10-04),
+  labelled as sample text on each page. On a live site the reader's
   own writing replaces or edits all of it: that is what makes it theirs. (Nothing calls a model at runtime;
   the text is static.)
 - **Card of the day for the collective.** A home-page slot for the one card the reader picks by hand each
   morning, the same for everyone. The card, its orientation, the date and the message live in
-  `js/data/collective.js`; with no message it shows the placeholder box.
+  `js/data/collective.js`, which now holds a labelled sample message for the sample card; with no message it shows the placeholder box.
 - **Video and streams.** Reels row and live-reading panel on the home page, the monthly recorded
   reading in the Vault: designed empty states, labelled. No third-party embed script loads.
-- **Payments and bookings.** Every pay or book button opens a "that button is switched off" notice.
-  No payment integration, no keys, not even test keys, and no card field anywhere.
+- **Payments and bookings.** `book.html` (session, time, question, confirm), `checkout.html` (Supporter or
+  Membership), `live.html` (pay-by-the-minute room with a meter preview and a chat that goes nowhere) and
+  `account.html` (sign-in by first name only, plan, sessions, chart, journal) are clickable walk-throughs that
+  end at the "that button is switched off" notice. State lives in localStorage (`js/members.js`); a confirmed
+  booking is stored as a labelled "demo hold". No payment integration, no keys, not even test keys, no password
+  or email field, and no card field anywhere.
 - **Contact.** The notice says contact details go here; there is no real address on the site.
 
 ## What is deliberately not here
@@ -94,6 +103,7 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
 | Keeping it out of search | `noindex,nofollow` meta on every page. `robots.txt` is kept, but on a project site it is not at the domain root, so crawlers never read it; the meta tag does the work. |
 | `og:image` | Absolute URL, plus `og:url` per page. |
 | `404.html` | Absolute paths with the `/tarot-platform-demo/` prefix, so it renders at any missing depth. |
+| Service worker | `sw.js` at the site root (scope = the whole demo). **Bump `VERSION` in sw.js on every publish**; the new worker deletes old caches. Registered over http(s) only, never from a file. |
 | Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), well under the 1 GB limit. |
 
 This build takes no money. Production client sites that take bookings or subscriptions belong on a host
@@ -108,14 +118,15 @@ node tests/run.js
 Plain Node, no dependencies. `tests/chart.test.js` (ephemeris, angles, time zones, houses at -34° and
 +70°, time-unknown mode, aspects, midpoints), `tests/calendars.test.js` (numerology, Maya, Chinese New Year,
 Four Pillars, moon phases, tarot birth cards), `tests/tools.test.js` (Chiron against JPL, solar return, progressions, returns, eclipses against NASA, void Moon, planetary hours, Davison, text coverage), `tests/handbook.test.js` (Handbook structure, sanitised book HTML, footnotes, sources, and a site-wide scan that fails on any emoji), `tests/vedic.test.js` (Lahiri positions and Lagna against Swiss Ephemeris, nakshatras, Navamsa, dashas, Panchang, Manglik, Sade Sati, text coverage), `tests/acg.test.js` (lines through Astronomy Engine's horizon code, distances, map data), `tests/transits.test.js` (stations against Swiss Ephemeris, exact hits, transits in effect, Moon and Sun by house, text coverage), `tests/natal.test.js` (dignities, balance, chart ruler, aspects, Big Three, coverage of all 477 reading texts), `tests/reading.test.js` (correspondences against the Golden Dawn table, numbers, dignities, angel numbers, the spread's total, reading it through), `tests/deck.test.js` (uniformity, persistence, Significator,
-spreads, spread analysis).
+spreads, spread analysis), `tests/journal.test.js` (journal save, notes, stats, backup round-trip, junk files, blocked storage), `tests/members.test.js` (mock-up prices, calendar rules, demo holds and sign-in), `tests/signs.test.js` (solar houses, ingresses, sky aspects, Moon path, text coverage), `tests/app.test.js` (manifest, icons, the service worker stores every page and script). The emoji scan also catches JavaScript `\u{...}` and surrogate escapes since 2026-10-04.
 Reference data: `tests/fixtures/lunar-javascript-reference.json`, `tests/fixtures/stations-2026-swisseph.json`, `tests/fixtures/houses-swisseph.json`, `tests/fixtures/vedic-swisseph.json` (house cusps, stations and Lahiri positions from Swiss Ephemeris 2.10.03, numbers only; the library itself is not part of the site).
 
 ## Files
 
 ```
 index.html  pull.html  moon.html  birthchart.html  vedic.html  astromap.html  horoscope.html  tools.html  compatibility.html  numerology.html  chinese.html  maya.html
-handbook.html  pricing.html  404.html
+handbook.html  pricing.html  404.html  journal.html  signs.html  book.html  checkout.html  live.html  account.html
+sw.js  manifest.webmanifest  assets/app/  the service worker, app manifest and app icons
 css/base.css          design system, four palettes, all components
 js/site.js            brand config, nav, footer, Customise panel, Free/Subscriber view, demo modal
 js/tour.js            the guided tour
@@ -141,6 +152,12 @@ js/data/vedic-text.js texts for the Vedic chart and astrocartography (loaded on 
 js/transits.js        personal horoscope: transit hits, transits in effect, stations, Sun and Moon by house
 js/data/transit-text.js the personal-horoscope texts (loaded on demand)
 js/places.js          birth-place search over js/data/cities.js
+js/journal.js         the reading journal (localStorage tarotdemo.journal)
+js/members.js         the mock account, sessions and demo holds behind book/checkout/live/account
+js/signs.js           horoscopes by sign: solar houses, ingresses, Moon path, sky aspects, lunations
+js/data/signs-text.js the texts for horoscopes by sign
+js/share.js           a finished reading as a PNG, shared or downloaded
+js/data/extra-text.js sample texts for the Moon, numerology, birth cards, Chinese, Maya, compatibility
 js/deck.js            the persistent deck, Significator, spread analysis, card back
 js/reading.js         reading it through: positions, elements, dignities, movement, repeated numbers, the spread's total
 js/spreads.js         the eight spreads; Celtic Cross positions in Waite's words

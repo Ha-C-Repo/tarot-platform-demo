@@ -6,6 +6,7 @@
 <meta name="description" content="A complete readings-and-tools site for tarot readers and astrologers. Real card draws, moon calendar, birth charts, personal horoscopes, compatibility, numerology, Chinese and Maya calculators.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 
 <!-- Open Graph / Meta / Facebook -->
@@ -45,7 +46,7 @@
     <p class="lede">Private readings with <b data-brand-name></b>, plus a set of tools you can use for free
       any time you want to check the sky before you make a decision.</p>
     <div style="display:flex;gap:11px;flex-wrap:wrap;margin-top:26px">
-      <a class="btn primary" href="pricing.html">Book a private reading</a>
+      <a class="btn primary" href="book.html">Book a private reading</a>
       <a class="btn" href="pull.html">Pull today&rsquo;s card &mdash; free</a>
       <button class="btn tourbtn" id="tourgo" type="button">Take the tour</button>
     </div>
@@ -93,6 +94,9 @@
       <p class="note" style="margin-top:8px">Shuffle a real 78-card deck and choose a spread: one card, yes or no,
         past-present-future, love, the full moon, the zodiac houses or the Celtic Cross. Upright or reversed, each
         with its traditional meaning. Nothing about you changes what comes up.</p></a>
+    <a class="card pad" href="journal.html"><h3 style="font-size:17px">Reading journal</h3>
+      <p class="note" style="margin-top:8px">Every reading you finish, saved with your question and your notes. See which
+        cards keep coming back, your suits and reversals over time, and back it all up to a file.</p></a>
     <a class="card pad" href="moon.html"><h3 style="font-size:17px">Moon tracker</h3>
       <p class="note" style="margin-top:8px">Phase, sign, illumination, the month ahead, and the next new and full.</p></a>
     <a class="card pad" href="birthchart.html"><h3 style="font-size:17px">Birth chart</h3>
@@ -101,6 +105,9 @@
     <a class="card pad" href="horoscope.html"><h3 style="font-size:17px">Your horoscope</h3>
       <p class="note" style="margin-top:8px">Personal, from your own chart: what the planets are doing to it today, the
         exact dates of each contact this month, the slow transits of the year and the retrograde calendar.</p></a>
+    <a class="card pad" href="signs.html"><h3 style="font-size:17px">Horoscopes by sign</h3>
+      <p class="note" style="margin-top:8px">Today, the week, the month and the year ahead for all twelve signs, worked out
+        from where the planets really are. No birth time needed.</p></a>
     <a class="card pad" href="tools.html"><h3 style="font-size:17px">Astrology tools</h3>
       <p class="note" style="margin-top:8px">Solar return, progressions, Saturn and Jupiter returns, eclipses in your chart,
         the void-of-course Moon and planetary hours.</p></a>
@@ -161,6 +168,36 @@
   </div>
 </div>
 
+<div class="wrap sect tight" id="workwith">
+  <div class="eyebrow">Work with <span data-brand-name></span></div>
+  <h2 style="font-size:30px">Book, drop in, or join</h2>
+  <div class="grid g3" style="margin-top:22px">
+    <a class="card pad" href="book.html"><h3 style="font-size:17px">Book a session</h3>
+      <p class="note" style="margin-top:8px">A live session of 45 or 75 minutes, or a recorded reading. Pick an open time in your
+        own time zone and say what you want to look at.</p></a>
+    <a class="card pad" href="live.html"><h3 style="font-size:17px">Live reading room</h3>
+      <p class="note" style="margin-top:8px">A quick question by chat or video, paid by the minute, with the meter in view the
+        whole time.</p></a>
+    <a class="card pad" href="account.html"><h3 style="font-size:17px">Your account</h3>
+      <p class="note" style="margin-top:8px">Your plan, your sessions, your saved chart and your reading journal, in one place.</p></a>
+  </div>
+  <p class="note" style="margin-top:12px">Demo flows: they show every step, and stop before any money moves.</p>
+</div>
+
+<div class="wrap sect tight" id="getapp">
+  <div class="card pad" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <img src="assets/app/icon-192.png" alt="" width="72" height="72" style="border-radius:18px;flex:none">
+    <div style="flex:1;min-width:220px">
+      <div class="eyebrow">Take it with you</div>
+      <h2 style="font-size:24px">Put it on your home screen</h2>
+      <p class="note" style="margin-top:6px;font-size:13px">Install the site as an app: its own icon, full screen, and it opens
+        without a connection once you have visited. Your journal, your chart and the deck stay on your phone.</p>
+      <p class="note" id="apphelp" style="margin-top:6px"></p>
+    </div>
+    <button class="btn primary" type="button" id="appgo">Install the app</button>
+  </div>
+</div>
+
 <div class="wrap sect">
   <div class="grid g2">
     <div class="card pad">
@@ -197,6 +234,15 @@ document.getElementById('skysub').textContent=
   `${(pct*100).toFixed(0)}% lit · sun in ${A.sunSign(jd)} · next full moon ${A.fromJD(A.nextFullMoon(jd)).toDateString()}`;
 document.getElementById('mdisc').innerHTML=moonSVG(ang,64);
 document.getElementById('tourgo').onclick=()=>TD.tour.start();
+/* Install as an app (js/site.js TD.install, manifest.webmanifest, sw.js) */
+(function(){
+  const go = document.getElementById('appgo'), help = document.getElementById('apphelp');
+  const sync = () => { const st = TD.install.state();
+    if (st === 'installed') { document.getElementById('getapp').style.display = 'none'; return; }
+    go.style.display = st === 'ready' ? '' : 'none'; help.textContent = st === 'ready' ? '' : TD.install.help(); };
+  go.onclick = () => TD.install.prompt().then(sync);
+  document.addEventListener('installready', sync); sync();
+})();
 /* Today's card for the collective: the reader's hand-picked card, from js/data/collective.js */
 (function(){
   const C = TD.COLLECTIVE, card = C && TD.DECK.find(c => c.id === C.card);

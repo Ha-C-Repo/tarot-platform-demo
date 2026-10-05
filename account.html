@@ -1,0 +1,121 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Your account — tarot platform demo</title>
+<meta name="description" content="Your plan, your sessions, your saved birth chart and your reading journal in one place.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/account.html">
+<meta property="og:title" content="Your account — tarot platform demo">
+<meta property="og:description" content="Your plan, your sessions, your saved birth chart and your reading journal in one place.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="mockflag">Demo account &middot; stored in this browser only</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)" id="hello">Your<br><span class="prism">account</span></h1>
+
+  <section id="signin" class="col hide">
+    <p class="lede">On a live site you sign in with a one-time link sent to your email, so there is no password to
+      remember. Here, a first name is enough to see how the account page looks.</p>
+    <div class="card pad" style="margin-top:22px;max-width:460px">
+      <label class="f" for="aname">Your first name</label>
+      <input id="aname" maxlength="40" autocomplete="off">
+      <button class="btn primary wide" type="button" id="ago" style="margin-top:14px">Sign in to the demo</button>
+      <p class="note" style="margin-top:10px">No email, no password, nothing sent. The name is kept in this browser and
+        cleared by <b>Reset demo data</b>.</p>
+    </div>
+  </section>
+
+  <section id="dash" class="hide">
+    <p class="lede" id="since"></p>
+    <div class="grid g2" style="margin-top:24px;align-items:start">
+      <div class="card pad"><div class="eyebrow">Your plan</div><div id="plan"></div></div>
+      <div class="card pad"><div class="eyebrow">Sessions</div><div id="books"></div></div>
+      <div class="card pad"><div class="eyebrow">Your charts</div><div id="charts"></div></div>
+      <div class="card pad"><div class="eyebrow">Your journal</div><div id="journal"></div></div>
+      <div class="card pad"><div class="eyebrow">Your recorded readings</div>
+        <div class="ph"><span class="k">Placeholder &mdash; members&rsquo; videos go here</span>
+          <p>Each month&rsquo;s personal reading arrives here as a video to watch and rewatch, with the cards and notes
+          the reader used. Nothing loads from any video service on this demo.</p></div></div>
+      <div class="card pad"><div class="eyebrow">Settings</div>
+        <p class="note" style="font-size:13px">On a live site: email and reminders, payment method, receipts, download or
+          delete your data. Here, signing out forgets the name; <b>Reset demo data</b> in Customise clears everything.</p>
+        <div class="jact"><button class="btn" type="button" data-demo>Payment and receipts</button>
+          <button class="btn" type="button" id="aout">Sign out</button></div></div>
+    </div>
+  </section>
+</div>
+<script src="js/cards.js"></script><script src="js/spreads.js"></script><script src="js/journal.js"></script>
+<script src="js/icons.js"></script><script src="js/members.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('account.html');
+const M = TD.members, J = TD.journal, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dl = (t, o) => new Date(t).toLocaleString(undefined, o || { day: 'numeric', month: 'long', year: 'numeric' });
+
+function plan(){
+  const sub = TD.isSubscriber();
+  $('plan').innerHTML = sub
+    ? `<h3 style="font-size:22px">Membership</h3><p class="note" style="margin-top:6px;font-size:13px">${TD.money(TD.brand.rate)} a month: one recorded
+        reading every month, no ads, the members&rsquo; shelf. Renews ${dl(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1), { day: 'numeric', month: 'long' })}.</p>
+       <div class="jact"><a class="btn" href="checkout.html?plan=supporter">Change plan</a><button class="btn" type="button" data-demo>Cancel membership</button></div>`
+    : `<h3 style="font-size:22px">Free</h3><p class="note" style="margin-top:6px;font-size:13px">Every tool and every card pull, with ads.</p>
+       <div class="jact"><a class="btn primary" href="checkout.html?plan=member">Become a member</a><a class="btn" href="checkout.html?plan=supporter">Switch the ads off, $5</a></div>`;
+  $('plan').insertAdjacentHTML('beforeend', `<p class="note" style="margin-top:12px">The plan shown follows <b>Viewing as</b> in Customise.</p>`);
+}
+function books(){
+  const S = M.sessions(TD.brand.rate), list = M.bookings().sort((a, b) => (a.at || a.made) - (b.at || b.made));
+  $('books').innerHTML = (list.length ? list.map(b => {
+    const s = S.find(x => x.id === b.kind) || { name: b.kind };
+    return `<div class="sumrow"><span><b style="color:var(--text)">${esc(s.name)}</b><br>${b.at ? dl(b.at, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'Recorded, within 7 days'}
+      &middot; <span class="pill warn">Demo hold</span></span><button class="btn" type="button" data-cancel="${esc(b.id)}" style="font-size:12px;padding:7px 12px;align-self:center">Remove</button></div>`;
+  }).join('') : `<p class="note" style="font-size:13px">No sessions yet.</p>`) +
+    `<div class="jact"><a class="btn" href="book.html">Book a session</a><a class="btn" href="live.html">Live reading room</a></div>`;
+}
+$('books').addEventListener('click', e => { const b = e.target.closest('[data-cancel]'); if (b) { M.cancel(b.dataset.cancel); books(); } });
+function charts(){
+  let n = null; try { n = JSON.parse(localStorage.getItem('tarotdemo.natal') || 'null'); } catch (e) {}
+  $('charts').innerHTML = n && n.bd
+    ? `<div class="sumrow"><span>Birth chart</span><span>${esc(n.nm || 'You')}</span></div>
+       <div class="sumrow"><span>Born</span><span>${esc(dl(n.bd + 'T12:00:00', { day: 'numeric', month: 'long', year: 'numeric' }))}${n.bu ? '' : n.bt ? ', ' + esc(n.bt) : ''}</span></div>
+       ${n.place ? `<div class="sumrow"><span>Place</span><span>${esc(n.place)}</span></div>` : ''}
+       <div class="jact"><a class="btn" href="birthchart.html">Open the chart</a><a class="btn" href="horoscope.html">Your horoscope</a></div>`
+    : `<p class="note" style="font-size:13px">No birth chart saved yet. Make one and it is kept here for the horoscope, the tools and the Vedic chart.</p>
+       <div class="jact"><a class="btn" href="birthchart.html">Make your birth chart</a></div>`;
+}
+function journal(){
+  const L = J.list();
+  $('journal').innerHTML = L.length
+    ? `<div class="sumrow"><span>Readings saved</span><span>${L.length}</span></div>
+       <div class="sumrow"><span>Last reading</span><span>${esc(TD.spreadById(L[0].spread).name)}, ${dl(L[0].at, { day: 'numeric', month: 'short' })}</span></div>
+       <div class="jact"><a class="btn" href="journal.html">Open your journal</a></div>`
+    : `<p class="note" style="font-size:13px">No readings yet. Every reading you finish on the card pull is saved here.</p>
+       <div class="jact"><a class="btn" href="pull.html">Pull a card</a></div>`;
+}
+function render(){
+  const a = M.account();
+  $('signin').classList.toggle('hide', !!a); $('dash').classList.toggle('hide', !a);
+  if (!a) { $('hello').innerHTML = 'Sign <span class="prism">in</span>'; return; }
+  $('hello').innerHTML = `Hello,<br><span class="prism">${esc(a.name)}</span>`;
+  $('since').textContent = `Demo account since ${dl(a.since)}.`;
+  plan(); books(); charts(); journal();
+}
+$('ago').onclick = () => { if (M.signIn($('aname').value)) render(); else $('aname').focus(); };
+$('aname').addEventListener('keydown', e => { if (e.key === 'Enter') $('ago').click(); });
+$('aout').onclick = () => { M.signOut(); render(); };
+document.addEventListener('tierchange', () => { if (M.account()) plan(); });
+/* data-demo buttons drawn after site.js wired the page still open the switched-off notice */
+document.addEventListener('click', e => { const b = e.target.closest('#dash [data-demo]'); if (b) { e.preventDefault(); TD.openModal(); } });
+render();
+</script></body></html>

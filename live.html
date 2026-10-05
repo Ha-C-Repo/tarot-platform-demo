@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Live reading room — tarot platform demo</title>
+<meta name="description" content="Pay by the minute for a quick question by chat or video when the reader is online, with the meter in view the whole time.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/live.html">
+<meta property="og:title" content="Live reading room — tarot platform demo">
+<meta property="og:description" content="Pay by the minute for a quick question by chat or video when the reader is online, with the meter in view the whole time.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="mockflag">Demo room &middot; nobody is on the other end</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">The live<br><span class="prism">reading room</span></h1>
+  <p class="lede">Pay by the minute for a quick question, by chat or on video, whenever <b data-brand-name></b> is
+    online. You see the meter the whole time and you can stop whenever you like.</p>
+
+  <div class="room">
+    <div>
+      <div class="stage" id="stage">
+        <div><span class="pill warn" id="status">Offline</span>
+          <div class="who" style="margin-top:12px" data-brand-name></div>
+          <p class="note" style="margin-top:6px;max-width:34ch">On a live site the reader&rsquo;s video appears here when they
+            take your session. This demo has no video service behind it and never asks for your camera.</p></div>
+        <div class="self">Your camera (off)</div>
+      </div>
+      <div class="card pad" style="margin-top:14px">
+        <div class="eyebrow">The meter</div>
+        <div class="meter">
+          <div><div class="stat" id="mtime">0:00</div><div class="note">time in session</div></div>
+          <div><div class="stat" id="mcost">$0.00</div><div class="note">so far, at <b id="rate"></b> a minute</div></div>
+        </div>
+        <div class="jact">
+          <button class="btn primary" type="button" id="start">Start a paid session</button>
+          <button class="btn" type="button" id="preview">Preview the meter</button>
+        </div>
+        <p class="note" style="margin-top:10px">The preview runs the meter for show and charges nothing. On a live site the reader sets
+          the rules, for example a limit you choose before you start, after which the meter stops unless you top up. The per-minute price here is the reading price in Customise spread over 30 minutes.</p>
+      </div>
+    </div>
+
+    <div class="chat">
+      <div class="chatlog" id="log" aria-live="polite">
+        <div class="msg sys">This is a demo room. Messages you type stay on this screen and go nowhere, and no reply will come.</div>
+      </div>
+      <form class="chatin" id="chatform" onsubmit="return false">
+        <input id="chatmsg" maxlength="300" placeholder="Type your question" autocomplete="off" aria-label="Message">
+        <button class="btn" type="submit" id="send">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card pad"><div class="eyebrow">Opening hours</div>
+      <p class="note" style="font-size:13px">Sample hours: Tuesday to Saturday, 10:00 to 18:00 in your time zone. Outside them,
+        <a href="book.html" style="text-decoration:underline">book a session</a> instead.</p></div>
+    <div class="ph"><span class="k">On a live site</span>
+      <p>The room runs on a video-and-chat service with per-minute billing through the payment provider, and the
+      reader switches themselves online or offline from their phone.</p></div>
+  </div>
+</div>
+<script src="js/icons.js"></script><script src="js/members.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('live.html');
+const M = TD.members, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pm = () => M.perMinute(TD.brand.rate);
+const showRate = () => { $('rate').textContent = '$' + pm().toFixed(2); };
+showRate(); $('dp').addEventListener('input', showRate);
+/* Online during the sample hours, offline outside them. */
+(function(){
+  const d = new Date(), on = M.HOURS.days.includes(d.getDay()) && d.getHours() >= M.HOURS.from && d.getHours() < M.HOURS.to + 1;
+  $('status').textContent = on ? 'Online now (sample)' : 'Offline';
+  $('status').className = 'pill ' + (on ? 'ok' : 'warn');
+})();
+let t0 = 0, timer = 0;
+function tick(){
+  const s = Math.floor((Date.now() - t0) / 1000);
+  $('mtime').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  $('mcost').textContent = '$' + (s / 60 * pm()).toFixed(2);
+}
+$('preview').onclick = () => {
+  if (timer) { clearInterval(timer); timer = 0; $('preview').textContent = 'Preview the meter'; return; }
+  t0 = Date.now(); tick(); timer = setInterval(tick, 1000); $('preview').textContent = 'Stop the preview';
+};
+$('start').onclick = () => TD.openModal();
+$('chatform').addEventListener('submit', () => {
+  const v = $('chatmsg').value.trim(); if (!v) return;
+  $('log').insertAdjacentHTML('beforeend', `<div class="msg me">${esc(v)}</div>`);
+  $('chatmsg').value = ''; $('log').scrollTop = $('log').scrollHeight;
+});
+</script></body></html>

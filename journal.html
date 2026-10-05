@@ -1,0 +1,214 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Your reading journal — tarot platform demo</title>
+<meta name="description" content="Every card reading you finish, kept with your question and your notes, and the patterns across them: the cards that keep coming back, the suits, the reversals.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/journal.html">
+<meta property="og:title" content="Your reading journal — tarot platform demo">
+<meta property="og:description" content="Every card reading you finish, kept with your question and your notes, and the patterns across them: the cards that keep coming back, the suits, the reversals.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free &middot; kept in this browser</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Your<br><span class="prism">reading journal</span></h1>
+  <p class="lede">Every reading you finish on <a href="pull.html" style="text-decoration:underline">the card pull</a>
+    lands here by itself, with your question and the cards in their places. Add a note when something comes
+    of it, and over time you can see which cards keep turning up.</p>
+
+  <div id="stats"></div>
+
+  <div class="jtools" id="jtools">
+    <input type="search" id="jq" placeholder="Search your questions, notes and cards" aria-label="Search the journal">
+    <select id="jsp" aria-label="Spread"><option value="">Every spread</option></select>
+    <button class="btn" id="jexport" type="button" style="font-size:13px;padding:9px 14px">Back up to a file</button>
+    <button class="btn" id="jimport" type="button" style="font-size:13px;padding:9px 14px">Load a backup</button>
+  </div>
+  <input type="file" id="jfile" accept=".json,application/json" hidden>
+  <p class="note" id="jmsg" aria-live="polite" style="margin-top:8px;min-height:1.5em"></p>
+
+  <div class="jlist" id="jlist"></div>
+
+  <div class="warn col" style="margin-top:28px"><span class="k">Where your journal lives</span>
+    <p>Only in this browser, on this device. Nothing is sent anywhere and nobody else can read it. That also means
+    clearing your browser data, or <b>Reset demo data</b>, wipes it. <b>Back up to a file</b> saves the whole journal
+    as one small file you keep; <b>Load a backup</b> adds the readings from that file, here or in another browser,
+    without touching the ones already here.</p></div>
+  <div class="card pad col" style="margin-top:18px">
+    <div class="ph"><span class="k">On a live site</span>
+      <p>With accounts switched on, the journal follows the visitor to every device they sign in on, and the reader
+      can offer to look over a client&rsquo;s journal before a private session, with the client&rsquo;s permission.</p></div>
+  </div>
+</div>
+<script src="js/cards.js"></script><script src="js/data/correspondences.js"></script><script src="js/data/interpretations.js"></script>
+<script src="js/spreads.js"></script><script src="js/reading.js"></script><script src="js/journal.js"></script><script src="js/share.js"></script>
+<script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('journal.html');
+const J = TD.journal, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const SPN = id => (TD.SPREADS.find(s => s.id === id) || { name: id }).name;
+const FOC = { general: '', love: 'Love', work: 'Work and money' };
+const thumb = c => TD.faceHTML({ card: TD.DECK[c.i], reversed: !!c.r }, { caption: false });
+const cssId = s => String(s).replace(/[^a-z0-9-]/gi, '');
+
+$('jsp').insertAdjacentHTML('beforeend', TD.SPREADS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join(''));
+
+function when(ms){
+  const d = new Date(ms);
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: d.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' })
+    + ' &middot; ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+/* ---------- patterns ---------- */
+function bar(label, n, of){
+  const p = pct(n, of);
+  return `<div class="jbar"><span>${label}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`;
+}
+function renderStats(all){
+  if (!all.length) { $('stats').innerHTML = ''; return; }
+  const S = J.stats(all), N = S.cards;
+  const top = S.top.slice(0, 5).map(x => `<li>${thumb({ i: x.i })}<span>${esc(TD.DECK[x.i].name)}</span>
+      <span class="note">${x.n} time${x.n === 1 ? '' : 's'}${x.rev ? ', ' + x.rev + ' reversed' : ''}</span></li>`).join('');
+  const spreads = Object.entries(S.spreads).sort((a, b) => b[1] - a[1])
+    .map(([id, n]) => bar(esc(SPN(id)), n, S.readings)).join('');
+  const rep = S.repeat.length
+    ? `<p class="note" style="margin-top:12px;font-size:12.5px;color:var(--muted)"><b style="color:var(--text)">Turning up more than chance would suggest:</b>
+        ${S.repeat.slice(0, 3).map(x => esc(TD.DECK[x.i].name) + ' (' + x.n + ' times)').join(', ')}.
+        With ${N} cards drawn, any one card turns up about ${S.expected.toFixed(1)} times on average.</p>` : '';
+  $('stats').innerHTML = `<div class="grid g2" style="margin-top:26px">
+    <div class="card pad"><div class="eyebrow">So far</div>
+      <div class="statrow">
+        <div><div class="stat">${S.readings}</div><div class="note">reading${S.readings === 1 ? '' : 's'} since ${new Date(S.first).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div></div>
+        <div><div class="stat">${N}</div><div class="note">cards drawn</div></div>
+        <div><div class="stat">${pct(S.reversed, N)}%</div><div class="note">reversed (about 50% by chance)</div></div>
+      </div>
+      <div class="eyebrow" style="margin-top:22px">The cards you drew</div>
+      <div class="jbars">
+        ${bar('Major Arcana', S.majors, N)}
+        ${J.SUITS.map(s => bar(s[0].toUpperCase() + s.slice(1), S.suits[s], N)).join('')}
+      </div>
+      <p class="note" style="margin-top:10px">By chance alone a full deck gives about 28% Major Arcana and 18% for each suit.
+        A suit far above that across many readings says where your questions keep going: Wands to drive and work,
+        Cups to feelings, Swords to thoughts and conflict, Pentacles to money and the body.</p>
+    </div>
+    <div class="card pad"><div class="eyebrow">Your most frequent cards</div>
+      <ul class="toplist">${top}</ul>${rep}
+      <div class="eyebrow" style="margin-top:22px">Spreads you use</div>
+      <div class="jbars">${spreads}</div>
+    </div></div>`;
+}
+
+/* ---------- the list ---------- */
+let armed = null;                                    // delete needs a second tap on the same entry
+function entryHTML(e){
+  const sp = TD.spreadById(e.spread), known = sp.id === e.spread, id = cssId(e.id);
+  const thumbs = e.cards.slice(0, 5).map(thumb).join('') + (e.cards.length > 5 ? `<span class="more">+${e.cards.length - 5}</span>` : '');
+  const sub = e.question ? esc(e.question) : e.cards.map(c => esc(TD.DECK[c.i].name) + (c.r ? ' (reversed)' : '')).join(', ');
+  const cards = e.cards.map((c, k) => {
+    const card = TD.DECK[c.i], R = TD.READINGS[card.id] || {};
+    const pos = known && sp.pos[k] ? sp.pos[k].name : 'Card ' + (k + 1);
+    const txt = { general: c.r ? R.rev : R.up, love: c.r ? R.loveRev : R.loveUp, work: c.r ? R.workRev : R.workUp }[e.focus] || (c.r ? R.rev : R.up) || '';
+    return `<div><div class="jcard">${thumb(c)}<p><span class="pos">${e.cards.length > 1 ? (k + 1) + '. ' : ''}${esc(pos)}</span>
+      <b>${esc(card.name)}${c.r ? ', reversed' : ''}</b>${esc(c.r ? card.rev : card.up)}</p></div>
+      <details class="note" style="margin-top:6px"><summary style="cursor:pointer">The reading</summary>
+        <p style="margin-top:6px;font-size:12.5px;color:var(--muted)">${esc(txt)}</p></details></div>`;
+  }).join('');
+  const sig = e.sig != null ? `<p class="note" style="margin-bottom:12px">Significator: <b>${esc(TD.DECK[e.sig].name)}</b></p>` : '';
+  return `<details class="jentry" data-id="${id}"><summary>
+      <div class="jthumbs">${thumbs}</div>
+      <div class="jsum"><b>${esc(SPN(e.spread))}${FOC[e.focus] && sp.focus !== e.focus ? ' &middot; ' + FOC[e.focus] : ''}</b><span>${sub}</span></div>
+      <div class="jwhen">${when(e.at)}${e.note ? '<br>Has a note' : ''}</div></summary>
+    <div class="jbody">
+      ${e.question ? `<p style="font-size:14px;margin-bottom:14px"><span class="note">Your question:</span> ${esc(e.question)}</p>` : ''}
+      ${sig}<div class="jcards">${cards}</div>
+      <label class="f" for="n-${id}" style="margin-top:16px">Your note</label>
+      <textarea id="n-${id}" data-note="${id}" maxlength="4000" placeholder="What did it bring up? What happened next?">${esc(e.note)}</textarea>
+      <div class="jact"><button class="btn" type="button" data-img="${id}">Save as image</button><span class="note" data-saved="${id}" aria-live="polite"></span>
+        <button class="btn" type="button" data-del="${id}" style="margin-left:auto">Delete this reading</button></div>
+    </div></details>`;
+}
+function matches(e, q, sp){
+  if (sp && e.spread !== sp) return false;
+  if (!q) return true;
+  const hay = [e.question, e.note, SPN(e.spread)].concat(e.cards.map(c => TD.DECK[c.i].name)).join(' ').toLowerCase();
+  return q.split(/\s+/).every(w => hay.includes(w));
+}
+function render(){
+  const all = J.list(), q = $('jq').value.trim().toLowerCase(), sp = $('jsp').value;
+  const open = new Set([...document.querySelectorAll('.jentry[open]')].map(d => d.dataset.id));
+  renderStats(all);
+  $('jtools').style.display = all.length ? '' : 'none';
+  if (!all.length) {
+    $('jlist').innerHTML = `<div class="card pad col"><h3 style="font-size:20px">No readings yet</h3>
+      <p class="note" style="margin-top:8px;font-size:13px">Shuffle, choose a spread and pull. When the last card lands, the reading is
+      saved here.</p><div class="jact"><a class="btn primary" href="pull.html">Pull your first reading</a>
+      <button class="btn" type="button" id="jimport2">Load a backup</button></div></div>`;
+    $('jimport2').onclick = () => $('jfile').click();
+    return;
+  }
+  const shown = all.filter(e => matches(e, q, sp));
+  $('jlist').innerHTML = shown.length ? shown.map(entryHTML).join('')
+    : `<p class="note" style="font-size:13px">No reading matches that.</p>`;
+  open.forEach(id => { const d = document.querySelector(`.jentry[data-id="${id}"]`); if (d) d.open = true; });
+}
+$('jq').addEventListener('input', render);
+$('jsp').addEventListener('change', render);
+
+const nt = {};
+$('jlist').addEventListener('input', ev => {
+  const id = ev.target.dataset.note; if (!id) return;
+  clearTimeout(nt[id]);
+  nt[id] = setTimeout(() => {
+    J.update(id, { note: ev.target.value });
+    const s = document.querySelector(`[data-saved="${id}"]`); if (s) s.textContent = 'Note saved.';
+  }, 400);
+});
+$('jlist').addEventListener('click', ev => {
+  const im = ev.target.closest('[data-img]');
+  if (im) { const e = J.get(im.dataset.img); if (e) TD.share.saveReading(e.spread, e.cards, e, document.querySelector(`[data-saved="${im.dataset.img}"]`)); return; }
+  const b = ev.target.closest('[data-del]'); if (!b) return;
+  const id = b.dataset.del;
+  if (armed !== id) { armed = id; b.textContent = 'Tap again to delete'; b.style.borderColor = 'var(--a1)'; return; }
+  armed = null; J.remove(id); $('jmsg').textContent = 'Reading deleted.'; render();
+});
+
+/* ---------- backup ---------- */
+$('jexport').onclick = () => {
+  const blob = new Blob([J.exportText()], { type: 'application/json' });
+  const a = document.createElement('a'), d = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = `tarot-journal-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('jmsg').textContent = 'Backup saved to your downloads.';
+};
+$('jimport').onclick = () => $('jfile').click();
+$('jfile').onchange = ev => {
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  if (f.size > 2e6) { $('jmsg').textContent = 'That file is too big to be a journal backup.'; ev.target.value = ''; return; }
+  const r = new FileReader();
+  r.onload = () => {
+    const res = J.importText(String(r.result));
+    $('jmsg').textContent = res.ok
+      ? `Added ${res.added} reading${res.added === 1 ? '' : 's'}${res.skipped ? `; ${res.skipped} already here or unreadable, left as they were` : ''}.`
+      : res.error;
+    ev.target.value = ''; render();
+  };
+  r.readAsText(f);
+};
+render();
+</script></body></html>

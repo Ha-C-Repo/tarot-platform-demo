@@ -6,6 +6,7 @@
 <meta name="description" content="Two birth charts compared: rising signs, houses and a real grid of planetary aspects, with the score weighting published.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/compatibility.html">
@@ -102,7 +103,7 @@
 <script src="js/vendor/astronomy.browser.min.js"></script>
 <script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/tools.js"></script><script src="js/places.js"></script>
 <script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/data/extra-text.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('compatibility.html');
 const $ = id => document.getElementById(id);
@@ -223,9 +224,10 @@ function contactsHTML(s, pa, pb){
     <div class="scrollx"><table class="ctab"><tbody>${top.map(c => `<tr><td>${esc(poss(pa.name))} ${G(c.a)} ${c.a}</td><td>${c.glyph} ${c.type}</td>
       <td>${esc(poss(pb.name, true))} ${G(c.b)} ${c.b}</td><td>orb ${c.orb.toFixed(1)}&deg;</td>
       <td style="color:${c.points > 0 ? 'var(--a4)' : '#FF6B81'}">${c.points > 0 ? '+' : '\u2212'}${Math.abs(c.points).toFixed(2)}</td></tr>`).join('')}</tbody></table></div>
-    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-      <p>A short line for each planet pair and aspect: &ldquo;your Venus trine their Mars&rdquo; and so on. Around 300 lines,
-      short ones, not paragraphs. That writing, not the arithmetic, is what makes this the reader&rsquo;s tool.</p></div></div>`;
+    <div style="margin-top:12px">${top.slice(0, 5).map(c => { const R = TD.EXTRA.compatRole, K = TD.EXTRA.compatKind;
+      return `<p style="font-size:13px;line-height:1.55;margin-top:8px"><b>${esc(poss(pa.name))} ${c.a}</b> (${R[c.a] || c.a}) and
+        <b>${esc(poss(pb.name, true))} ${c.b}</b> (${R[c.b] || c.b}), ${c.type}. ${K[c.type] || ''}</p>`; }).join('')}
+      <p class="note" style="margin-top:10px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p></div></div>`;
 }
 function compositeHTML(A, B, pa, pb){
   const cp = TD.composite(A, B);
@@ -269,6 +271,7 @@ function fgo(){
 
 /* ---------- quick mode: unchanged from the first demo ---------- */
 const TRIAD = {Rat:0,Dragon:0,Monkey:0, Ox:1,Snake:1,Rooster:1, Tiger:2,Horse:2,Dog:2, Rabbit:3,Goat:3,Pig:3};
+const ANIMAL_ORDER = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
 function person(name, iso){
   const jd = TD.toJD(new Date(iso + 'T12:00:00Z'));
   const si = TD.signIndex(TD.sunLongitude(jd));
@@ -306,9 +309,12 @@ function go(){
       <div class="kv"><span>Life path resonance (max 20)</span><span>${lifeScore}</span></div>
       <div class="kv"><span>Modality mix (max 15)</span><span>${modScore}</span></div>
     </div>
-    <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-      <p>A short line for each pairing, around 300 of them. Short lines, not paragraphs &mdash; this is the
-      corpus a reader can finish in a couple of sittings.</p></div>`;
+    <div class="res"><h3>Reading the pair</h3>
+      <p style="font-size:13.5px;line-height:1.6">${TD.EXTRA.quickElement[[a.element, b.element].sort().join('|')] || ''}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:8px">${TD.EXTRA.quickAnimal[TRIAD[a.animal] === TRIAD[b.animal] ? 'triad'
+        : Math.abs(ANIMAL_ORDER.indexOf(a.animal) - ANIMAL_ORDER.indexOf(b.animal)) === 6 ? 'clash' : 'other']}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:8px">${TD.EXTRA.quickModality[a.modality === b.modality ? 'same' : 'mixed']}</p>
+      <p class="note" style="margin-top:10px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p></div>`;
 }
 $('cgo').onclick = go;
 ['p1n','p1d','p2n','p2d'].forEach(id=>$(id).addEventListener('change',go));

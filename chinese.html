@@ -6,6 +6,7 @@
 <meta name="description" content="Animal and element from the real lunisolar calendar, showing both the Lunar New Year and Lichun boundaries.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/chinese.html">
@@ -57,7 +58,7 @@
 <script src="js/vendor/astronomy.browser.min.js"></script>
 <script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/places.js"></script>
 <script src="js/cards.js"></script><script src="js/moonviz.js"></script><script src="js/numerology.js"></script>
-<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script src="js/chinese.js"></script><script src="js/maya.js"></script><script src="js/data/extra-text.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('chinese.html');
 const $ = id => document.getElementById(id);
@@ -75,6 +76,13 @@ function pillarBox(label, p, sub){
     <p class="note" style="font-size:12px">${p.stem} ${p.branch}<br>${p.polarity} ${p.element} &middot; ${p.animal}</p>
     ${sub ? `<p class="note" style="color:var(--a5);margin-top:4px">${sub}</p>` : ''}</div>`;
 }
+/* Allies: the animal's triad (four and eight places on). Opposite: six places round the wheel. */
+const ANI = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
+function relLines(animal){
+  const i = ANI.indexOf(animal); if (i < 0) return '';
+  const fill = (t, a, b) => t.replace('{a}', a).replace('{b}', b || '');
+  return fill(TD.EXTRA.chineseTriad, ANI[(i + 4) % 12], ANI[(i + 8) % 12]) + ' ' + fill(TD.EXTRA.chineseClash, ANI[(i + 6) % 12]);
+}
 function go(){
   const iso = $('cd').value; if (!iso) return;
   const [y, mo, d] = iso.split('-').map(Number);
@@ -89,8 +97,10 @@ function go(){
   const b = TD.bazi({ y, mo, d, h, mi, timeKnown: known, bornUtc: t.utc, tz,
                       dayStartUtc: span && span.s, dayEndUtc: span && span.e });
   const box = (ttl,p,lab) => `<div class="res"><h3>${ttl}</h3>
-      <div class="big">${p.emoji} ${p.element} ${p.animal}</div>
+      <div class="big"><span class="prism" lang="zh-Hant">${p.glyph}</span> ${p.element} ${p.animal}</div>
       <p class="note" style="font-size:13px">${TD.ANIMAL_NOTE[p.animal]}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:8px">${TD.EXTRA.animal[p.animal] || ''} ${TD.EXTRA.element[p.element] || ''}</p>
+      <p class="note" style="font-size:12.5px;margin-top:6px">${relLines(p.animal)}</p>
       <div class="kv" style="margin-top:10px"><span>Year pillar</span><span>${p.stem} · ${p.polarity} ${p.element}</span></div>
       <div class="kv"><span>Boundary used</span><span>${lab}</span></div></div>`;
   const baziAnimal = b.year;       // exact-instant year pillar
@@ -123,9 +133,7 @@ function go(){
        <div class="kv"><span>Lunar New Year that year</span><span>${fmt(c.cny)}</span></div>
        <div class="kv"><span>Next Lunar New Year</span><span>${fmt(c.nextCny)}</span></div>
      </div>
-     <div class="ph" style="margin-top:14px"><span class="k">Placeholder &mdash; your writing goes here</span>
-       <p>60 animal-and-element combinations plus 144 short compatibility lines, and a line for each pillar if the
-       reader works with Four Pillars. A modest corpus, and one of the quicker ones to write.</p></div>`;
+     <p class="note" style="margin-top:14px">Sample text written for this demo. On a live site the reader&rsquo;s own words replace it.</p>`;
 }
 ['cd', 'ct'].forEach(id => $(id).addEventListener('change', go));
 $('cu').addEventListener('change', go);

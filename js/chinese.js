@@ -6,8 +6,8 @@ window.TD = window.TD || {};
 (function(NS){
 'use strict';
 const ANIMALS = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
-const EMOJI   = ['\u{1F401}','\u{1F402}','\u{1F405}','\u{1F407}','\u{1F409}','\u{1F40D}',
-                 '\u{1F40E}','\u{1F410}','\u{1F412}','\u{1F413}','\u{1F415}','\u{1F416}'];
+/* The animal written as its traditional character (text, not emoji: the site draws no emoji anywhere). */
+const GLYPH   = ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
 const STEMS    = ['Jia','Yi','Bing','Ding','Wu','Ji','Geng','Xin','Ren','Gui'];
 const ELEMENTS = ['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
 const YIN_YANG = ['Yang','Yin'];
@@ -23,7 +23,7 @@ function pillar(year){
   const i = ((year - 1984) % 60 + 60) % 60;
   const stem = i % 10, branch = i % 12;
   return { stem: STEMS[stem], element: ELEMENTS[stem], polarity: YIN_YANG[stem % 2],
-           animal: ANIMALS[branch], emoji: EMOJI[branch], branchIndex: branch };
+           animal: ANIMALS[branch], glyph: GLYPH[branch], branchIndex: branch };
 }
 /* Chinese New Year, exact: month 1 begins on the CST day of a new moon; month 11 is the month
    containing the December solstice; New Year is two new moons after the start of month 11, or
@@ -107,7 +107,7 @@ const norm = d => ((d % 360) + 360) % 360;
 function pillarOf(stem, branch){
   return { stem: STEMS[stem], branch: BRANCHES[branch], zh: STEM_ZH[stem] + BRANCH_ZH[branch],
            element: ELEMENTS[stem], polarity: YIN_YANG[stem % 2], animal: ANIMALS[branch],
-           emoji: EMOJI[branch], stemIndex: stem, branchIndex: branch };
+           glyph: GLYPH[branch], stemIndex: stem, branchIndex: branch };
 }
 function sunLon(ms){ const A = window.Astronomy; return A.Ecliptic(A.GeoVector(A.Body.Sun, new Date(ms), true)).elon; }
 function lichunMs(year){

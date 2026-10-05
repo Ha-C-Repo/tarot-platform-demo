@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Checkout — tarot platform demo</title>
+<meta name="description" content="The two subscriptions, Supporter and Membership, with the price and renewal date shown before you pay.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/checkout.html">
+<meta property="og:title" content="Checkout — tarot platform demo">
+<meta property="og:description" content="The two subscriptions, Supporter and Membership, with the price and renewal date shown before you pay.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css"></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="mockflag">Demo flow &middot; nothing is sent or charged</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Check<span class="prism">out</span></h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="grid g2" style="margin-top:26px;align-items:start">
+    <div class="card pad">
+      <div class="eyebrow">Your plan</div>
+      <div class="seg" id="planseg" role="group" aria-label="Plan" style="margin-bottom:14px">
+        <button type="button" data-plan="supporter">Supporter</button><button type="button" data-plan="member">Membership</button></div>
+      <div id="sum"></div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow">Payment</div>
+      <div class="ph"><span class="k">Placeholder &mdash; the payment form goes here</span>
+        <p>On a live site this box is the payment provider&rsquo;s own secure form (card, Apple Pay, Google Pay), so card
+        numbers never touch the reader&rsquo;s site. This demo has no payment account and never shows a card field.</p></div>
+      <button class="btn primary wide" type="button" id="pay" style="margin-top:16px">Subscribe</button>
+      <p class="note" style="margin-top:10px">Cancel any time from <a href="account.html" style="text-decoration:underline">your account</a>.
+        A plan renews each period until cancelled; the price and the renewal date are shown before you pay.</p>
+    </div>
+  </div>
+  <p class="note col" style="margin-top:22px">Looking for a one-off live session instead? <a href="book.html" style="text-decoration:underline">Book a session</a>.</p>
+</div>
+<script src="js/icons.js"></script><script src="js/members.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('checkout.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* The two subscriptions on pricing.html: Supporter $5 a month, Membership at the reading price a month. */
+const PLANS = {
+  supporter: { name: 'Supporter', price: () => 5, lede: 'No ads anywhere, the members&rsquo; shelf in the Handbook, unlimited card pulls, and your charts saved.',
+    items: ['No ads anywhere', 'The members&rsquo; shelf', 'Unlimited card pulls', 'Save your charts'] },
+  member: { name: 'Membership', price: () => Math.max(1, Math.round(Number(TD.brand.rate) || 85)),
+    lede: 'One personalised reading every month, recorded for you, plus everything in Supporter. Seats are capped.',
+    items: ['One recorded reading a month, 8&ndash;10 min', 'Everything in Supporter', 'Priority booking on live sessions', 'Discount on live sessions'] }
+};
+let plan = 'member';
+try { const p = new URLSearchParams(location.search).get('plan'); if (PLANS[p]) plan = p; } catch (e) {}
+function render(){
+  const P = PLANS[plan], total = P.price(), next = new Date(); next.setMonth(next.getMonth() + 1);
+  document.querySelectorAll('#planseg [data-plan]').forEach(b => b.setAttribute('aria-pressed', b.dataset.plan === plan));
+  $('lede').innerHTML = P.lede;
+  $('sum').innerHTML = `<ul style="list-style:none;display:grid;gap:6px;margin-bottom:12px;font-size:13px;color:var(--muted)">${P.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    <div class="sumrow"><span>${P.name}, monthly</span><span>${TD.money(total)}</span></div>
+    <div class="sumrow"><span>Renews</span><span>${next.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
+    <div class="sumrow total"><span>Due today</span><span>${TD.money(total)}</span></div>`;
+  $('pay').textContent = `Subscribe for ${TD.money(total)}`;
+}
+document.querySelectorAll('#planseg [data-plan]').forEach(b => b.onclick = () => { plan = b.dataset.plan; render(); });
+$('pay').onclick = () => TD.openModal();
+document.getElementById('dp').addEventListener('input', render);       // the price in Customise changes the membership live
+render();
+</script></body></html>
