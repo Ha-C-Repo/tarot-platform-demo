@@ -15,11 +15,11 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['lenormand.html','Lenormand'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
-  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching, runes, dice, geomancy',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','More oracles',1], ['dreams.html','Angel numbers and dreams',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 /* The Astrology menu (Amanda, 2026-10-05): every astrology page, calculator and report, in sections. Columns on desktop, an accordion on phones. */
 const ASTRO = [
-  [['Charts and calculators', [['birthchart.html','Birth chart'], ['vedic.html','Vedic chart'], ['astromap.html','Astrocartography'], ['compatibility.html','Compatibility'], ['tools.html','Astrology tools']]],
+  [['Charts and calculators', [['birthchart.html','Birth chart'], ['vedic.html','Vedic chart'], ['astromap.html','Astrocartography'], ['compatibility.html','Compatibility'], ['horary.html','Horary: ask a question'], ['tools.html','Astrology tools']]],
    ['Horoscopes', [['horoscope.html','Personal horoscope'], ['signs.html','Horoscopes by sign']]]],
   [['Reports: soul and self', [['reports.html','All reports'], ['pastlife.html','Past lives'], ['karmic.html','Karmic path'], ['report.html?r=lifepath','Life path'], ['report.html?r=vocation','Vocational guidance'],
     ['report.html?r=child','Child report'], ['report.html?r=family','Family patterns in love'], ['report.html?r=chakras','Chakras, stones and essences']]]],

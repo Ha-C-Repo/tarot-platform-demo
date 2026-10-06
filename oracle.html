@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>I Ching, runes, dice and geomancy — tarot platform demo</title>
+<title>More oracles — tarot platform demo</title>
 <meta name="description" content="Cast the coins for the I Ching in James Legge's 1882 translation, or cast the 24 runes of the Elder Futhark in four spreads, or roll the three astrology dice.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
@@ -22,13 +22,13 @@
 <meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
-  <div class="eyebrow">Free &middot; four more oracles</div>
-  <h1 style="font-size:clamp(34px,6vw,54px)">I Ching, runes,<br><span class="prism">dice and geomancy</span></h1>
+  <div class="eyebrow">Free &middot; six more oracles</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">More<br><span class="prism">oracles</span></h1>
   <p class="lede">Cast the coins for the Book of Changes, in James Legge&rsquo;s 1882 translation, cast the 24 runes of the
-    Elder Futhark, roll the three astrology dice, or cast a geomancy chart. Hold your question in mind first.</p>
+    Elder Futhark, roll the three astrology dice, cast a geomancy chart, draw the Ogham tree letters, or open an old book at random. Hold your question in mind first.</p>
 
   <div class="tabs" id="otabs" role="tablist" aria-label="Oracle">
-    <button type="button" role="tab" data-t="iching">I Ching</button><button type="button" role="tab" data-t="runes">Runes</button><button type="button" role="tab" data-t="dice">Astro dice</button><button type="button" role="tab" data-t="geo">Geomancy</button></div>
+    <button type="button" role="tab" data-t="iching">I Ching</button><button type="button" role="tab" data-t="runes">Runes</button><button type="button" role="tab" data-t="dice">Astro dice</button><button type="button" role="tab" data-t="geo">Geomancy</button><button type="button" role="tab" data-t="ogham">Ogham</button><button type="button" role="tab" data-t="biblio">Bibliomancy</button></div>
   <section id="iching" class="col" style="max-width:820px;margin-top:20px">
     <div class="qrow"><label class="f" for="iq">Your question</label><input id="iq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
     <div class="jact"><button class="btn primary" type="button" id="cast">Cast the coins</button>
@@ -82,12 +82,32 @@
       whether the figure of house 1 (you) and the figure of the house your question is about come together, by occupation, conjunction, mutation or
       translation, checked in that order. The randomness is your browser&rsquo;s cryptographic generator; the readings are sample text written for this demo.</p></div>
   </section>
+  <section id="ogham" class="col hide" style="max-width:860px;margin-top:20px">
+    <div class="qrow"><label class="f" for="oq">Your question</label><input id="oq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
+    <div class="jact"><div class="seg" id="osp" role="group" aria-label="Spread" style="min-width:min(100%,420px)"></div>
+      <button class="btn primary" type="button" id="odraw">Draw the staves</button></div>
+    <div id="oout" aria-live="polite"></div>
+    <div class="warn"><span class="k">Method</span><p>Ogham is the early Irish alphabet of twenty letters cut as strokes along a stem line, found on standing stones from about
+      the 4th century. Medieval Irish manuscripts tie each letter to a tree; using the letters for divination is a modern practice built on those
+      tree meanings. Staves are drawn at random from all twenty without repeats, with your browser&rsquo;s cryptographic generator, and read one way up.
+      The letters are drawn on the page; the readings are sample text written for this demo.</p></div>
+  </section>
+  <section id="biblio" class="col hide" style="max-width:860px;margin-top:20px">
+    <div class="qrow"><label class="f" for="bq">Your question</label><input id="bq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
+    <div class="qrow"><label class="f" for="bbook">Open</label><select id="bbook"></select></div>
+    <div class="jact"><button class="btn primary" type="button" id="bopen">Open the book</button></div>
+    <div id="bout" aria-live="polite"></div>
+    <div class="warn"><span class="k">Method</span><p>Bibliomancy is the old custom of opening a book at random and reading the first passage your eye falls on as an
+      answer. Here the books are the six public-domain works in the Handbook. A book (or the one you choose), a chapter and a paragraph are picked with
+      your browser&rsquo;s cryptographic generator; very short lines, headings and footnotes are skipped. The passage is quoted exactly, in its author&rsquo;s
+      own words and spelling, with where it comes from. The question under it is ours, to help you reflect.</p></div>
+  </section>
   <div class="card pad col" style="margin-top:18px">
     <div class="ph"><span class="k">On a live site</span>
       <p>The reader can keep, edit or replace any of this text, and offer an I Ching or rune reading as a paid session.</p></div>
   </div>
 </div>
-<script src="js/data/iching.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/geomancy.js"></script><script src="js/data/oracle-text.js"></script><script src="js/journal.js"></script>
+<script src="js/data/iching.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/geomancy.js"></script><script src="js/ogham.js"></script><script src="js/data/handbook.js"></script><script src="js/data/oracle-text.js"></script><script src="js/journal.js"></script>
 <script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('oracle.html');
@@ -96,7 +116,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const ORD = ['first (bottom)', 'second', 'third', 'fourth', 'fifth', 'sixth (top)'];
 const LINE = { 6: 'changing broken line', 7: 'unbroken line', 8: 'broken line', 9: 'changing unbroken line' };
 let tab = 'iching', nRunes = 3;
-try { const q = new URLSearchParams(location.search).get('o'); if (q === 'runes' || q === 'dice' || q === 'geo') tab = q; } catch (e) {}
+try { const q = new URLSearchParams(location.search).get('o'); if (['runes', 'dice', 'geo', 'ogham', 'biblio'].includes(q)) tab = q; } catch (e) {}
 
 function hexHead(h, ch){
   const T = TD.TRIGRAMS;
@@ -279,10 +299,62 @@ $('gcast').onclick = () => {
   $('gout').innerHTML = html;
 };
 
+/* ---------- Ogham ---------- */
+const OG = TD.ogham;
+let ospread = 'three';
+$('osp').innerHTML = OG.SPREADS.map(s => `<button type="button" data-o="${s.id}">${s.name}</button>`).join('');
+$('osp').addEventListener('click', ev => { const b = ev.target.closest('[data-o]'); if (b) { ospread = b.dataset.o; renderTabs(); } });
+$('odraw').onclick = () => {
+  const S = OG.SPREADS.find(s => s.id === ospread), d = OG.draw(S.pos.length), q = $('oq').value.trim();
+  let html = (q ? `<p class="note" style="margin-top:18px">Your question: <b style="color:var(--text)">${esc(q)}</b></p>` : '') +
+    `<div class="runerow">${d.map((i, k) => { const f = OG.FEDA[i];
+      return `<div class="runecard"><div class="pos">${esc(S.pos[k][0])}</div><p class="note" style="font-size:11.5px">${esc(S.pos[k][1])}</p>
+        <div class="runestone">${OG.svg(i, { size: 26, stroke: 'url(#tdPrism)' })}</div>
+        <h3 style="font-size:20px">${esc(f.name)}</h3><p class="note">${esc(f.tree)} &middot; the sound &ldquo;${esc(f.sound)}&rdquo; &middot; ${OG.FAMILY[f.family]}</p>
+        <p style="margin-top:8px;font-size:13.5px;line-height:1.55">${esc(RT['ogham:' + f.id] || '')}</p></div>`; }).join('')}</div>`;
+  if (J && J.add({ kind: 'ogham', spread: 'ogham-' + ospread, question: q, ogham: d })) html += '<p class="note" style="margin-top:12px">Saved to <a href="journal.html">your journal</a>.</p>';
+  $('oout').innerHTML = html;
+};
+
+/* ---------- Bibliomancy ---------- */
+const HB = TD.HANDBOOK, BOOKS = Object.keys(HB.books);
+const PROMPTS = ['What in this passage answers your question, even sideways?', 'Which single phrase caught your eye first, and why that one?',
+  'If this passage were advice from a friend, what would they be telling you?', 'What does the passage ask you to notice that you have been overlooking?',
+  'Where in your question do you meet the same feeling as this passage?', 'What would change if you took this passage as permission?',
+  'Read it again slowly. Which word would you underline?', 'What is the oldest part of your question, the part this author might also have known?'];
+$('bbook').innerHTML = '<option value="">Any of the six books</option>' + BOOKS.map(id => `<option value="${id}">${esc(HB.books[id].title)}</option>`).join('');
+const bookLoading = {};
+function loadBook(id){
+  if (TD.BOOKTEXT && TD.BOOKTEXT[id]) return Promise.resolve();
+  return bookLoading[id] || (bookLoading[id] = new Promise((ok, no) => { const s = document.createElement('script'); s.src = HB.books[id].file; s.onload = ok;
+    s.onerror = () => { delete bookLoading[id]; no(); }; document.head.appendChild(s); }));
+}
+/* Paragraphs worth reading as an answer: plain body paragraphs only (headings, centred lines and footnotes carry attributes or
+   open with "["), 140 to 900 characters, footnote markers removed. */
+const plain = h => h.replace(/<sup[^>]*>.*?<\/sup>/g, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').trim();
+function passages(id, ch){ return [...TD.BOOKTEXT[id][ch].matchAll(/<p>([\s\S]*?)<\/p>/g)].map(m => plain(m[1])).filter(t => t.length >= 140 && t.length <= 900 && !/^\[/.test(t)); }
+function rnd(n){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+$('bopen').onclick = () => {
+  const q = $('bq').value.trim(), id = $('bbook').value || BOOKS[rnd(BOOKS.length)];
+  $('bout').innerHTML = '<p class="note" style="margin-top:14px">Opening the book&hellip;</p>';
+  loadBook(id).then(() => {
+    const b = HB.books[id], chs = b.chapters.map((c, i) => i).filter(i => passages(id, i).length);
+    const ch = chs[rnd(chs.length)], ps = passages(id, ch), p = rnd(ps.length), text = ps[p];
+    let html = (q ? `<p class="note" style="margin-top:18px">Your question: <b style="color:var(--text)">${esc(q)}</b></p>` : '') +
+      `<div class="card pad" style="margin-top:14px"><p class="legge" style="font-size:16px;line-height:1.7">&ldquo;${esc(text)}&rdquo;</p>
+        <p class="note" style="margin-top:12px">${esc(b.author)}, <i>${esc(b.title)}</i>, &ldquo;${esc(b.chapters[ch].t)}&rdquo;. ${esc(b.edition)}
+          <a href="handbook.html#handbook/${id}/${ch}">Read the chapter in the Handbook</a>.</p>
+        <div class="eyebrow" style="margin-top:16px">To reflect on</div><p class="interp">${esc(PROMPTS[rnd(PROMPTS.length)])}</p></div>`;
+    if (J && J.add({ kind: 'biblio', spread: 'biblio', question: q, book: id, ch, passage: text })) html += '<p class="note" style="margin-top:12px">Saved to <a href="journal.html">your journal</a>.</p>';
+    $('bout').innerHTML = html;
+  }, () => { $('bout').innerHTML = '<p class="note" style="margin-top:14px">The book could not be opened. Check the connection and try again.</p>'; });
+};
+
 function renderTabs(){
   document.querySelectorAll('#otabs [data-t]').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab));
-  ['iching', 'runes', 'dice', 'geo'].forEach(t => $(t).classList.toggle('hide', tab !== t));
+  ['iching', 'runes', 'dice', 'geo', 'ogham', 'biblio'].forEach(t => $(t).classList.toggle('hide', tab !== t));
   document.querySelectorAll('#rn [data-n]').forEach(b => b.setAttribute('aria-pressed', b.dataset.n === spread));
+  document.querySelectorAll('#osp [data-o]').forEach(b => b.setAttribute('aria-pressed', b.dataset.o === ospread));
   const S = O.RUNE_SPREADS.find(x => x.id === spread);
   $('rspread').textContent = spread === 'cast' ? 'Nine runes thrown onto a cloth; only those face up on the cloth are read, by how close they lie to the centre.'
     : S.pos.map(p => p[0]).join(' · ');

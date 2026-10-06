@@ -8,14 +8,14 @@
      books, card images) are kept from the first time they are used.
    - Nothing from any other site is touched.
    Bump VERSION whenever the site is published; old caches are deleted when the new worker takes over. */
-const VERSION = 'tarotdemo-2026-10-06a';
+const VERSION = 'tarotdemo-2026-10-06b';
 const PRECACHE = [
-  './', 'index.html', 'pull.html', 'journal.html', 'learn.html', 'oracle.html', 'crystal.html', 'lenormand.html', 'moon.html', 'birthchart.html', 'vedic.html', 'astromap.html', 'pastlife.html', 'karmic.html', 'report.html', 'reports.html',
+  './', 'index.html', 'pull.html', 'journal.html', 'learn.html', 'oracle.html', 'crystal.html', 'lenormand.html', 'horary.html', 'dreams.html', 'moon.html', 'birthchart.html', 'vedic.html', 'astromap.html', 'pastlife.html', 'karmic.html', 'report.html', 'reports.html',
   'horoscope.html', 'signs.html', 'tools.html', 'compatibility.html', 'numerology.html', 'chinese.html', 'maya.html',
   'handbook.html', 'pricing.html', 'book.html', 'checkout.html', 'live.html', 'account.html', '404.html',
   'css/base.css', 'css/book.css', 'css/report.css',
   'js/acg.js', 'js/astro.js', 'js/cards.js', 'js/chart.js', 'js/chinese.js', 'js/deck.js', 'js/handbook.js', 'js/icons.js',
-  'js/gooddays.js', 'js/journal.js', 'js/learn.js', 'js/oracle.js', 'js/crystal.js', 'js/geomancy.js', 'js/lenormand.js', 'js/data/lenormand.js', 'js/data/lenormand-art.js', 'js/data/lenormand-text.js', 'js/kundli.js', 'js/maya.js', 'js/members.js', 'js/moonviz.js', 'js/natal.js', 'js/numerology.js', 'js/factors.js', 'js/reportpage.js', 'js/reports.js',
+  'js/gooddays.js', 'js/journal.js', 'js/learn.js', 'js/oracle.js', 'js/crystal.js', 'js/geomancy.js', 'js/lenormand.js', 'js/ogham.js', 'js/horary.js', 'js/data/dreams-text.js', 'js/data/lenormand.js', 'js/data/lenormand-art.js', 'js/data/lenormand-text.js', 'js/kundli.js', 'js/maya.js', 'js/members.js', 'js/moonviz.js', 'js/natal.js', 'js/numerology.js', 'js/factors.js', 'js/reportpage.js', 'js/reports.js',
   'js/places.js', 'js/reading.js', 'js/share.js', 'js/signs.js', 'js/site.js', 'js/spreads.js', 'js/tools.js', 'js/tour.js',
   'js/transits.js', 'js/vedic.js', 'js/wheel.js',
   'js/vendor/astronomy.browser.min.js', 'js/vendor/astrochart.js',

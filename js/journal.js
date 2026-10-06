@@ -7,7 +7,7 @@
    - Reset demo data clears it with everything else (site.js clears localStorage).
    Entry: { id, at (ms), spread, focus, question, note, sig: card index or null, cards: [{i, r}] }
    Oracle entries (oracle.html, 2026-10-05) add kind: 'runes' with runes: [{i: 0-23, r, z: zone}] (1-9), or
-   kind: 'dice' with dice: [planet 0-11, sign 0-11, house 1-12]; kind: 'lenormand' with lnm [card indices 0-35 in layout order] and sig (27 or 28 for a Grand Tableau); kind: 'geomancy' with mothers [4 figure indices 0-15] and house 1-12 (the chart is rebuilt from them); or kind: 'crystal' (crystal.html) with the answer text and
+   kind: 'dice' with dice: [planet 0-11, sign 0-11, house 1-12]; kind: 'ogham' with ogham [letter indices 0-19]; kind: 'biblio' with book id, ch and the passage text; kind: 'horary' with house 2-12 and the answer text; kind: 'lenormand' with lnm [card indices 0-35 in layout order] and sig (27 or 28 for a Grand Tableau); kind: 'geomancy' with mothers [4 figure indices 0-15] and house 1-12 (the chart is rebuilt from them); or kind: 'crystal' (crystal.html) with the answer text and
    orb: the two hidden cards [{i, r}], kept but never shown; their cards list is empty and the tarot stats skip them. */
 window.TD = window.TD || {};
 (function(NS){
@@ -32,6 +32,9 @@ const str = (x, n) => typeof x === 'string' ? x.slice(0, n) : '';
 const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
 function validOracle(e){
   if (e.kind === 'runes') return Array.isArray(e.runes) && e.runes.length >= 1 && e.runes.length <= 9 && e.runes.every(x => x && isInt(x.i, 0, 23));
+  if (e.kind === 'ogham') return Array.isArray(e.ogham) && [1, 3, 5].includes(e.ogham.length) && e.ogham.every(x => isInt(x, 0, 19)) && new Set(e.ogham).size === e.ogham.length;
+  if (e.kind === 'biblio') return typeof e.book === 'string' && /^[a-z]{2,20}$/.test(e.book) && isInt(e.ch, 0, 500) && typeof e.passage === 'string' && e.passage.length > 0;
+  if (e.kind === 'horary') return isInt(e.house, 2, 12) && typeof e.answer === 'string' && e.answer.length > 0;
   if (e.kind === 'lenormand') return Array.isArray(e.lnm) && [3, 5, 9, 36].includes(e.lnm.length) && e.lnm.every(x => isInt(x, 0, 35)) && new Set(e.lnm).size === e.lnm.length
     && (e.lnm.length !== 36 || e.sig === 27 || e.sig === 28);
   if (e.kind === 'geomancy') return Array.isArray(e.mothers) && e.mothers.length === 4 && e.mothers.every(x => isInt(x, 0, 15)) && isInt(e.house, 1, 12);
@@ -54,6 +57,9 @@ function clean(e){
     cards: e.kind ? [] : e.cards.map(c => ({ i: c.i, r: !!c.r })),
     ...(e.kind === 'runes' ? { kind: 'runes', runes: e.runes.map(x => ({ i: x.i, r: !!x.r, z: ['heart', 'near', 'edge'].includes(x.z) ? x.z : '' })) } : {}),
     ...(e.kind === 'dice' ? { kind: 'dice', dice: e.dice.slice(0, 3) } : {}),
+    ...(e.kind === 'ogham' ? { kind: 'ogham', ogham: e.ogham.slice(0, 5) } : {}),
+    ...(e.kind === 'biblio' ? { kind: 'biblio', book: e.book, ch: e.ch, passage: str(e.passage, 2000) } : {}),
+    ...(e.kind === 'horary' ? { kind: 'horary', house: e.house, answer: str(e.answer, 2000) } : {}),
     ...(e.kind === 'lenormand' ? { kind: 'lenormand', lnm: e.lnm.slice(0, 36), sig: e.lnm.length === 36 ? e.sig : null } : {}),
     ...(e.kind === 'geomancy' ? { kind: 'geomancy', mothers: e.mothers.slice(0, 4), house: e.house } : {}),
     ...(e.kind === 'crystal' ? { kind: 'crystal', orb: e.orb.map(x => ({ i: x.i, r: !!x.r })), answer: str(e.answer, 3000) } : {}) };
