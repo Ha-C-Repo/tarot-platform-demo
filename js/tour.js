@@ -27,6 +27,8 @@ const STEPS = [
     body: 'Every card carries its traditional upright and reversed meaning, from Waite’s 1911 book, and the spread is read as a whole. A finished reading can be saved as an image to share, or printed. On a live site the reader’s own writing replaces the sample text.' },
   { page: 'crystal.html', sel: '.cbwrap', title: 'A new kind of oracle: the crystal ball',
     body: 'A visitor types a question. Behind the glass the deck is shuffled, a card drawn, shuffled again and a second card drawn, and the ball answers from those two cards in its own voice, without ever showing them. It reads love, work and yes-or-no questions differently.' },
+  { page: 'lenormand.html', sel: '#lsp', title: 'Lenormand, read the way readers read it',
+    body: 'The 36-card Lenormand deck, drawn fresh for this site, read in pairs: every one of the 630 possible pairs has its own reading. A line of three or five, the box of nine, or the Grand Tableau of all 36 cards around the card that stands for the visitor.' },
   { page: 'journal.html', sel: '#jlist', title: 'Every reading, kept',
     body: 'The journal keeps each reading with its question and the visitor’s notes, and shows the cards that keep coming back. It lives in the visitor’s browser and backs up to a file.' },
   { page: 'learn.html', sel: '#stage', title: 'Learning the cards',

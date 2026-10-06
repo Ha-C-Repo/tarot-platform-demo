@@ -13,7 +13,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 
 /* 'astro' marks where the Astrology menu sits. Third field 1 = phone menu only; on desktop those pages are linked from the pages. */
 const NAV = [
-  ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
+  ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['lenormand.html','Lenormand'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
   ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching, runes, dice, geomancy',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];

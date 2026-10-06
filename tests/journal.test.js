@@ -89,6 +89,9 @@ module.exports = [
     assert(J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 78 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 4 }], answer: '' }) === null, 'bad crystal accepted');
     assert(J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 15, 3, 4], house: 7 }).house === 7, 'geomancy saved');
     assert(J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 16, 3, 4], house: 7 }) === null && J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 1, 3, 4], house: 13 }) === null, 'bad geomancy accepted');
-    const back = J.exportText(); reset(); assert(J.importText(back).added === 5, 'oracle entries survive a backup');
+    assert(J.add({ kind: 'lenormand', spread: 'lnm-three', lnm: [0, 35, 7] }).sig === null, 'lenormand saved');
+    assert(J.add({ kind: 'lenormand', spread: 'lnm-gt', lnm: Array.from({ length: 36 }, (_, i) => i), sig: 27 }).sig === 27, 'grand tableau saved');
+    assert(J.add({ kind: 'lenormand', spread: 'lnm-three', lnm: [0, 0, 7] }) === null && J.add({ kind: 'lenormand', spread: 'lnm-three', lnm: [0, 36, 7] }) === null && J.add({ kind: 'lenormand', spread: 'lnm-x', lnm: [0, 1, 2, 3] }) === null, 'bad lenormand accepted');
+    const back = J.exportText(); reset(); assert(J.importText(back).added === 7, 'oracle entries survive a backup');
   }],
 ];

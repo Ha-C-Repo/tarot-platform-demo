@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Lenormand cards — tarot platform demo</title>
+<meta name="description" content="The 36-card Petit Lenormand, read in pairs: a line of three or five, the box of nine and the Grand Tableau.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0710">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF2E88'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230A0710'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ha-c-repo.github.io/tarot-platform-demo/lenormand.html">
+<meta property="og:title" content="Lenormand cards — tarot platform demo">
+<meta property="og:description" content="The 36-card Lenormand oracle, read in pairs.">
+<meta property="og:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1376">
+<meta property="og:image:height" content="768">
+<meta property="og:image:secure_url" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<meta property="og:image:alt" content="Rider-Waite tarot cards spread on a wooden table">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.lrow{display:grid;gap:10px;margin-top:16px;justify-content:center}
+.lrow svg{width:100%;height:auto;display:block}
+.lrow .lc{max-width:110px}
+.lrow.c3{grid-template-columns:repeat(3,minmax(0,110px))}.lrow.c5{grid-template-columns:repeat(5,minmax(0,110px))}
+.lrow.gt{grid-template-columns:repeat(9,minmax(0,1fr));gap:5px}
+.lrow.gt .lc{max-width:none}
+.lc.sig svg rect{stroke:var(--a1);stroke-width:2.5}.lc.touch svg rect{stroke:var(--a3);stroke-width:2}
+.lc.dim{opacity:.45}
+.lpair{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.lpair .mini{display:flex;gap:4px}.lpair .mini svg{width:38px;height:auto}
+.lpair .pos{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a3)}
+.lmean{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:10px}
+.lmean>div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+@media(max-width:640px){.lrow.c5{grid-template-columns:repeat(3,minmax(0,110px))}.lrow.gt{grid-template-columns:repeat(6,minmax(0,1fr))}}
+</style></head><body>
+<div class="wrap sect" style="position:relative"><div class="aura"></div>
+  <div class="eyebrow">Free &middot; the 36-card oracle</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">Lenormand<br><span class="prism">cards</span></h1>
+  <p class="lede">The Petit Lenormand: 36 plain, practical pictures read two at a time, so that two cards make one phrase.
+    Lay a short line for a quick question, the box of nine for a fuller look, or the Grand Tableau for everything at once.</p>
+  <div class="col" style="max-width:900px;margin-top:20px">
+    <div class="qrow"><label class="f" for="lq">Your question</label><input id="lq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
+    <div class="jact"><div class="seg" id="lsp" role="group" aria-label="Spread" style="min-width:min(100%,520px)"></div>
+      <button class="btn primary" type="button" id="lgo">Shuffle and lay out</button></div>
+    <div class="qrow" id="lsigrow" style="margin-top:10px"><label class="f" for="lsig">Your card</label>
+      <select id="lsig"><option value="27">Card 28, the Man</option><option value="28">Card 29, the Woman</option></select></div>
+    <p class="note" id="lnote" style="margin-top:8px"></p>
+    <div id="lout" aria-live="polite"></div>
+    <div class="warn"><span class="k">Method</span><p>The 36 cards are shuffled with your browser&rsquo;s cryptographic random generator and laid out in order; Lenormand cards
+      are read upright only. Every spread is read in pairs, as Lenormand readers do: in a line, each card with its neighbour and the two ends as the summary;
+      in the box of nine, the centre card with each card around it, then the corners. In the Grand Tableau all 36 cards lie in four rows of nine: your card
+      (the Man or the Woman, whichever you choose to stand for you, of any gender) is read with every card touching it, the house it lands in (place n is the
+      house of card n) colours the whole reading, and on its row the cards to the left lie behind you and those to the right ahead. The card pictures are
+      original line drawings made for this site; the numbers and playing-card insets follow the 1799 <i>Game of Hope</i> the deck descends from. The
+      readings are sample text written for this demo.</p></div>
+  </div>
+  <div class="adslot" style="margin-top:30px">Advertisement<b>Free tier only</b></div>
+</div>
+<script src="js/data/lenormand.js"></script><script src="js/data/lenormand-art.js"></script><script src="js/data/lenormand-text.js"></script>
+<script src="js/lenormand.js"></script><script src="js/journal.js"></script>
+<script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
+<script>
+TD.chrome('lenormand.html');
+const L = TD.lenormand, C = TD.LENORMAND, T = TD.LENORMAND_TEXT || {}, $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let spread = 'three';
+try { const s = localStorage.getItem('tarotdemo.lnmspread'); if (L.SPREADS.some(x => x.id === s)) spread = s; const g = localStorage.getItem('tarotdemo.lnmsig'); if (g === '27' || g === '28') $('lsig').value = g; } catch (e) {}
+const NOTES = { three: 'Three cards in a line: two pairs, and the two ends as the summary.', five: 'Five cards in a line: four neighbour pairs, then the centre with each end.',
+  box: 'Nine cards in a square: the centre is the heart of the matter, read with each card around it, then the corners.',
+  gt: 'All 36 cards in four rows of nine, read around the card that stands for you.' };
+const name = i => `${C[i].name} (${C[i].n})`;
+function mini(i){ return L.cardSVG(i, { size: 38 }); }
+function pairHTML(p){
+  return `<div class="lpair"><div class="mini">${mini(p.a)}${mini(p.b)}</div><div><div class="pos">${esc(p.label)}</div>
+    <b style="font-size:14px">${esc(C[p.a].name)} and ${esc(C[p.b].name)}</b><p style="margin-top:4px;font-size:13.5px;line-height:1.55">${esc(T[p.key] || '')}</p></div></div>`;
+}
+function meaningHTML(list){
+  return `<details class="card pad" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">Each card on its own</summary><div class="lmean">${
+    [...new Set(list)].map(i => `<div><b>${esc(name(i))}</b><p class="note" style="margin:2px 0 6px">${esc(C[i].keys)} &middot; ${esc(C[i].inset)}</p><p style="font-size:13px;line-height:1.55">${esc(T['lnm:' + C[i].id] || '')}</p></div>`).join('')}</div></details>`;
+}
+function render(sp, cards, sig, q){
+  let html = q ? `<p class="note" style="margin-top:18px">Your question: <b style="color:var(--text)">${esc(q)}</b></p>` : '';
+  if (sp === 'gt') {
+    const t = L.tableau(cards, sig), ps = L.pairs('gt', cards, sig), touch = new Set(ps.map(p => p.b));
+    html += `<div class="lrow gt">${cards.map(i => `<div class="lc${i === sig ? ' sig' : touch.has(i) ? ' touch' : ''}">${L.cardSVG(i)}</div>`).join('')}</div>
+      <p class="note" style="margin-top:8px">Pink outline: your card. Blue: the cards touching it.</p>
+      <div class="eyebrow" style="margin-top:22px">Your house: place ${t.house}, the house of the ${esc(C[t.houseCard].name)}</div>
+      <div class="card pad" style="margin-top:8px"><p class="note">Your card lies in the place that belongs to card ${t.house}, so its theme, ${esc(C[t.houseCard].keys)}, colours the reading.</p>
+        <p style="margin-top:6px;font-size:13.5px;line-height:1.55">${esc(T['lnm:' + C[t.houseCard].id] || '')}</p></div>
+      <div class="eyebrow" style="margin-top:22px">The cards touching you</div>${ps.map(pairHTML).join('')}
+      <div class="eyebrow" style="margin-top:22px">On your row</div>
+      <div class="card pad" style="margin-top:8px"><p style="font-size:13.5px;line-height:1.6"><b>Behind you:</b> ${t.behind.length ? t.behind.map(i => esc(C[i].name) + ' (' + esc(C[i].keys.split(',')[0]) + ')').join(', ') : 'nothing; your card opens the row'}.</p>
+        <p style="font-size:13.5px;line-height:1.6;margin-top:6px"><b>Ahead of you:</b> ${t.ahead.length ? t.ahead.map(i => esc(C[i].name) + ' (' + esc(C[i].keys.split(',')[0]) + ')').join(', ') : 'nothing; your card closes the row'}.</p></div>
+      ${meaningHTML([sig, ...ps.map(p => p.b)])}`;
+  } else {
+    const cols = sp === 'box' ? 'c3' : sp === 'five' ? 'c5' : 'c3';
+    html += `<div class="lrow ${cols}">${cards.map((i, k) => `<div class="lc${sp === 'box' && k === 4 ? ' sig' : ''}">${L.cardSVG(i)}</div>`).join('')}</div>
+      <div class="eyebrow" style="margin-top:22px">Reading the pairs</div>${L.pairs(sp, cards).map(pairHTML).join('')}${meaningHTML(cards)}`;
+  }
+  return html;
+}
+$('lgo').onclick = () => {
+  const q = $('lq').value.trim(), cards = L.draw(spread), sig = spread === 'gt' ? +$('lsig').value : null;
+  let html = render(spread, cards, sig, q);
+  if (TD.journal && TD.journal.add({ kind: 'lenormand', spread: 'lnm-' + spread, question: q, lnm: cards, sig })) html += '<p class="note" style="margin-top:12px">Saved to <a href="journal.html">your journal</a>.</p>';
+  $('lout').innerHTML = html;
+};
+function renderSpread(){
+  $('lsp').innerHTML = L.SPREADS.map(s => `<button type="button" data-s="${s.id}" aria-pressed="${s.id === spread}">${s.name}</button>`).join('');
+  $('lsigrow').style.display = spread === 'gt' ? '' : 'none';
+  $('lnote').textContent = NOTES[spread];
+}
+$('lsp').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; spread = b.dataset.s;
+  try { localStorage.setItem('tarotdemo.lnmspread', spread); } catch (x) {} renderSpread(); });
+$('lsig').onchange = () => { try { localStorage.setItem('tarotdemo.lnmsig', $('lsig').value); } catch (x) {} };
+TD.icon('cards', { prism: true });
+renderSpread();
+</script></body></html>
