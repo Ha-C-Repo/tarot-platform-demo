@@ -48,7 +48,7 @@ const STEPS = [
   { page: 'chinese.html', sel: '#boundary', title: 'The detail most sites get wrong',
     body: 'The Chinese zodiac year does not start on 1 January, and there are two boundaries in use. This page shows both, and the Four Pillars from the exact birth moment.' },
   { page: 'oracle.html', sel: '#otabs', title: 'The I Ching, the runes and astro dice',
-    body: 'Two more oracles: the Book of Changes cast with three coins, in James Legge’s 1882 translation, the 24 runes of the Elder Futhark in four spreads, including a nine-rune cast onto a cloth, a rune of the day and a bind-rune maker, and three astrology dice that answer what, how and where. Every reading saves to the journal.' },
+    body: 'Two more oracles: the Book of Changes cast with three coins, in James Legge’s 1882 translation, the 24 runes of the Elder Futhark in four spreads, including a nine-rune cast onto a cloth, a rune of the day and a bind-rune maker, three astrology dice that answer what, how and where, and a full geomancy chart: sixteen figures, the shield and the twelve houses. Every reading saves to the journal.' },
   { page: 'handbook.html', sel: '#vault', title: 'The members’ Vault',
     body: 'What a subscriber gets: the long-form practice pieces and a recorded reading every month. Switch the view to Free visitor in Customise and watch it lock.' },
   { page: 'pricing.html', sel: '#tiers', title: 'Four ways in',

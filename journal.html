@@ -53,7 +53,7 @@
   </div>
 </div>
 <script src="js/cards.js"></script><script src="js/data/correspondences.js"></script><script src="js/data/interpretations.js"></script>
-<script src="js/spreads.js"></script><script src="js/reading.js"></script><script src="js/journal.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/data/oracle-text.js"></script><script src="js/share.js"></script>
+<script src="js/spreads.js"></script><script src="js/reading.js"></script><script src="js/journal.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/geomancy.js"></script><script src="js/data/oracle-text.js"></script><script src="js/share.js"></script>
 <script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('journal.html');
@@ -65,7 +65,7 @@ const FOC = { general: '', love: 'Love', work: 'Work and money' };
 const thumb = c => TD.faceHTML({ card: TD.DECK[c.i], reversed: !!c.r }, { caption: false });
 const cssId = s => String(s).replace(/[^a-z0-9-]/gi, '');
 
-$('jsp').insertAdjacentHTML('beforeend', TD.SPREADS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('') + '<option value="kind:runes">Runes</option><option value="kind:dice">Astro dice</option><option value="kind:crystal">Crystal ball</option>');
+$('jsp').insertAdjacentHTML('beforeend', TD.SPREADS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('') + '<option value="kind:runes">Runes</option><option value="kind:dice">Astro dice</option><option value="kind:crystal">Crystal ball</option><option value="kind:geomancy">Geomancy</option>');
 
 function when(ms){
   const d = new Date(ms);
@@ -115,10 +115,11 @@ function renderStats(all){
 
 /* Rune and astro-dice readings from oracle.html: their own entry layout, no tarot stats. */
 const O = TD.oracle, RT = TD.ORACLE_TEXT || {};
-const ONAME = e => e.kind === 'crystal' ? 'Crystal ball' : e.kind === 'dice' ? 'Astro dice' : ((O.RUNE_SPREADS.find(s => 'runes-' + s.id === e.spread) || {}).name || 'Runes');
+const ONAME = e => e.kind === 'geomancy' ? 'Geomancy' : e.kind === 'crystal' ? 'Crystal ball' : e.kind === 'dice' ? 'Astro dice' : ((O.RUNE_SPREADS.find(s => 'runes-' + s.id === e.spread) || {}).name || 'Runes');
 const ZN = { heart: 'At the heart', near: 'Around you', edge: 'At the edge' };
 const ord = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
 function oracleWords(e){
+  if (e.kind === 'geomancy') { const c = TD.geomancy.chart(e.mothers); return ['Judge ' + c.judge.name, 'house ' + e.house + ' ' + c.houses[e.house - 1].name]; }
   if (e.kind === 'crystal') return [e.answer.split('\n')[0]];
   if (e.kind === 'dice') return [O.DICE_PLANETS[e.dice[0]][0], O.DICE_SIGNS[e.dice[1]][0], ord(e.dice[2]) + ' house'];
   return e.runes.map(x => TD.RUNES[x.i].name + (x.r ? ' (reversed)' : ''));
@@ -126,7 +127,13 @@ function oracleWords(e){
 function oracleEntryHTML(e){
   const id = cssId(e.id);
   let thumbs, body;
-  if (e.kind === 'crystal') {
+  if (e.kind === 'geomancy') {
+    const G = TD.geomancy, c = G.chart(e.mothers), r = G.read(c, e.house);
+    thumbs = `<span class="jglyph">${G.figureSVG(c.judge, { size: 12 })}</span>`;
+    body = `<p class="dsum">Judge ${esc(c.judge.name)}, ${esc(c.judge.en)} &middot; house ${e.house}: ${esc(G.HOUSES[e.house - 1])}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:8px">${esc(RT[r.answerKey] || '')}</p>
+      <p class="note" style="margin-top:6px">Mothers: ${c.mothers.map(f => esc(f.name)).join(', ')}. Perfection: ${r.perfection.mode}.</p>`;
+  } else if (e.kind === 'crystal') {
     thumbs = '<span class="jglyph"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="9" r="6.5"/><path d="M5.5 17h9M7 15.5h6"/></svg></span>';
     body = e.answer.split(/\n\n/).map(p => `<p style="font-size:13.5px;line-height:1.6;margin-top:8px">${esc(p)}</p>`).join('');
   } else if (e.kind === 'dice') {

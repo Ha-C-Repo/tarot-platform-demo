@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>I Ching, runes and astro dice — tarot platform demo</title>
+<title>I Ching, runes, dice and geomancy — tarot platform demo</title>
 <meta name="description" content="Cast the coins for the I Ching in James Legge's 1882 translation, or cast the 24 runes of the Elder Futhark in four spreads, or roll the three astrology dice.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
@@ -22,13 +22,13 @@
 <meta name="twitter:image" content="https://ha-c-repo.github.io/tarot-platform-demo/assets/Link-image.jpg?v=2">
 <link rel="stylesheet" href="css/base.css"></head><body>
 <div class="wrap sect" style="position:relative"><div class="aura"></div>
-  <div class="eyebrow">Free &middot; three more oracles</div>
-  <h1 style="font-size:clamp(34px,6vw,54px)">I Ching, runes<br><span class="prism">and astro dice</span></h1>
+  <div class="eyebrow">Free &middot; four more oracles</div>
+  <h1 style="font-size:clamp(34px,6vw,54px)">I Ching, runes,<br><span class="prism">dice and geomancy</span></h1>
   <p class="lede">Cast the coins for the Book of Changes, in James Legge&rsquo;s 1882 translation, cast the 24 runes of the
-    Elder Futhark, or roll the three astrology dice. Hold your question in mind first.</p>
+    Elder Futhark, roll the three astrology dice, or cast a geomancy chart. Hold your question in mind first.</p>
 
   <div class="tabs" id="otabs" role="tablist" aria-label="Oracle">
-    <button type="button" role="tab" data-t="iching">I Ching</button><button type="button" role="tab" data-t="runes">Runes</button><button type="button" role="tab" data-t="dice">Astro dice</button></div>
+    <button type="button" role="tab" data-t="iching">I Ching</button><button type="button" role="tab" data-t="runes">Runes</button><button type="button" role="tab" data-t="dice">Astro dice</button><button type="button" role="tab" data-t="geo">Geomancy</button></div>
   <section id="iching" class="col" style="max-width:820px;margin-top:20px">
     <div class="qrow"><label class="f" for="iq">Your question</label><input id="iq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
     <div class="jact"><button class="btn primary" type="button" id="cast">Cast the coins</button>
@@ -69,12 +69,25 @@
       Every face has the same odds, from your browser&rsquo;s cryptographic random generator. Go deeper opens the full birth-chart texts for that
       planet in that sign and house. The readings are sample text written for this demo.</p></div>
   </section>
+  <section id="geo" class="col hide" style="max-width:900px;margin-top:20px">
+    <div class="qrow"><label class="f" for="gq">Your question</label><input id="gq" maxlength="200" placeholder="Optional" autocomplete="off"></div>
+    <div class="qrow"><label class="f" for="gh">It is about</label><select id="gh"></select></div>
+    <div class="jact"><button class="btn primary" type="button" id="gcast">Cast the figures</button></div>
+    <div id="gout" aria-live="polite"></div>
+    <div class="warn"><span class="k">Method</span><p>Western geomancy, as practised in Europe from the Middle Ages. Sixteen lines of marks are made at random and each counts
+      odd (one dot) or even (two dots); every four lines make one of the four Mothers. The rest of the chart follows by fixed rules: the Daughters are the
+      Mothers read across, the Nieces add pairs of figures (row by row, odd one dot, even two), the two Witnesses add the Nieces, the Judge adds the Witnesses
+      and the Reconciler adds the Judge to the First Mother. The Judge always has an even number of dots, so only eight figures can judge. The twelve
+      Mothers, Daughters and Nieces also fill the twelve houses in order, the common modern method. The answer weighs the Judge with <i>perfection</i>:
+      whether the figure of house 1 (you) and the figure of the house your question is about come together, by occupation, conjunction, mutation or
+      translation, checked in that order. The randomness is your browser&rsquo;s cryptographic generator; the readings are sample text written for this demo.</p></div>
+  </section>
   <div class="card pad col" style="margin-top:18px">
     <div class="ph"><span class="k">On a live site</span>
       <p>The reader can keep, edit or replace any of this text, and offer an I Ching or rune reading as a paid session.</p></div>
   </div>
 </div>
-<script src="js/data/iching.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/data/oracle-text.js"></script><script src="js/journal.js"></script>
+<script src="js/data/iching.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/geomancy.js"></script><script src="js/data/oracle-text.js"></script><script src="js/journal.js"></script>
 <script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('oracle.html');
@@ -83,7 +96,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const ORD = ['first (bottom)', 'second', 'third', 'fourth', 'fifth', 'sixth (top)'];
 const LINE = { 6: 'changing broken line', 7: 'unbroken line', 8: 'broken line', 9: 'changing unbroken line' };
 let tab = 'iching', nRunes = 3;
-try { const q = new URLSearchParams(location.search).get('o'); if (q === 'runes' || q === 'dice') tab = q; } catch (e) {}
+try { const q = new URLSearchParams(location.search).get('o'); if (q === 'runes' || q === 'dice' || q === 'geo') tab = q; } catch (e) {}
 
 function hexHead(h, ch){
   const T = TD.TRIGRAMS;
@@ -228,9 +241,47 @@ function rollDice(){
 }
 $('roll').onclick = rollDice;
 
+/* ---------- geomancy ---------- */
+const G = TD.geomancy;
+$('gh').innerHTML = G.HOUSES.map((h, k) => `<option value="${k + 1}"${k === 0 ? ' selected' : ''}>${k + 1}. ${esc(h)}</option>`).join('');
+const NAT = { good: 'favorable', bad: 'unfavorable', mixed: 'mixed' };
+const PERF = { occupation: 'Occupation', conjunction: 'Conjunction', mutation: 'Mutation', translation: 'Translation', none: 'No perfection' };
+const fig = (f, label, cls) => `<div class="gfig${cls ? ' ' + cls : ''}">${G.figureSVG(f, { size: 26, fill: 'url(#tdPrism)' })}<b>${esc(f.name)}</b><span>${label}</span></div>`;
+function geoReading(c, q, question, marks){
+  const r = G.read(c, q), p = r.perfection, H = q - 1;
+  const lines = marks ? `<details class="card pad" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">The sixteen lines</summary>
+    <div class="glines">${[0, 1, 2, 3].map(m => `<div><div class="pos">${['First', 'Second', 'Third', 'Fourth'][m]} Mother</div>${marks.slice(4 * m, 4 * m + 4).map(n => `<div class="gline"><span>${'|'.repeat(n)}</span><em>${n} &middot; ${n % 2 ? 'odd, one dot' : 'even, two dots'}</em></div>`).join('')}</div>`).join('')}</div></details>` : '';
+  const shield = `<div class="gshield">
+    <div class="grow g8">${[...c.daughters.map((f, k) => [f, 'Daughter ' + (k + 1)]).reverse(), ...c.mothers.map((f, k) => [f, 'Mother ' + (k + 1)]).reverse()].map(([f, l]) => fig(f, l)).join('')}</div>
+    <div class="grow g4">${c.nieces.map((f, k) => [f, 'Niece ' + (k + 1)]).reverse().map(([f, l]) => fig(f, l)).join('')}</div>
+    <div class="grow g2">${fig(c.left, 'Left Witness')}${fig(c.right, 'Right Witness')}</div>
+    <div class="grow g1">${fig(c.judge, 'The Judge', 'gjudge')}</div>
+    <div class="grow g1">${fig(c.reconciler, 'The Reconciler')}</div></div>`;
+  const mark = h => h === 1 || h === q ? ' gq' : p.houses.includes(h) ? ' gp' : '';
+  const houses = `<div class="ghouses">${c.houses.map((f, k) => `<div class="ghouse${mark(k + 1)}"><span class="pos">House ${k + 1}</span>${G.figureSVG(f, { size: 18, fill: 'currentColor' })}<b>${esc(f.name)}</b><em>${esc(G.HOUSES[k])}</em></div>`).join('')}</div>`;
+  return (question ? `<p class="note" style="margin-top:18px">Your question: <b style="color:var(--text)">${esc(question)}</b> &middot; house ${q}, ${esc(G.HOUSES[H].toLowerCase())}</p>` : '') +
+    `<div class="card pad" style="margin-top:14px"><div class="eyebrow">The answer</div><p class="dsum" style="margin-top:6px">${esc(RT[r.answerKey] || '')}</p>
+      <div class="ganswer">${fig(c.judge, 'The Judge &middot; ' + NAT[c.judge.nature], 'gjudge')}<div><p class="interp">${esc(RT[r.judgeKey] || '')}</p></div></div>
+      <div class="eyebrow" style="margin-top:16px">${PERF[p.mode]}${p.self ? ': a question about yourself' : p.houses.length ? ` &middot; houses ${p.houses.join(' and ')}` : ''}</div>
+      <p class="interp">${p.self ? 'House 1 is both you and the matter, so the Judge speaks alone.' : esc(RT[r.perfKey] || '')}</p></div>
+    <div class="eyebrow" style="margin-top:22px">The house of your question: house ${q}, ${esc(c.houses[H].name)}</div>
+    <div class="card pad" style="margin-top:8px"><p class="interp">${esc(RT[r.houseKey] || '')}</p></div>
+    <div class="eyebrow" style="margin-top:22px">The shield chart</div>${shield}
+    <p class="note" style="margin-top:8px">The Right Witness speaks for what lies behind, the Left Witness for what lies ahead; the Reconciler is the last word when the
+      answer is unclear. Right Witness: ${esc(c.right.name)}, ${esc(c.right.sense)}. Left Witness: ${esc(c.left.name)}, ${esc(c.left.sense)}. Reconciler: ${esc(c.reconciler.name)}, ${esc(c.reconciler.sense)}.</p>
+    <div class="eyebrow" style="margin-top:22px">The house chart</div>${houses}
+    <p class="note" style="margin-top:8px">Outlined: house 1 (you) and house ${q} (the matter)${p.houses.filter(h => h !== 1 && h !== q).length ? '; dashed: the houses that make the perfection' : ''}.</p>${lines}`;
+}
+$('gcast').onclick = () => {
+  const q = +$('gh').value, question = $('gq').value.trim(), cast = G.castLines(), c = G.chart(cast.mothers);
+  let html = geoReading(c, q, question, cast.marks);
+  if (J && J.add({ kind: 'geomancy', spread: 'geomancy', question, mothers: cast.mothers, house: q })) html += '<p class="note" style="margin-top:12px">Saved to <a href="journal.html">your journal</a>.</p>';
+  $('gout').innerHTML = html;
+};
+
 function renderTabs(){
   document.querySelectorAll('#otabs [data-t]').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab));
-  ['iching', 'runes', 'dice'].forEach(t => $(t).classList.toggle('hide', tab !== t));
+  ['iching', 'runes', 'dice', 'geo'].forEach(t => $(t).classList.toggle('hide', tab !== t));
   document.querySelectorAll('#rn [data-n]').forEach(b => b.setAttribute('aria-pressed', b.dataset.n === spread));
   const S = O.RUNE_SPREADS.find(x => x.id === spread);
   $('rspread').textContent = spread === 'cast' ? 'Nine runes thrown onto a cloth; only those face up on the cloth are read, by how close they lie to the centre.'

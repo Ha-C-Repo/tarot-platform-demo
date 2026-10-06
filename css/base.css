@@ -753,3 +753,22 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 .dsum{font-size:18px;line-height:1.4}
 @media print{.dicerow,.runecross,.castwrap{break-inside:avoid}}
 .jglyph{display:inline-grid;place-items:center;width:30px;height:40px;border-radius:7px;background:var(--raised);border:1px solid var(--line);font-size:16px;color:var(--text);margin-right:4px;flex:none}
+/* geomancy (oracle.html?o=geo, 2026-10-05) */
+.gfig{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.gfig b{font-size:11.5px;line-height:1.2}.gfig span{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.gfig.gjudge{border-color:var(--a2);box-shadow:0 0 0 1px var(--a2) inset}
+.gshield{display:grid;gap:8px;margin-top:10px}
+.grow{display:grid;gap:8px;margin:0 auto;width:100%}
+.grow.g8{grid-template-columns:repeat(8,minmax(0,1fr))}.grow.g4{grid-template-columns:repeat(4,minmax(0,1fr));width:min(100%,560px)}
+.grow.g2{grid-template-columns:repeat(2,minmax(0,1fr));width:min(100%,280px)}.grow.g1{grid-template-columns:1fr;width:min(100%,140px)}
+@media(max-width:640px){.grow.g8{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ganswer{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start;margin-top:12px}
+@media(max-width:520px){.ganswer{grid-template-columns:1fr}}
+.ghouses{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.ghouse{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"p p" "s b" "s e";column-gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.ghouse .pos{grid-area:p;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a3)}
+.ghouse svg{grid-area:s;color:var(--text)}.ghouse b{grid-area:b;font-size:12.5px}.ghouse em{grid-area:e;font-style:normal;font-size:10.5px;color:var(--dim)}
+.ghouse.gq{border-color:var(--a2)}.ghouse.gp{border-style:dashed;border-color:var(--a3)}
+.glines{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:10px}
+.glines .pos{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a3)}
+.gline{display:flex;justify-content:space-between;gap:8px;font-size:12px}.gline span{letter-spacing:2px;color:var(--a2);font-weight:700}.gline em{font-style:normal;color:var(--dim)}

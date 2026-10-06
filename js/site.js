@@ -15,7 +15,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
-  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching, runes and dice',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching, runes, dice, geomancy',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 /* The Astrology menu (Amanda, 2026-10-05): every astrology page, calculator and report, in sections. Columns on desktop, an accordion on phones. */
 const ASTRO = [

@@ -1,6 +1,6 @@
 // I Ching and runes: the 64 figures, the coin odds, changing lines, and fair rune draws.
 const load = require('./load');
-const TD = load(['js/data/iching.js', 'js/data/runes.js', 'js/oracle.js', 'js/data/oracle-text.js']).TD, O = TD.oracle;
+const TD = load(['js/data/iching.js', 'js/data/runes.js', 'js/oracle.js', 'js/data/oracle-text.js', 'js/geomancy.js']).TD, O = TD.oracle;
 const assert = (c, msg) => { if (!c) throw new Error(msg); };
 
 module.exports = [
@@ -71,5 +71,27 @@ module.exports = [
     assert(c.h[0] === 0 && chi(c.p) < 31.3 && chi(c.s) < 31.3 && chi(c.h.slice(1)) < 31.3, 'chi-square ' + [chi(c.p), chi(c.s), chi(c.h.slice(1))].map(x => x.toFixed(1)));
     for (let p = 0; p < 12; p++) for (let s = 0; s < 12; s++) for (let h = 1; h <= 12; h++) { const K = O.diceKeys({ p, s, h }); assert(TD.ORACLE_TEXT[K.p] && TD.ORACLE_TEXT[K.s] && TD.ORACLE_TEXT[K.h], JSON.stringify(K)); }
     O.DICE_PLANETS.concat(O.DICE_SIGNS).forEach(([n, g]) => assert(!/\p{Extended_Pictographic}(?!︎)/u.test(g), n + ' glyph must be text'));
+  }],
+  ['Geomancy: sixteen distinct figures, the shield follows the rules, the Judge is always even, every text exists', () => {
+    const G = TD.geomancy, F = G.FIGURES;
+    assert(F.length === 16 && new Set(F.map(f => f.rows.join(''))).size === 16, 'sixteen distinct figures');
+    assert(G.add(G.byRows([1, 1, 1, 1]), G.byRows([1, 2, 1, 2])).name === 'Acquisitio', 'Via + Amissio = Acquisitio');
+    const judges = new Set(); let perf = {};
+    for (let a = 0; a < 16; a++) for (let b = 0; b < 16; b++) for (let c = 0; c < 16; c += 3) for (let d = 0; d < 16; d += 5) {
+      const ch = G.chart([a, b, c, d]);
+      assert(G.dots(ch.judge) % 2 === 0, 'odd judge'); judges.add(ch.judge.name);
+      assert(ch.daughters[1].rows.join('') === ch.mothers.map(m => m.rows[1]).join(''), 'daughter = mothers read across');
+      assert(ch.judge === G.add(G.add(ch.nieces[0], ch.nieces[1]), G.add(ch.nieces[2], ch.nieces[3])), 'judge from witnesses');
+      assert(ch.reconciler === G.add(ch.judge, ch.mothers[0]), 'reconciler');
+      for (let q = 1; q <= 12; q++) { const r = G.read(ch, q); perf[r.perfection.mode] = (perf[r.perfection.mode] || 0) + 1;
+        [r.answerKey, r.judgeKey, r.houseKey].concat(r.perfection.self ? [] : [r.perfKey]).forEach(k => assert(TD.ORACLE_TEXT[k], 'missing ' + k)); }
+    }
+    assert([...judges].sort().join() === 'Acquisitio,Amissio,Carcer,Conjunctio,Fortuna Major,Fortuna Minor,Populus,Via', 'judges ' + [...judges].join());
+    assert(['occupation', 'conjunction', 'mutation', 'translation', 'none'].every(m => perf[m] > 0), 'every perfection mode occurs ' + JSON.stringify(perf));
+    const ch = G.chart([4, 4, 0, 0]);                 // Fortuna Major in houses 1 and 2: occupation
+    assert(G.perfection(ch, 2).mode === 'occupation', 'occupation');
+    const cast = G.castLines(); assert(cast.marks.length === 16 && cast.marks.every(n => n >= 6 && n <= 15) && cast.mothers.length === 4, 'cast');
+    cast.mothers.forEach((m, k) => assert(F[m].rows.join('') === cast.marks.slice(4 * k, 4 * k + 4).map(n => n % 2 ? 1 : 2).join(''), 'mother from marks'));
+    return JSON.stringify(perf);
   }],
 ];

@@ -87,6 +87,8 @@ module.exports = [
     const cb = J.add({ kind: 'crystal', spread: 'crystal', question: 'Will it rain?', orb: [{ i: 3, r: 1 }, { i: 77 }], answer: 'The glass leans yes.' });
     assert(cb && cb.kind === 'crystal' && cb.orb[0].r === true && cb.answer === 'The glass leans yes.' && cb.cards.length === 0, 'crystal saved');
     assert(J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 78 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 4 }], answer: '' }) === null, 'bad crystal accepted');
-    const back = J.exportText(); reset(); assert(J.importText(back).added === 4, 'oracle entries survive a backup');
+    assert(J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 15, 3, 4], house: 7 }).house === 7, 'geomancy saved');
+    assert(J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 16, 3, 4], house: 7 }) === null && J.add({ kind: 'geomancy', spread: 'geomancy', mothers: [0, 1, 3, 4], house: 13 }) === null, 'bad geomancy accepted');
+    const back = J.exportText(); reset(); assert(J.importText(back).added === 5, 'oracle entries survive a backup');
   }],
 ];
