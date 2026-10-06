@@ -691,7 +691,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 .hexfig{color:var(--a2)}
 .legge{font-family:'CormorantV',Georgia,serif;font-style:italic;font-size:17px;line-height:1.5;margin-top:12px;color:var(--text)}
 .ev .legge{font-size:16px;margin-top:4px}
-.runerow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px}
+.runerow{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:16px}
 .runecard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
 .runecard .pos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--a3)}
 .runestone{display:grid;place-items:center;width:84px;height:110px;margin:10px 0;border-radius:40% 40% 36% 36%;background:var(--raised);border:1px solid var(--line)}
@@ -730,3 +730,26 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
   .navlinks .navmenu a{padding:7px 0;border-bottom:0;font-size:14px}
 }
 [data-theme="light"] .navmenu{box-shadow:0 22px 50px rgba(40,20,60,.14)}
+/* runes and astro dice (oracle.html, 2026-10-05) */
+.runeday{margin-bottom:18px}
+.runeday-in{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.runeday-in .runestone{width:60px;height:80px;margin:0;flex:none}
+.runeday-in .pos,.die .pos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--a3)}
+.runecross{display:grid;gap:14px;margin-top:16px;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:". t ." "l c r" ". b ."}
+@media(max-width:700px){.runecross{grid-template-columns:1fr;grid-template-areas:"c" "l" "r" "t" "b"}}
+.castwrap{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:18px;align-items:center;margin-top:16px}
+@media(max-width:640px){.castwrap{grid-template-columns:1fr}}
+.cloth{width:100%;max-width:300px;height:auto;background:radial-gradient(circle,var(--surface) 0 66%,transparent 67%);border-radius:50%}
+.bindpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px;margin-top:12px}
+.bindpick button{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);padding:6px 8px;font:inherit;font-size:11.5px;cursor:pointer}
+.bindpick button[aria-pressed="true"]{border-color:var(--a2);color:var(--text)}
+.bindout{display:flex;gap:18px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.bindfig{display:grid;place-items:center;width:130px;height:190px;background:var(--raised);border:1px solid var(--line);border-radius:40% 40% 36% 36%}
+.dicerow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px;text-align:center}
+.die{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 8px}
+.die svg{width:86px;height:86px;display:block;margin:0 auto}
+.die .dg{position:absolute;left:0;right:0;top:44px;font-size:24px;font-weight:700;line-height:1;font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif}
+.die b{display:block;font-size:14px;margin-top:2px}
+.dsum{font-size:18px;line-height:1.4}
+@media print{.dicerow,.runecross,.castwrap{break-inside:avoid}}
+.jglyph{display:inline-grid;place-items:center;width:30px;height:40px;border-radius:7px;background:var(--raised);border:1px solid var(--line);font-size:16px;color:var(--text);margin-right:4px;flex:none}

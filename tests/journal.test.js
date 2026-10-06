@@ -72,4 +72,21 @@ module.exports = [
     assert(w2.TD.journal.list().length === 0, 'list');
     assert(w2.TD.journal.add(reading([[1, false]])) === null, 'add');
   }],
+  ['Rune and dice readings: saved, cleaned, refused when malformed, left out of the tarot stats', () => {
+    reset();
+    const r = J.add({ kind: 'runes', spread: 'runes-norns', question: 'q', runes: [{ i: 0, r: 1, z: 'bogus' }, { i: 23 }], extra: 'x' });
+    assert(r && r.kind === 'runes' && r.runes[0].r === true && r.runes[0].z === '' && r.cards.length === 0 && !('extra' in r), JSON.stringify(r));
+    assert(J.add({ kind: 'dice', spread: 'dice', dice: [11, 0, 12] }), 'dice saved');
+    assert(J.add({ kind: 'runes', spread: 'x', runes: [{ i: 24 }] }) === null, 'rune 24 accepted');
+    assert(J.add({ kind: 'runes', spread: 'x', runes: [] }) === null, 'no runes accepted');
+    assert(J.add({ kind: 'dice', spread: 'dice', dice: [0, 0, 0] }) === null, 'house 0 accepted');
+    assert(J.add({ kind: 'tea', spread: 'x', cards: [{ i: 1 }] }) === null, 'unknown kind accepted');
+    J.add(reading([[0, false]]));
+    const S = J.stats(J.list()); assert(S.readings === 1 && S.cards === 1, 'stats count tarot only');
+    const u = J.update(r.id, { note: 'hi' }); assert(u.note === 'hi' && u.runes.length === 2 && u.kind === 'runes', 'note on a rune entry');
+    const cb = J.add({ kind: 'crystal', spread: 'crystal', question: 'Will it rain?', orb: [{ i: 3, r: 1 }, { i: 77 }], answer: 'The glass leans yes.' });
+    assert(cb && cb.kind === 'crystal' && cb.orb[0].r === true && cb.answer === 'The glass leans yes.' && cb.cards.length === 0, 'crystal saved');
+    assert(J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 78 }], answer: 'x' }) === null && J.add({ kind: 'crystal', spread: 'crystal', orb: [{ i: 3 }, { i: 4 }], answer: '' }) === null, 'bad crystal accepted');
+    const back = J.exportText(); reset(); assert(J.importText(back).added === 4, 'oracle entries survive a backup');
+  }],
 ];

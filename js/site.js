@@ -13,9 +13,9 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 
 /* 'astro' marks where the Astrology menu sits. Third field 1 = phone menu only; on desktop those pages are linked from the pages. */
 const NAV = [
-  ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
+  ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
-  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching, runes and dice',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 /* The Astrology menu (Amanda, 2026-10-05): every astrology page, calculator and report, in sections. Columns on desktop, an accordion on phones. */
 const ASTRO = [
@@ -25,15 +25,16 @@ const ASTRO = [
     ['report.html?r=child','Child report'], ['report.html?r=family','Family patterns in love'], ['report.html?r=chakras','Chakras, stones and essences']]]],
   [['Reports: timing', [['report.html?r=solarreturn','Solar return'], ['report.html?r=lunarreturn','Lunar return'], ['report.html?r=progressions','Progressed chart'], ['report.html?r=saturn','Saturn cycle'], ['report.html?r=relocation','Relocation']]],
    ['Reports: relationships', [['report.html?r=synastry','Synastry'], ['report.html?r=composite','Composite chart'], ['report.html?r=couplefc','Couple forecast'], ['report.html?r=couplepast','Past lives together']]]],
-  [['Other traditions', [['chinese.html','Chinese astrology'], ['report.html?r=chinese','Chinese astrology report'], ['maya.html','Maya calendar']]]]
+  [['Other traditions', [['chinese.html','Chinese astrology'], ['report.html?r=chinese','Chinese astrology report'], ['oracle.html?o=dice','Astro dice'], ['maya.html','Maya calendar']]]]
 ];
 /* Is this menu link the page being shown? report.html links match on their ?r= id (Life path when none is given). */
 function isHere(h, current){
   const [page, q] = h.split('?');
   if (page !== current) return false;
   if (!q) return true;
-  let r = null; try { r = new URLSearchParams(location.search).get('r'); } catch (e) {}
-  return q === 'r=' + (r || 'lifepath');
+  const [k, v] = q.split('=');
+  let have = null; try { have = new URLSearchParams(location.search).get(k); } catch (e) {}
+  return v === (have || (k === 'r' ? 'lifepath' : ''));
 }
 function astroMenu(current){
   const on = ASTRO.some(col => col.some(([, links]) => links.some(([h]) => isHere(h, current))));

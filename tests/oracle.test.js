@@ -1,6 +1,6 @@
 // I Ching and runes: the 64 figures, the coin odds, changing lines, and fair rune draws.
 const load = require('./load');
-const TD = load(['js/data/iching.js', 'js/data/runes.js', 'js/oracle.js']).TD, O = TD.oracle;
+const TD = load(['js/data/iching.js', 'js/data/runes.js', 'js/oracle.js', 'js/data/oracle-text.js']).TD, O = TD.oracle;
 const assert = (c, msg) => { if (!c) throw new Error(msg); };
 
 module.exports = [
@@ -45,5 +45,31 @@ module.exports = [
     }
     assert(Math.abs(rev / n - 0.5) < 0.03, 'reversal rate ' + (rev / n).toFixed(3));
     assert(O.castRunes(30).length === 24, 'cannot draw more than 24');
+  }],
+  ['Rune spreads, the cloth cast and the rune of the day', () => {
+    assert(O.RUNE_SPREADS.map(x => x.id + x.n).join() === 'one1,norns3,cross5,cast9', 'spreads');
+    O.RUNE_SPREADS.filter(x => x.id !== 'cast').forEach(x => assert(x.pos.length === x.n, x.id + ' positions'));
+    let off = 0, up = 0, n = 0;
+    for (let i = 0; i < 2000; i++) O.castCloth(9).forEach(x => { n++;
+      const r = Math.hypot(x.x, x.y); assert(r <= 1.1 + 1e-9, 'inside the throw');
+      const z = r > 1 ? 'off' : r <= 0.4 ? 'heart' : r <= 0.75 ? 'near' : 'edge'; assert(z === x.zone, 'zone ' + x.zone + ' at ' + r);
+      if (x.zone === 'off') off++; if (x.up) up++; });
+    assert(Math.abs(off / n - (1 - 1 / 1.21)) < 0.02, 'off-cloth rate ' + (off / n).toFixed(3));
+    assert(Math.abs(up / n - 0.5) < 0.02, 'face-up rate ' + (up / n).toFixed(3));
+    const st = {}, store = { getItem: k => st[k] || null, setItem: (k, v) => { st[k] = v; } };
+    const a = O.dailyRune('2026-10-05', store), b = O.dailyRune('2026-10-05', store);
+    assert(a.fresh && !b.fresh && a.rune.id === b.rune.id && a.reversed === b.reversed, 'same rune all day');
+    assert(O.dailyRune('2026-10-06', store).fresh, 'new day, new draw');
+    assert(/<svg[^>]*>.*<path d="M10 2V30"/.test(O.bindRuneSVG(TD.RUNES.slice(0, 3)).replace(/\s+/g, ' ')), 'bind rune stave');
+    TD.RUNES.forEach(r => { assert(TD.ORACLE_TEXT['rune:' + r.id], 'deep ' + r.id); if (!r.sym) assert(TD.ORACLE_TEXT['runerev:' + r.id], 'rev ' + r.id); });
+  }],
+  ['Astro dice: three fair twelve-sided dice, every face has its text', () => {
+    assert(O.DICE_PLANETS.length === 12 && O.DICE_SIGNS.length === 12, 'faces');
+    const c = { p: new Array(12).fill(0), s: new Array(12).fill(0), h: new Array(13).fill(0) }, N = 24000;
+    for (let i = 0; i < N; i++) { const d = O.rollDice(); c.p[d.p]++; c.s[d.s]++; c.h[d.h]++; }
+    const chi = a => a.reduce((t, x) => t + (x - N / 12) ** 2 / (N / 12), 0);
+    assert(c.h[0] === 0 && chi(c.p) < 31.3 && chi(c.s) < 31.3 && chi(c.h.slice(1)) < 31.3, 'chi-square ' + [chi(c.p), chi(c.s), chi(c.h.slice(1))].map(x => x.toFixed(1)));
+    for (let p = 0; p < 12; p++) for (let s = 0; s < 12; s++) for (let h = 1; h <= 12; h++) { const K = O.diceKeys({ p, s, h }); assert(TD.ORACLE_TEXT[K.p] && TD.ORACLE_TEXT[K.s] && TD.ORACLE_TEXT[K.h], JSON.stringify(K)); }
+    O.DICE_PLANETS.concat(O.DICE_SIGNS).forEach(([n, g]) => assert(!/\p{Extended_Pictographic}(?!︎)/u.test(g), n + ' glyph must be text'));
   }],
 ];

@@ -5,7 +5,10 @@
    - The visitor can add a question and a note, delete an entry, and back the whole journal up to a
      file and load it again (here or in another browser), so nothing is locked to one device.
    - Reset demo data clears it with everything else (site.js clears localStorage).
-   Entry: { id, at (ms), spread, focus, question, note, sig: card index or null, cards: [{i, r}] } */
+   Entry: { id, at (ms), spread, focus, question, note, sig: card index or null, cards: [{i, r}] }
+   Oracle entries (oracle.html, 2026-10-05) add kind: 'runes' with runes: [{i: 0-23, r, z: zone}] (1-9), or
+   kind: 'dice' with dice: [planet 0-11, sign 0-11, house 1-12]; or kind: 'crystal' (crystal.html) with the answer text and
+   orb: the two hidden cards [{i, r}], kept but never shown; their cards list is empty and the tarot stats skip them. */
 window.TD = window.TD || {};
 (function(NS){
 'use strict';
@@ -26,7 +29,15 @@ function write(list){
   try { localStorage.setItem(KEY, JSON.stringify({ v: VERSION, entries: list })); return true; } catch (e) { return false; }
 }
 const str = (x, n) => typeof x === 'string' ? x.slice(0, n) : '';
+const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
+function validOracle(e){
+  if (e.kind === 'runes') return Array.isArray(e.runes) && e.runes.length >= 1 && e.runes.length <= 9 && e.runes.every(x => x && isInt(x.i, 0, 23));
+  if (e.kind === 'crystal') return Array.isArray(e.orb) && e.orb.length === 2 && e.orb.every(x => x && isInt(x.i, 0, 77)) && typeof e.answer === 'string' && e.answer.length > 0;
+  if (e.kind === 'dice') return Array.isArray(e.dice) && e.dice.length === 3 && isInt(e.dice[0], 0, 11) && isInt(e.dice[1], 0, 11) && isInt(e.dice[2], 1, 12);
+  return false;
+}
 function valid(e){
+  if (e && e.kind) return typeof e.id === 'string' && /^[a-z0-9-]{1,40}$/i.test(e.id) && Number.isFinite(e.at) && typeof e.spread === 'string' && validOracle(e);
   return e && typeof e.id === 'string' && /^[a-z0-9-]{1,40}$/i.test(e.id) && Number.isFinite(e.at) && typeof e.spread === 'string' &&
     Array.isArray(e.cards) && e.cards.length >= 1 && e.cards.length <= 12 &&
     e.cards.every(c => c && Number.isInteger(c.i) && c.i >= 0 && c.i < 78);
@@ -37,7 +48,10 @@ function clean(e){
     question: str(e.question, 300), note: str(e.note, 4000),
     sig: Number.isInteger(e.sig) && e.sig >= 0 && e.sig < 78 ? e.sig : null,
     name: str(e.name, 40), pos: Array.isArray(e.pos) ? e.pos.slice(0, 12).map(p => str(p, 30)) : [],   // a spread the visitor made
-    cards: e.cards.map(c => ({ i: c.i, r: !!c.r })) };
+    cards: e.kind ? [] : e.cards.map(c => ({ i: c.i, r: !!c.r })),
+    ...(e.kind === 'runes' ? { kind: 'runes', runes: e.runes.map(x => ({ i: x.i, r: !!x.r, z: ['heart', 'near', 'edge'].includes(x.z) ? x.z : '' })) } : {}),
+    ...(e.kind === 'dice' ? { kind: 'dice', dice: e.dice.slice(0, 3) } : {}),
+    ...(e.kind === 'crystal' ? { kind: 'crystal', orb: e.orb.map(x => ({ i: x.i, r: !!x.r })), answer: str(e.answer, 3000) } : {}) };
 }
 function newId(){
   const a = new Uint8Array(6); crypto.getRandomValues(a);
@@ -64,6 +78,7 @@ function remove(id){ const all = list(), n = all.length, rest = all.filter(e => 
 /* ---------- patterns over time ---------- */
 const SUITS = ['wands', 'cups', 'swords', 'pentacles'];
 function stats(entries){
+  entries = entries.filter(e => !e.kind);                // tarot only: rune and dice entries have no cards
   const D = NS.DECK, count = new Array(78).fill(0), rev = new Array(78).fill(0);
   let cards = 0, reversed = 0, majors = 0;
   const suits = { wands: 0, cups: 0, swords: 0, pentacles: 0 }, spreads = {}, foci = { general: 0, love: 0, work: 0 };

@@ -53,7 +53,7 @@
   </div>
 </div>
 <script src="js/cards.js"></script><script src="js/data/correspondences.js"></script><script src="js/data/interpretations.js"></script>
-<script src="js/spreads.js"></script><script src="js/reading.js"></script><script src="js/journal.js"></script><script src="js/share.js"></script>
+<script src="js/spreads.js"></script><script src="js/reading.js"></script><script src="js/journal.js"></script><script src="js/data/runes.js"></script><script src="js/oracle.js"></script><script src="js/data/oracle-text.js"></script><script src="js/share.js"></script>
 <script src="js/icons.js"></script><script src="js/tour.js"></script><script src="js/site.js"></script>
 <script>
 TD.chrome('journal.html');
@@ -65,7 +65,7 @@ const FOC = { general: '', love: 'Love', work: 'Work and money' };
 const thumb = c => TD.faceHTML({ card: TD.DECK[c.i], reversed: !!c.r }, { caption: false });
 const cssId = s => String(s).replace(/[^a-z0-9-]/gi, '');
 
-$('jsp').insertAdjacentHTML('beforeend', TD.SPREADS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join(''));
+$('jsp').insertAdjacentHTML('beforeend', TD.SPREADS.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('') + '<option value="kind:runes">Runes</option><option value="kind:dice">Astro dice</option><option value="kind:crystal">Crystal ball</option>');
 
 function when(ms){
   const d = new Date(ms);
@@ -79,6 +79,7 @@ function bar(label, n, of){
   return `<div class="jbar"><span>${label}</span><i><b style="width:${p}%"></b></i><em>${p}%</em></div>`;
 }
 function renderStats(all){
+  all = all.filter(e => !e.kind);
   if (!all.length) { $('stats').innerHTML = ''; return; }
   const S = J.stats(all), N = S.cards;
   const top = S.top.slice(0, 5).map(x => `<li>${thumb({ i: x.i })}<span>${esc(TD.DECK[x.i].name)}</span>
@@ -112,9 +113,54 @@ function renderStats(all){
     </div></div>`;
 }
 
+/* Rune and astro-dice readings from oracle.html: their own entry layout, no tarot stats. */
+const O = TD.oracle, RT = TD.ORACLE_TEXT || {};
+const ONAME = e => e.kind === 'crystal' ? 'Crystal ball' : e.kind === 'dice' ? 'Astro dice' : ((O.RUNE_SPREADS.find(s => 'runes-' + s.id === e.spread) || {}).name || 'Runes');
+const ZN = { heart: 'At the heart', near: 'Around you', edge: 'At the edge' };
+const ord = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+function oracleWords(e){
+  if (e.kind === 'crystal') return [e.answer.split('\n')[0]];
+  if (e.kind === 'dice') return [O.DICE_PLANETS[e.dice[0]][0], O.DICE_SIGNS[e.dice[1]][0], ord(e.dice[2]) + ' house'];
+  return e.runes.map(x => TD.RUNES[x.i].name + (x.r ? ' (reversed)' : ''));
+}
+function oracleEntryHTML(e){
+  const id = cssId(e.id);
+  let thumbs, body;
+  if (e.kind === 'crystal') {
+    thumbs = '<span class="jglyph"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="9" r="6.5"/><path d="M5.5 17h9M7 15.5h6"/></svg></span>';
+    body = e.answer.split(/\n\n/).map(p => `<p style="font-size:13.5px;line-height:1.6;margin-top:8px">${esc(p)}</p>`).join('');
+  } else if (e.kind === 'dice') {
+    const [p, s, h] = e.dice, K = O.diceKeys({ p, s, h });
+    thumbs = `<span class="jglyph">${O.DICE_PLANETS[p][1]}</span><span class="jglyph">${O.DICE_SIGNS[s][1]}</span><span class="jglyph">${h}</span>`;
+    body = `<p class="dsum">${esc(O.DICE_PLANETS[p][0])} in ${esc(O.DICE_SIGNS[s][0])} in the ${ord(h)} house</p>` +
+      [['What is at work', K.p], ['How it unfolds', K.s], ['Where in your life', K.h]].map(([t, k]) => `<div class="eyebrow" style="margin-top:12px">${t}</div><p style="font-size:13px;line-height:1.55;color:var(--muted)">${esc(RT[k] || '')}</p>`).join('');
+  } else {
+    const sp = O.RUNE_SPREADS.find(s => 'runes-' + s.id === e.spread) || { pos: [] };
+    thumbs = e.runes.slice(0, 5).map(x => `<span class="jglyph">${O.runeSVG(TD.RUNES[x.i], { size: 14, reversed: x.r, weight: 2.4 })}</span>`).join('') + (e.runes.length > 5 ? `<span class="more">+${e.runes.length - 5}</span>` : '');
+    body = `<div class="jcards">${e.runes.map((x, k) => { const r = TD.RUNES[x.i];
+      const pos = x.z ? ZN[x.z] : sp.pos[k] ? sp.pos[k][0] : 'Rune ' + (k + 1);
+      return `<div><div class="jcard"><span class="jglyph" style="width:44px;height:58px">${O.runeSVG(r, { size: 24, reversed: x.r, weight: 2.4 })}</span><p><span class="pos">${esc(pos)}</span>
+        <b>${esc(r.name)}${x.r ? ', reversed' : ''}</b>${esc(x.r ? r.rev : r.up)}</p></div></div>`; }).join('')}</div>`;
+  }
+  const sub = e.question ? esc(e.question) : oracleWords(e).map(esc).join(', ');
+  return `<details class="jentry" data-id="${id}"><summary>
+      <div class="jthumbs">${thumbs}</div>
+      <div class="jsum"><b>${esc(ONAME(e))}</b><span>${sub}</span></div>
+      <div class="jwhen">${when(e.at)}${e.note ? '<br>Has a note' : ''}</div></summary>
+    <div class="jbody">
+      ${e.question ? `<p style="font-size:14px;margin-bottom:14px"><span class="note">Your question:</span> ${esc(e.question)}</p>` : ''}
+      ${body}
+      <label class="f" for="n-${id}" style="margin-top:16px">Your note</label>
+      <textarea id="n-${id}" data-note="${id}" maxlength="4000" placeholder="What did it bring up? What happened next?">${esc(e.note)}</textarea>
+      <div class="jact"><span class="note" data-saved="${id}" aria-live="polite"></span>
+        <button class="btn" type="button" data-del="${id}" style="margin-left:auto">Delete this reading</button></div>
+    </div></details>`;
+}
+
 /* ---------- the list ---------- */
 let armed = null;                                    // delete needs a second tap on the same entry
 function entryHTML(e){
+  if (e.kind) return oracleEntryHTML(e);
   const sp = TD.spreadById(e.spread), known = sp.id === e.spread && !(sp.custom && e.pos.length), id = cssId(e.id);
   const thumbs = e.cards.slice(0, 5).map(thumb).join('') + (e.cards.length > 5 ? `<span class="more">+${e.cards.length - 5}</span>` : '');
   const sub = e.question ? esc(e.question) : e.cards.map(c => esc(TD.DECK[c.i].name) + (c.r ? ' (reversed)' : '')).join(', ');
@@ -142,9 +188,9 @@ function entryHTML(e){
     </div></details>`;
 }
 function matches(e, q, sp){
-  if (sp && e.spread !== sp) return false;
+  if (sp && (sp.startsWith('kind:') ? e.kind !== sp.slice(5) : e.spread !== sp)) return false;
   if (!q) return true;
-  const hay = [e.question, e.note, SPN(e.spread, e)].concat(e.cards.map(c => TD.DECK[c.i].name)).join(' ').toLowerCase();
+  const hay = [e.question, e.note, e.kind ? ONAME(e) : SPN(e.spread, e)].concat(e.kind ? oracleWords(e) : e.cards.map(c => TD.DECK[c.i].name)).join(' ').toLowerCase();
   return q.split(/\s+/).every(w => hay.includes(w));
 }
 function render(){
