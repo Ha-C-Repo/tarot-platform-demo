@@ -24,8 +24,8 @@ const ASTRO = [
   [['Reports: soul and self', [['reports.html','All reports'], ['pastlife.html','Past lives'], ['karmic.html','Karmic path'], ['report.html?r=lifepath','Life path'], ['report.html?r=vocation','Vocational guidance'],
     ['report.html?r=child','Child report'], ['report.html?r=family','Family patterns in love'], ['report.html?r=chakras','Chakras, stones and essences']]]],
   [['Reports: timing', [['report.html?r=solarreturn','Solar return'], ['report.html?r=lunarreturn','Lunar return'], ['report.html?r=progressions','Progressed chart'], ['report.html?r=saturn','Saturn cycle'], ['report.html?r=relocation','Relocation']]],
-   ['Reports: relationships', [['report.html?r=synastry','Synastry'], ['report.html?r=composite','Composite chart'], ['report.html?r=couplefc','Couple forecast']]]],
-  [['Other traditions', [['chinese.html','Chinese astrology'], ['maya.html','Maya calendar']]]]
+   ['Reports: relationships', [['report.html?r=synastry','Synastry'], ['report.html?r=composite','Composite chart'], ['report.html?r=couplefc','Couple forecast'], ['report.html?r=couplepast','Past lives together']]]],
+  [['Other traditions', [['chinese.html','Chinese astrology'], ['report.html?r=chinese','Chinese astrology report'], ['maya.html','Maya calendar']]]]
 ];
 /* Is this menu link the page being shown? report.html links match on their ?r= id (Life path when none is given). */
 function isHere(h, current){

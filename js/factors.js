@@ -216,5 +216,79 @@ function saturnCycle(c){
   return out;
 }
 
-NS.factors = { saturnCycle, cuspSign, houseRulers, declination, outOfBounds, PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
+/* ---------- couple past lives (2026-10-05): the single-person past-life method applied to a relationship ----------
+   Five systems, each read for the pair, then the same convergence rule (a planet named by two or more systems is "confirmed"):
+   cayce   composite sojourn: decanate rulers of the composite (midpoint) SIDEREAL Sun and Moon. Each person's position is
+           made sidereal with their own birth date's ayanamsa first, then the midpoint is taken.
+   karmic  composite South Node (midpoint of the two mean nodes + 180): its sign = shared setting, its whole-sign house from
+           the composite Ascendant = shared roles (both birth times); plus karmic synastry: planets on the other's nodes
+           (orb 5), the two nodal axes together or reversed (orb 5), planets in the other's 12th house.
+   vedic   composite Ketu: midpoint of the two sidereal South Nodes; its sign's traditional ruler (the Vedic dispositor).
+   numbers relationship number = the two Life Paths added and reduced (11, 22, 33 kept); 13/14/16/19 on the way = the
+           couple's karmic debt number. Relationship card = the two Greer personality cards added, reduced to 22 or less.
+   chart   composite planets within 8 deg of the composite Sun, Moon, Ascendant or Midheaven. */
+const NODE_ORB = 5;
+const digitSum = n => String(n).split('').reduce((a, c) => a + (+c), 0);
+function coupleNumbers(lpA, lpB, cardA, cardB){
+  const steps = [lpA + lpB];
+  let n = steps[0];
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) { n = digitSum(n); steps.push(n); }
+  let k = cardA + cardB; while (k > 22) k = digitSum(k);
+  return { sum: steps[0], steps, rel: n, debts: steps.filter(x => [13, 14, 16, 19].includes(x)), card: 'major-' + String(k === 22 ? 0 : k).padStart(2, '0'), cardN: k };
+}
+function couplePast(A, B, mode = 'fagan', lpA, lpB, cardA, cardB){
+  const side = (lon, when) => NS.vedic.sidereal(lon, when, mode), mid = NS.midpoint;
+  const sideMoonEnds = c => c.timeKnown ? [side(c.planets[1].lon, c.utc), side(c.planets[1].lon, c.utc)]
+    : [side(c.planets[1].range[0], new Date(c.daySpan.start)), side(c.planets[1].range[1], new Date(c.daySpan.end))];
+  const sunLon = mid(side(A.planets[0].lon, A.utc), side(B.planets[0].lon, B.utc));
+  const ma = sideMoonEnds(A), mb = sideMoonEnds(B);
+  const moonLon = mid(side(A.planets[1].lon, A.utc), side(B.planets[1].lon, B.utc));
+  const soj = { sun: Object.assign({ body: 'Sun', lon: sunLon }, decanOf(sunLon)), moon: Object.assign({ body: 'Moon', lon: moonLon }, decanOf(moonLon)) };
+  const m0 = decanOf(mid(ma[0], mb[0])), m1 = decanOf(mid(ma[1], mb[1]));
+  if (m0.sign !== m1.sign || m0.decan !== m1.decan) soj.moon.alternatives = [m0, m1];
+  soj.planets = [...new Set([soj.sun.ruler].concat(soj.moon.alternatives ? [] : [soj.moon.ruler]))];
+  const cp = NS.composite(A, B), both = !!(A.angles && B.angles);
+  const nn = mid(A.node, B.node), sn = norm(nn + 180);
+  const comp = { planets: cp.planets, asc: cp.asc, mc: cp.mc, nn: { lon: nn, sign: signIdx(nn) },
+    sn: { lon: sn, sign: signIdx(sn), house: both ? NS.houseOf(sn, cp.asc, 'whole') : null } };
+  comp.snRuler = MODERN[comp.sn.sign];
+  const ketu = mid(side(norm(A.node + 180), A.utc), side(norm(B.node + 180), B.utc));
+  const vedic = { ketu, sign: signIdx(ketu), ruler: NS.natal.RULER[signIdx(ketu)] };
+  /* karmic synastry, both directions: who holds the planet, whose point it touches */
+  const people = [['A', A], ['B', B]], ties = { sn: [], nn: [], h12: [], nodes: null };
+  people.forEach(([hx, X]) => people.forEach(([oy, Y]) => {
+    if (hx === oy) return;
+    const ySn = norm(Y.node + 180);
+    X.planets.forEach(p => {
+      if (p.key === 'Moon' && !X.timeKnown) return;
+      const os = NS.separation(p.lon, ySn), on = NS.separation(p.lon, Y.node);
+      if (os <= NODE_ORB) ties.sn.push({ holder: hx, other: oy, key: p.key, orb: os, textKey: 'ksn:' + p.key });
+      if (on <= NODE_ORB) ties.nn.push({ holder: hx, other: oy, key: p.key, orb: on, textKey: 'knn:' + p.key });
+      if (Y.angles && PLANETS.indexOf(p.key) < 7 && NS.houseOf(p.lon, Y.angles.asc, Y.system, Y.cusps) === 12) ties.h12.push({ holder: hx, other: oy, key: p.key, textKey: 'k12:' + p.key });
+    });
+  }));
+  const same = NS.separation(A.node, B.node), rev = NS.separation(A.node, norm(B.node + 180));
+  if (same <= NODE_ORB) ties.nodes = { kind: 'same', orb: same, textKey: 'knode:same' };
+  else if (rev <= NODE_ORB) ties.nodes = { kind: 'reversed', orb: rev, textKey: 'knode:reversed' };
+  ['sn', 'nn'].forEach(k => ties[k].sort((a, b) => a.orb - b.orb));
+  const nums = lpA != null ? coupleNumbers(lpA, lpB, cardA, cardB) : null;
+  /* composite emphasis: planets near the composite Sun, Moon or angles */
+  const anchors = [['Sun', cp.planets[0].lon], ...(A.timeKnown && B.timeKnown ? [['Moon', cp.planets[1].lon]] : []), ...(both ? [['Ascendant', cp.asc], ['Midheaven', cp.mc]] : [])];
+  const emph = [];
+  cp.planets.forEach(p => { if (/^(Sun|Moon)$/.test(p.key)) return; anchors.forEach(([k, l]) => { const o = NS.separation(p.lon, l); if (o <= 8 && !emph.some(e => e.key === p.key)) emph.push({ key: p.key, to: k, orb: o }); }); });
+  const votes = {};
+  const vote = (k, sys, pts, why) => { const x = votes[k] || (votes[k] = { key: k, score: 0, systems: new Set(), why: [] }); x.score += pts; x.systems.add(sys); x.why.push(why); };
+  soj.planets.forEach(p => vote(p, 'cayce', 3, 'composite sojourn'));
+  vote(comp.snRuler, 'karmic', 2, 'composite South Node ruler');
+  ties.sn.forEach(t => vote(t.key, 'karmic', 2, 'on a South Node'));
+  ties.nn.forEach(t => vote(t.key, 'karmic', 1, 'on a North Node'));
+  vote(vedic.ruler, 'vedic', 2, 'composite Ketu ruler');
+  if (nums) { (NS.NUMBER_PLANET[nums.rel] || []).forEach(p => vote(p, 'numerology', 3, 'relationship number ' + nums.rel));
+    nums.debts.forEach(d => NS.DEBT_PLANET[d].forEach(p => vote(p, 'numerology', 2, 'karmic debt ' + d))); }
+  emph.forEach(e => vote(e.key, 'chart', 2, `composite ${e.key} on the composite ${e.to}`));
+  const all = Object.values(votes).map(x => Object.assign(x, { systems: [...x.systems], why: [...new Set(x.why)] })).sort((a, b) => b.systems.length - a.systems.length || b.score - a.score);
+  return { soj, comp, vedic, ties, nums, emph, votes: all, core: all.filter(x => x.systems.length >= 2).slice(0, 3), mode };
+}
+
+NS.factors = { couplePast, coupleNumbers, saturnCycle, cuspSign, houseRulers, declination, outOfBounds, PLANETS, MODERN, nodes, onNodes, retrogrades, emphasis, fortune, strength, CHAKRAS, chakras, decanOf, sojourns, bothZodiacs, decanCard, atmakaraka, convergence };
 })(window.TD);

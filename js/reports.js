@@ -351,7 +351,7 @@ Object.assign(REPORTS, {
       const cpl = k => cp.planets.find(q => q.key === k);
       out.push(H.chapter(1, 'The character of the relationship', 'The composite Sun, Moon, Venus and Mars by sign.' + (times ? '' : ' Without both birth times the composite Moon&rsquo;s sign is approximate.')),
         `<div class="grid g2" style="align-items:start">${COMP4.map(k => { const q = cpl(k), sg = S(q.lon);
-          return H.block(`${H.glyph(k)} Composite ${k} in ${sg}${k === 'Moon' && !times ? ' <span class="pill">approximate</span>' : ''}`, H.para(X[k + ':' + sg])); }).join('')}</div>`);
+          return H.block(`${H.glyph(k)} Composite ${k} in ${sg}${k === 'Moon' && !times ? ' <span class="pill">approximate</span>' : ''}`, H.para(T['comp-sign:' + k + ':' + sg] || X[k + ':' + sg])); }).join('')}</div>`);
       out.push(H.chapter(2, 'Where the relationship lives', 'The composite Sun to Saturn by house: the life areas the two of you pour that energy into together.'),
         cp.asc != null ? H.items(`Composite Ascendant in ${S(cp.asc)}`, SEVEN.map(k => { const q = cpl(k);
           return `<h4>${H.glyph(k)} Composite ${k} in the ${H.ordinal(q.house)} house</h4>${H.para(T[`comp-h:${k}:${q.house}`])}`; }))
@@ -391,6 +391,111 @@ Object.assign(REPORTS, {
         rows.length ? H.block('Timeline', `<table class="conv"><tr><th>Contact</th><th>Exact on</th></tr>${rows.map(r => `<tr><td>${label(r.h)}</td><td>${r.dates.map(fmtDate).join(', ')}</td></tr>`).join('')}</table>`) : '',
         H.items('What each contact brings', fresh.map(r => `<h4>${label(r.h)}</h4>${H.para(T['cfc:' + r.k])}`), rows.length ? '<p class="note">Every contact in the timeline is already in effect and read in the chapter above.</p>' : '<p class="note">No slow planet makes an exact contact to the composite chart in the next twelve months.</p>'),
         '<p class="note rlink" style="margin-top:12px">For each of you on your own, see the <a href="horoscope.html">Personal horoscope</a>.</p>', H.disclaimerPlain);
+      return out.join('');
+    }
+  }
+});
+/* ---------------- W5: couple past lives and the Chinese report ---------------- */
+const SYS2 = { cayce: 'the composite sojourn', karmic: 'the karmic contacts', vedic: 'the composite Ketu', numerology: 'your numbers together', chart: 'the composite chart' };
+const listOf2 = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const the2 = k => /^(Sun|Moon)$/.test(k) ? 'the ' + k : k;
+const ERA_SET = { Aries: 'the frontier and the warrior', Taurus: 'the land and the builders', Gemini: 'trade and writing', Cancer: 'clan and hearth', Leo: 'royal courts and the stage',
+  Virgo: 'healing, craft and the cloister', Libra: 'art and diplomacy', Scorpio: 'the mystery schools', Sagittarius: 'pilgrimage and teaching', Capricorn: 'empire and administration',
+  Aquarius: 'invention and reform', Pisces: 'faith and the spirit' };
+const BRANCH_EL = { Zi: 'Water', Chou: 'Earth', Yin: 'Wood', Mao: 'Wood', Chen: 'Earth', Si: 'Fire', Wu: 'Fire', Wei: 'Earth', Shen: 'Metal', You: 'Metal', Xu: 'Earth', Hai: 'Water' };
+Object.assign(REPORTS, {
+  couplepast: {
+    title: 'Past lives together', kicker: 'A past-life reading for two', card: 'major-20', caption: 'the card of awakening and rebirth', needs: 'partner', group: 'rel', nameLabel: 'Your name',
+    lede: 'The past-life method of the single report, applied to the two of you: the realm your souls are said to have shared between lives, where and as whom you may have met before, the karmic threads between your charts, your numbers together, and your shared cards.',
+    gv: 'Cayce Past Life and Karmic Past Life, for a couple',
+    method: 'Five systems, each read for the pair. <b>Composite sojourn</b>: each person&rsquo;s Sun and Moon made sidereal (Fagan-Bradley) for their own birth date, the midpoints taken, and the ruler of each midpoint&rsquo;s decanate read as a shared between-lives realm (triplicity decanates, modern rulers, as in the Past lives report). <b>Composite South Node</b>: midpoint of the two mean nodes; sign = the shared setting, whole-sign house from the composite Ascendant = the roles (both birth times). <b>Karmic contacts</b>: a planet within 5&deg; of the other person&rsquo;s South or North Node, the two nodal axes together or reversed (5&deg;), planets in the other&rsquo;s 12th house, Saturn contacts. <b>Vedic</b>: the composite Ketu (midpoint of the two sidereal South Nodes) and its sign&rsquo;s ruler. <b>Numbers</b>: the two Life Paths added and reduced (11, 22, 33 kept); 13, 14, 16 or 19 on the way is the couple&rsquo;s karmic number; the relationship card adds the two Greer birth cards. A planet named by two or more systems is called confirmed.',
+    render(ctx, H){
+      const { c, B, T, p, pB } = ctx, out = [], F = NS.factors, a = nm(H, p), b = nm(H, pB);
+      const bcA = NS.birthCards(ctx.iso), isoB = `${pB.input.y}-${String(pB.input.mo).padStart(2, '0')}-${String(pB.input.d).padStart(2, '0')}`, bcB = NS.birthCards(isoB);
+      const lpB = NS.numerology('', isoB).lifePath, X = F.couplePast(c, B, ctx.mode || 'fagan', ctx.num.lifePath, lpB, bcA.personality, bcB.personality);
+      const sn = NS.SIGNS[X.comp.sn.sign], ketu = NS.SIGNS[X.vedic.sign], who = h => h === 'A' ? a : b, whose = h => poss2(who(h));
+      const Who = h => who(h) === 'You' ? 'Your' : who(h) + '&rsquo;s';
+      /* Chapter 1: the shared story */
+      const story = [`<p>Read from your composite South Node in ${sn}, the two of you may have met before in the world of <b>${ERA_SET[sn]}</b>${X.comp.sn.house ? `, in the roles the ${H.ordinal(X.comp.sn.house)} house describes` : ''}.
+        Between lives, the Cayce tradition would place you together in the realm of <b>${listOf2(X.soj.planets.map(the2))}</b>.</p>`];
+      if (X.core.length) story.push(`<p>Your strongest shared signature is <b>${the2(X.core[0].key)}</b>, named independently by ${listOf2(X.core[0].systems.map(s => SYS2[s]))}.${X.core[1] ? ` <b>${the2(X.core[1].key)}</b> is confirmed too, by ${listOf2(X.core[1].systems.map(s => SYS2[s]))}.` : ''}</p>`);
+      else story.push('<p>No planet is named by two systems at once, so your shared themes are spread across the chapters below.</p>');
+      if (X.ties.sn.length || X.ties.nodes) story.push(`<p>${X.ties.nodes ? (X.ties.nodes.kind === 'same' ? 'Your two nodal axes line up: the tradition reads that as travelling the same road. ' : 'Your nodal axes are reversed: what is familiar to one of you is the growth edge of the other. ') : ''}${X.ties.sn.length ? `${X.ties.sn.length} planet${X.ties.sn.length > 1 ? 's sit' : ' sits'} on the other&rsquo;s South Node, the classic sign of a familiar bond.` : ''}</p>`);
+      out.push(H.chapter(1, 'The shared story in brief', 'Built from every chapter below. Where two or more systems agree, a theme is called confirmed.'),
+        `<div class="res story">${story.join('')}</div>`,
+        H.block('How the systems agree', `<table class="conv"><tr><th>Planet</th><th>Systems</th><th>Why</th></tr>${X.votes.map(x => `<tr><td><b>${H.glyph(x.key)} ${x.key}</b></td><td>${x.systems.length}</td><td>${x.why.join(', ')}</td></tr>`).join('')}</table>`));
+      /* Chapter 2: composite sojourns */
+      const sojBlock = (d, body) => d.alternatives ? H.block(`${H.glyph('Moon')} Composite Moon decanate: depends on the birth times`, `<p class="note">Without both birth times the composite Moon can fall in the ${NS.SIGNS[d.alternatives[0].decanSign]} or ${NS.SIGNS[d.alternatives[1].decanSign]} decanate, giving ${d.alternatives[0].ruler} or ${d.alternatives[1].ruler}.</p>`)
+        : H.block(`${H.glyph(body)} Composite ${body}: ${['first', 'second', 'third'][d.decan - 1]} decanate of sidereal ${NS.SIGNS[d.sign]}, ruled by ${d.ruler}`, `<p class="note">Sidereal composite ${body} at ${NS.fmtLon(d.lon)}.</p>${H.para(T['csoj:' + d.ruler])}`);
+      const same = !X.soj.moon.alternatives && X.soj.sun.ruler === X.soj.moon.ruler;
+      out.push(H.chapter(2, 'Between lives, together', 'The realm the two of you are said to have shared between earth lives, from the composite Sun and Moon.'),
+        `<div class="grid g2" style="align-items:start">${sojBlock(X.soj.sun, 'Sun')}${same ? H.block(`${H.glyph('Moon')} Composite Moon: the same realm, ${X.soj.moon.ruler}`, '<p class="note">Both composite lights point to one realm, which the tradition reads as a single strong theme.</p>') : sojBlock(X.soj.moon, 'Moon')}</div>`);
+      /* Chapter 3: settings and roles */
+      out.push(H.chapter(3, 'Where you may have met before', 'From the composite South Node: the familiar past of the relationship itself.'),
+        `<div class="grid g2" style="align-items:start">${H.block(`The setting: composite South Node in ${sn}`, H.para(T['cera:' + sn]))}
+          ${X.comp.sn.house ? H.block(`The roles: composite South Node in the ${H.ordinal(X.comp.sn.house)} house`, H.para(T['crole:' + X.comp.sn.house])) : H.block('The roles', '<p class="note">The roles come from the composite South Node&rsquo;s house, which needs both birth times.</p>')}</div>`,
+        ketu !== sn ? `<details class="more res"><summary>The Vedic view: composite Ketu in sidereal ${ketu}</summary><p class="note">Read in the sidereal zodiac, the composite South Node (Ketu) falls in ${ketu}, ruled by ${X.vedic.ruler}: a second possible setting.</p>${H.para(T['cera:' + ketu])}</details>`
+          : H.block(`The Vedic view agrees: composite Ketu in sidereal ${ketu}`, `<p class="note">The composite Ketu stays in ${ketu} in the sidereal zodiac too, ruled by ${X.vedic.ruler}: both traditions tell the same story.</p>`));
+      /* Chapter 4: karmic contacts */
+      const tie = (t, kind) => `<h4>${Who(t.holder)} ${H.glyph(t.key)} ${t.key} on ${whose(t.other)} ${kind}${t.orb != null ? ` &middot; ${t.orb.toFixed(1)}&deg;` : ''}</h4>${H.para(T[t.textKey])}`;
+      const sat = synContacts(ctx, H).list.filter(x => (x.a === 'Saturn') !== (x.b === 'Saturn') && /^(Sun|Moon|Mercury|Venus|Mars)$/.test(x.a === 'Saturn' ? x.b : x.a));
+      out.push(H.chapter(4, 'The karmic threads between you', 'Contacts between your two charts that past-life astrologers read as signs of an earlier bond: the lunar nodes, the hidden twelfth house and Saturn.'),
+        X.ties.nodes ? H.block(X.ties.nodes.kind === 'same' ? `Your nodal axes line up &middot; ${X.ties.nodes.orb.toFixed(1)}&deg;` : `Your nodal axes are reversed &middot; ${X.ties.nodes.orb.toFixed(1)}&deg;`, H.para(T[X.ties.nodes.textKey])) : '',
+        H.items('On the South Node: the familiar past', X.ties.sn.map(t => tie(t, 'South Node')), '<p class="note">No planet sits within 5&deg; of the other&rsquo;s South Node.</p>'),
+        H.items('On the North Node: the way forward', X.ties.nn.map(t => tie(t, 'North Node')), '<p class="note">No planet sits within 5&deg; of the other&rsquo;s North Node.</p>'),
+        H.items('In the other&rsquo;s twelfth house', X.ties.h12.map(t => `<h4>${Who(t.holder)} ${H.glyph(t.key)} ${t.key} in ${whose(t.other)} 12th house</h4>${H.para(T[t.textKey])}`),
+          c.angles || B.angles ? '<p class="note">No personal planet falls in the other&rsquo;s twelfth house.</p>' : '<p class="note">Twelfth-house contacts need at least one birth time.</p>'),
+        H.items('Saturn: commitments carried over', sat.map(x => `<h4>${H.poss(p.name)} ${H.glyph(x.a)} ${x.a} ${x.type} ${poss2(b)} ${H.glyph(x.b)} ${x.b} &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[x.textKey])}`), '<p class="note">No Saturn contact to a personal planet between you.</p>'));
+      /* Chapter 5: numbers */
+      const N = X.nums;
+      out.push(H.chapter(5, 'Your numbers together', `Life Paths ${ctx.num.lifePath} and ${lpB}: ${N.steps.join(' &rarr; ')}.`),
+        H.block(`Relationship number ${N.rel}`, H.para(T['reln:' + N.rel])),
+        N.debts.length ? N.debts.map(d => H.block(`Karmic number ${d} on the way to ${N.rel}`, H.para(T['ckdebt:' + d]))).join('') : H.block('No karmic number between you', '<p class="note">None of 13, 14, 16 or 19 appears on the way to your relationship number.</p>'));
+      /* Chapter 6: cards */
+      const sunC = X.comp.planets[0].lon, trop = F.decanCard(sunC), sid = F.decanCard(X.soj.sun.lon);
+      out.push(H.chapter(6, 'Your shared cards', 'The relationship card from your two birth cards, and the decan cards of your composite Sun.'),
+        H.block('The cards', `<div class="bcards">${[H.card(N.card, 'Relationship card'), H.card(trop.id, 'Composite Sun decan'), ...(sid.id !== trop.id ? [H.card(sid.id, 'Sidereal composite Sun decan')] : [])].join('')}</div>
+          <p class="note" style="margin-top:10px">Relationship card: ${a === 'You' ? 'your' : a + '&rsquo;s'} birth card ${bcA.personality} plus ${poss2(b)} ${bcB.personality}, reduced to 22 or less (Mary K. Greer&rsquo;s birth-card method, applied to the pair). Decan cards by the Golden Dawn attribution.</p>`));
+      /* Chapter 7: for reflection */
+      const lead = [...new Set([...X.core.map(x => x.key), ...X.soj.planets])].slice(0, 3);
+      out.push(H.chapter(7, 'For reflection: stones and affirmations for two', 'Traditional correspondences for the planets that lead your report, offered as focus points for reflection, never as treatment.'),
+        `<div class="grid g2" style="align-items:start">${lead.map(k => H.block(`${H.glyph(k)} ${k}`, H.para(T['gem:' + k]) + `<p class="affirm">${H.esc(T['caffirm:' + k] || '')}</p>`)).join('')}</div>`,
+        H.disclaimer);
+      return out.join('');
+    }
+  },
+  chinese: {
+    title: 'Chinese astrology report', kicker: 'The Four Pillars of destiny, read in full', card: 'major-10', caption: 'the card of the turning wheel', group: 'other',
+    lede: 'Your full Chinese chart from the exact birth moment: the year animal and its element, the month, day and hour pillars, your Day Master, and the balance of the five elements across all eight characters.',
+    gv: 'Chinese Astrology',
+    method: 'BaZi (Four Pillars) from the real solar calendar: the year and month change at the solar terms (the year at Lichun, the Sun at 315&deg;), computed with Astronomy Engine; the day pillar from the 60-day cycle; the hour from local standard time (an hour of daylight saving is taken off). The popular zodiac changes year at Lunar New Year instead; when the two differ, both are shown. Element balance counts the five elements over the four stems and four branches (each branch by its main element). Same engine as the Chinese astrology page.',
+    render(ctx, H){
+      const { c, T, p } = ctx, i = p.input, out = [];
+      const bz = NS.bazi({ y: i.y, mo: i.mo, d: i.d, h: i.h, mi: i.mi, timeKnown: c.timeKnown, bornUtc: +c.utc, tz: i.tz,
+        dayStartUtc: c.daySpan && c.daySpan.start, dayEndUtc: c.daySpan && c.daySpan.end });
+      const pop = NS.chinese(ctx.iso, c.timeKnown ? +c.utc : undefined).popular, y = bz.year;
+      const rel = NS.EXTRA ? (() => { const AN = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'], k = AN.indexOf(y.animal);
+        return NS.EXTRA.chineseTriad.replace('{a}', AN[(k + 4) % 12]).replace('{b}', AN[(k + 8) % 12]) + ' ' + NS.EXTRA.chineseClash.replace('{a}', AN[(k + 6) % 12]); })() : '';
+      out.push(H.chapter(1, `The year animal: ${y.polarity} ${y.element} ${y.animal}`, 'The year pillar: your public self, the first impression and how the wider world meets you.'),
+        `<div class="grid g2" style="align-items:start">${H.block(`<span lang="zh-Hant">${y.glyph}</span> The ${y.animal}`, H.para(T['cz-year:' + y.animal]) + (rel ? `<p class="note" style="margin-top:8px">${rel}</p>` : ''))}
+          ${H.block(`The ${y.element} element of your year`, H.para(T['cz-yel:' + y.element]))}</div>`,
+        pop.animal !== y.animal || pop.element !== y.element ? H.block('Two year boundaries', `<p class="note">Born between Lichun and Lunar New Year: by the Four Pillars you are ${y.element} ${y.animal}, by the popular zodiac ${pop.element} ${pop.animal}. Both are right in their own system; this report follows the Four Pillars.</p>`) : '',
+        bz.open.includes('year') ? H.block('', '<p class="note">Born on Lichun day with no birth time: the year pillar could be either side of the boundary.</p>') : '');
+      const pill = (lab, q) => q ? `<td><b lang="zh-Hant">${q.zh}</b><br>${q.stem} ${q.branch}<br>${q.polarity} ${q.element} &middot; ${q.animal}</td>` : '<td>&mdash;<br>needs a birth time</td>';
+      out.push(H.chapter(2, 'The Four Pillars', 'Year, month, day and hour: the eight characters of your chart. The month animal is the inner and family self, the day stem is your Day Master (the core self), the hour animal the private self.'),
+        H.block('Your eight characters', `<table class="conv" style="text-align:center"><tr><th>Hour</th><th>Day</th><th>Month</th><th>Year</th></tr><tr>${pill('Hour', bz.hour)}${pill('Day', bz.day)}${pill('Month', bz.month)}${pill('Year', bz.year)}</tr></table>`
+          + (bz.open.includes('month') ? '<p class="note" style="margin-top:8px">A solar term falls on this date: without a birth time the month pillar could be either month.</p>' : '')),
+        H.block(`Your Day Master: ${bz.day.stem}, ${bz.day.polarity} ${bz.day.element}`, H.para(T['cz-dm:' + bz.day.stem])),
+        `<div class="grid g2" style="align-items:start">${H.block(`The month animal: the ${bz.month.animal}`, H.para(T['cz-month:' + bz.month.animal]))}
+          ${bz.hour ? H.block(`The hour animal: the ${bz.hour.animal}`, H.para(T['cz-hour:' + bz.hour.animal])) : H.block('The hour animal', needTime('The hour pillar'))}</div>`);
+      const EL = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'], cnt = Object.fromEntries(EL.map(e => [e, 0]));
+      [bz.year, bz.month, bz.day, bz.hour].filter(Boolean).forEach(q => { cnt[q.element]++; cnt[BRANCH_EL[q.branch]]++; });
+      const total = bz.hour ? 8 : 6, strong = EL.filter(e => cnt[e] >= 3), missing = EL.filter(e => !cnt[e]);
+      out.push(H.chapter(3, 'The five elements in balance', `Each of the ${total} characters counted by its element${bz.hour ? '' : ' (six without the hour pillar)'}.`),
+        H.block('Element count', `<table class="conv"><tr>${EL.map(e => `<th>${e}</th>`).join('')}</tr><tr>${EL.map(e => `<td>${cnt[e]}</td>`).join('')}</tr></table>`),
+        H.items('Abundant and missing elements', [...strong.map(e => `<h4>${e}: abundant (${cnt[e]})</h4>${H.para(T[`cz-el:${e}:strong`])}`), ...missing.map(e => `<h4>${e}: missing</h4>${H.para(T[`cz-el:${e}:missing`])}`)],
+          '<p class="note">No element is missing and none appears three or more times: a well-spread chart.</p>'),
+        '<p class="note rlink" style="margin-top:12px">The year boundaries and the Four Pillars are explained on the <a href="chinese.html">Chinese astrology</a> page.</p>', H.disclaimerPlain);
       return out.join('');
     }
   }

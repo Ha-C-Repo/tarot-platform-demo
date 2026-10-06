@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path');
 const load = require('./load');
 const FILES = ['js/vendor/astronomy.browser.min.js', 'js/data/chiron.js', 'js/astro.js', 'js/chart.js', 'js/natal.js', 'js/vedic.js',
   'js/numerology.js', 'js/factors.js', 'js/cards.js', 'js/data/correspondences.js', 'js/data/extra-text.js',
-  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/tools.js', 'js/transits.js', 'js/data/astro-extra-text.js'];
+  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/tools.js', 'js/transits.js', 'js/data/astro-extra-text.js', 'js/chinese.js'];
 const W = load(FILES), TD = W.TD, F = TD.factors;
 const assert = (c, msg) => { if (!c) throw new Error(msg); };
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/fagan-swisseph.json'), 'utf8'));
@@ -114,6 +114,15 @@ module.exports = [
       for (let h = 1; h <= 12; h++) need(`comp-h:${x}:${h}`); });
     const C4 = ['Sun', 'Moon', 'Venus', 'Mars']; C4.forEach((x, i) => C4.slice(i + 1).forEach(y => K3.forEach(t => need(`comp-asp:${x}|${y}:${t}`))));
     ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].forEach(m => C4.concat('Asc').forEach(p => K3.forEach(t => need(`cfc:${m}:${p}:${t}`))));
+    TD.SIGNS.forEach(s => { C4.forEach(k => need(`comp-sign:${k}:${s}`)); need('cera:' + s); });
+    for (let h = 1; h <= 12; h++) need('crole:' + h);
+    F.PLANETS.forEach(k => ['csoj', 'ksn', 'knn', 'caffirm'].forEach(x => need(x + ':' + k)));
+    SEVEN.forEach(k => need('k12:' + k)); ['same', 'reversed'].forEach(k => need('knode:' + k));
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33].forEach(n => need('reln:' + n)); [13, 14, 16, 19].forEach(n => need('ckdebt:' + n));
+    const AN = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'], EL = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
+    AN.forEach(a => ['cz-year', 'cz-month', 'cz-hour'].forEach(x => need(x + ':' + a)));
+    EL.forEach(e => { need('cz-yel:' + e); need(`cz-el:${e}:strong`); need(`cz-el:${e}:missing`); });
+    ['Jia', 'Yi', 'Bing', 'Ding', 'Wu', 'Ji', 'Geng', 'Xin', 'Ren', 'Gui'].forEach(st => need('cz-dm:' + st));
     assert(!miss.length, 'missing: ' + miss.join(', '));
     return Object.keys(TD.REPORT_TEXT).length + ' report texts';
   }],
@@ -134,15 +143,31 @@ module.exports = [
     assert(cyc.map(x => x.kind).slice(0, 4).join() === 'wax,opp,wane,return' && cyc[0].age > 6 && cyc[0].age < 9, 'first stages ' + cyc.map(x => x.kind + '@' + x.age.toFixed(1)).join(' '));
     assert(cyc.filter(x => x.kind === 'return').map(x => x.textKey).join() === 'sat:return1,sat:return2,sat:return3', 'return keys');
   }],
+  ['Couple past lives: numbers, composite sojourn and nodal ties are computed as documented', () => {
+    const n = F.coupleNumbers(7, 6, 10, 12);
+    assert(n.sum === 13 && n.debts.join() === '13' && n.rel === 4 && n.card === 'major-00', JSON.stringify(n));
+    const m = F.coupleNumbers(11, 11, 21, 22);
+    assert(m.rel === 22 && m.debts.length === 0 && m.card === 'major-07', JSON.stringify(m));
+    const A = TD.chart(CHARTS[0][2]), B = TD.chart(CHARTS[2][2]), X = F.couplePast(A, B, 'fagan', 7, 6, 10, 12);
+    const side = (c, i) => TD.vedic.sidereal(c.planets[i].lon, c.utc, 'fagan');
+    assert(Math.abs(TD.separation(X.soj.sun.lon, TD.midpoint(side(A, 0), side(B, 0)))) < 1e-9, 'sojourn Sun = midpoint of sidereal Suns');
+    assert(X.soj.sun.ruler === F.decanOf(X.soj.sun.lon).ruler && X.soj.planets.includes(X.soj.sun.ruler), 'sojourn ruler');
+    assert(TD.separation(X.comp.sn.lon, (TD.midpoint(A.node, B.node) + 180) % 360) < 1e-9 && X.comp.sn.house >= 1, 'composite South Node with house');
+    X.ties.sn.forEach(t => { const Y = t.other === 'A' ? A : B, H = t.holder === 'A' ? A : B; assert(TD.separation(H.planets.find(p => p.key === t.key).lon, (Y.node + 180) % 360) <= 5, 'South Node tie orb'); });
+    assert(X.core.every(x => x.systems.length >= 2), 'core needs two systems');
+    const Z = F.couplePast(TD.chart(CHARTS[1][2]), TD.chart(CHARTS[5][2]), 'fagan', 7, 2, 10, 2);
+    assert(Z.comp.sn.house === null && Z.ties.h12.length === 0, 'no birth times: no composite houses, no 12th-house ties');
+    return 'core ' + X.core.map(x => x.key).join(',');
+  }],
   ['House rulers: twelve, each pointing to the house its ruler occupies', () => {
     const c = TD.chart(CHARTS[0][2]), hr = F.houseRulers(c);
     assert(hr.length === 12 && hr.map(x => x.textKey).join(' ') === 'ruler:1:7 ruler:2:11 ruler:3:4 ruler:4:4 ruler:5:11 ruler:6:7 ruler:7:9 ruler:8:10 ruler:9:2 ruler:10:9 ruler:11:10 ruler:12:9', hr.map(x => x.textKey).join(' '));
     assert(F.houseRulers(TD.chart(CHARTS[1][2])) === null, 'no time, no rulers');
   }],
-  ['report.html: all thirteen reports render every test chart with all their texts', () => {
+  ['report.html: all fifteen reports render every test chart with all their texts', () => {
     const ctx = load(FILES.concat(['js/reportpage.js', 'js/reports.js']), { document: { getElementById: () => null } });
     const R = ctx.TD.REPORTS, H = ctx.TD.reportHelpers;
-    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras,solarreturn,lunarreturn,progressions,saturn,relocation,synastry,composite,couplefc', Object.keys(R).join());
+    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras,solarreturn,lunarreturn,progressions,saturn,relocation,synastry,composite,couplefc,couplepast,chinese', Object.keys(R).join());
     let n = 0;
     Object.entries(R).forEach(([id, rep]) => CHARTS.forEach(([label, name, input]) => {
       const reloc = { name: 'London', lat: 51.5072, lon: -0.1276, tz: 'Europe/London' };
