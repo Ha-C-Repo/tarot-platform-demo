@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Report — tarot platform demo</title>
-<meta name="description" content="Astrology reports from a birth chart: Life path, Vocational guidance, Child report, Family patterns in love, and Chakras, stones and essences.">
+<meta name="description" content="Astrology reports from a birth chart: Life path, Vocational guidance, Child report, Family patterns in love, Chakras, stones and essences, forecasts, and the relationship reports: Synastry, Composite chart and Couple forecast.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A0710">
 <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
@@ -48,6 +48,16 @@
         <div><label class="f" for="bp">Birth place</label><input id="bp" placeholder="Start typing a city"></div>
       </div>
       <label class="check"><input type="checkbox" id="bu"> Birth time unknown</label>
+      <fieldset class="row" id="pprow" style="margin-top:14px;display:none;border:0;padding:0"><legend class="f" style="margin-bottom:8px">Your partner</legend>
+        <div class="row2">
+          <div><label class="f" for="pnm">Name</label><input id="pnm" value="Partner"></div>
+          <div><label class="f" for="pbd">Birth date</label><input id="pbd" type="date" value="1989-11-03"></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div><label class="f" for="pbt">Birth time</label><input id="pbt" type="time" value="08:45"></div>
+          <div><label class="f" for="pp">Birth place</label><input id="pp" placeholder="Start typing a city"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="pbu"> Birth time unknown</label></fieldset>
       <div class="row" id="nprow" style="margin-top:12px;display:none"><label class="f" for="np">Where you are now (the return chart is cast here)</label><input id="np" placeholder="Start typing a city"></div>
       <div class="row" id="rprow" style="margin-top:12px;display:none"><label class="f" for="rp">Place to read your chart for</label><input id="rp" placeholder="Start typing a city"></div>
       <button class="btn primary wide" id="go" style="margin-top:16px">Write the report</button>
@@ -67,7 +77,7 @@
 </div>
 <script src="js/vendor/astronomy.browser.min.js"></script><script src="js/data/chiron.js"></script>
 <script src="js/astro.js"></script><script src="js/chart.js"></script><script src="js/natal.js"></script><script src="js/vedic.js"></script>
-<script src="js/numerology.js"></script><script src="js/factors.js"></script><script src="js/tools.js"></script><script src="js/places.js"></script>
+<script src="js/numerology.js"></script><script src="js/factors.js"></script><script src="js/tools.js"></script><script src="js/transits.js"></script><script src="js/places.js"></script>
 <script src="js/cards.js"></script><script src="js/data/correspondences.js"></script>
 <script src="js/tour.js"></script><script src="js/site.js"></script><script src="js/reportpage.js"></script><script src="js/reports.js"></script>
 <script>
@@ -81,8 +91,8 @@
   $('rlede').textContent = R.lede;
   $('rmethod').innerHTML = R.method;
   if (R.nameLabel) $('nmlabel').innerHTML = R.nameLabel;
-  /* Only the field this report needs stays in the page: reportpage.js looks for #np / #rp. */
-  ['now', 'reloc'].forEach(k => { const row = $(k === 'now' ? 'nprow' : 'rprow'); if (R.needs === k) row.style.display = ''; else row.remove(); });
+  /* Only the field this report needs stays in the page: reportpage.js looks for #np / #rp / #pp. */
+  ['now', 'reloc', 'partner'].forEach(k => { const row = $({ now: 'nprow', reloc: 'rprow', partner: 'pprow' }[k]); if (R.needs === k) row.style.display = ''; else row.remove(); });
   $('rpick').innerHTML = ids.map(k => `<a href="report.html?r=${k}"${k === id ? ' class="on" aria-current="page"' : ''}>${TD.REPORTS[k].title}</a>`).join('');
   TD.reportPage({ page: 'report.html', render: (ctx, H) => {
     const html = R.render(ctx, H);

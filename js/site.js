@@ -11,14 +11,37 @@ try { stored = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) 
 const brand = Object.assign({}, DEF, stored);
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch (e) {} }
 
+/* 'astro' marks where the Astrology menu sits. Third field 1 = phone menu only; on desktop those pages are linked from the pages. */
 const NAV = [
-  ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'],
-  ['birthchart.html','Birth chart'], ['vedic.html','Vedic'], ['astromap.html','Astrocartography'], ['horoscope.html','Horoscope'], ['tools.html','Tools'], ['compatibility.html','Compatibility'], ['numerology.html','Numerology'],
-  ['chinese.html','Chinese'], ['maya.html','Maya'],
+  ['index.html','Home'], ['pull.html','Pull a card'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
-  /* Phone menu only (the desktop bar fits 13 links on one line from 1180 px); on desktop these are linked from the pages. */
-  ['reports.html','Astrology reports',1], ['pastlife.html','Past lives',1], ['karmic.html','Karmic path',1], ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['signs.html','Horoscopes by sign',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','I Ching and runes',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
+/* The Astrology menu (Amanda, 2026-10-05): every astrology page, calculator and report, in sections. Columns on desktop, an accordion on phones. */
+const ASTRO = [
+  [['Charts and calculators', [['birthchart.html','Birth chart'], ['vedic.html','Vedic chart'], ['astromap.html','Astrocartography'], ['compatibility.html','Compatibility'], ['tools.html','Astrology tools']]],
+   ['Horoscopes', [['horoscope.html','Personal horoscope'], ['signs.html','Horoscopes by sign']]]],
+  [['Reports: soul and self', [['reports.html','All reports'], ['pastlife.html','Past lives'], ['karmic.html','Karmic path'], ['report.html?r=lifepath','Life path'], ['report.html?r=vocation','Vocational guidance'],
+    ['report.html?r=child','Child report'], ['report.html?r=family','Family patterns in love'], ['report.html?r=chakras','Chakras, stones and essences']]]],
+  [['Reports: timing', [['report.html?r=solarreturn','Solar return'], ['report.html?r=lunarreturn','Lunar return'], ['report.html?r=progressions','Progressed chart'], ['report.html?r=saturn','Saturn cycle'], ['report.html?r=relocation','Relocation']]],
+   ['Reports: relationships', [['report.html?r=synastry','Synastry'], ['report.html?r=composite','Composite chart'], ['report.html?r=couplefc','Couple forecast']]]],
+  [['Other traditions', [['chinese.html','Chinese astrology'], ['maya.html','Maya calendar']]]]
+];
+/* Is this menu link the page being shown? report.html links match on their ?r= id (Life path when none is given). */
+function isHere(h, current){
+  const [page, q] = h.split('?');
+  if (page !== current) return false;
+  if (!q) return true;
+  let r = null; try { r = new URLSearchParams(location.search).get('r'); } catch (e) {}
+  return q === 'r=' + (r || 'lifepath');
+}
+function astroMenu(current){
+  const on = ASTRO.some(col => col.some(([, links]) => links.some(([h]) => isHere(h, current))));
+  const chev = '<svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+  return `<div class="navdrop${on ? ' here' : ''}"><button type="button" class="navdropbtn${on ? ' on' : ''}" id="astrobtn" aria-expanded="false" aria-controls="astromenu">Astrology ${chev}</button>
+    <div class="navmenu" id="astromenu">${ASTRO.map(col => `<div class="nmcol">${col.map(([title, links]) => `<div class="nmsec"><span class="nmh">${title}</span>${links.map(([h, t]) =>
+      `<a href="${h}"${isHere(h, current) ? ' class="on" aria-current="page"' : ''}>${t}</a>`).join('')}</div>`).join('')}</div>`).join('')}</div></div>`;
+}
 
 function chrome(current){
   document.documentElement.dataset.theme = brand.theme;
@@ -30,7 +53,7 @@ function chrome(current){
   const nav = `<a class="skip" href="#main">Skip to content</a>
     <nav class="nav"><div class="navin">
       <a class="brand" href="index.html" aria-label="Home"><span class="mark" aria-hidden="true"></span><b data-brand-name>${esc(brand.name)}</b></a>
-      <div class="navlinks" id="navlinks">${NAV.map(([h,t,m])=>
+      <div class="navlinks" id="navlinks">${NAV.map(([h,t,m])=> h === 'astro' ? astroMenu(current) :
         `<a href="${h}"${m?' class="monly'+(h===current?' on':'')+'"':h===current?' class="on"':''}${h===current?' aria-current="page"':''}>${t}</a>`).join('')}</div>
       <a class="navacct${current==='account.html'?' on':''}" href="account.html" aria-label="Your account" title="Your account"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8.2" r="3.8"/><path d="M4.5 20.2c.9-3.9 3.9-6.1 7.5-6.1s6.6 2.2 7.5 6.1"/></svg></a>
       <a class="navcta" href="book.html">Book a reading</a>
@@ -159,6 +182,15 @@ function wire(){
   // mobile nav
   const bg = document.getElementById('burger'), nl = document.getElementById('navlinks');
   if (bg) bg.onclick = () => { const o = nl.classList.toggle('open'); bg.setAttribute('aria-expanded', o); };
+  // Astrology menu: click or tap opens and closes it (desktop also opens on hover); Escape or a click elsewhere closes it.
+  const ab = document.getElementById('astrobtn');
+  if (ab) {
+    const dd = ab.parentNode, setOpen = o => { dd.classList.toggle('open', o); ab.setAttribute('aria-expanded', o); };
+    ab.onclick = e => { e.stopPropagation(); setOpen(!dd.classList.contains('open')); };
+    document.addEventListener('click', e => { if (!dd.contains(e.target) && !nl.classList.contains('open')) setOpen(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && dd.classList.contains('open')) { setOpen(false); ab.focus(); } });
+    if (dd.classList.contains('here') && matchMedia('(max-width:860px)').matches) setOpen(true);   // phone menu: open on the section you are in
+  }
   // demo CTAs: anything that would take money or book time stops at the modal
   const mw = document.getElementById('mwrap');
   const close = () => mw.classList.remove('open');

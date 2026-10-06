@@ -699,3 +699,34 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 /* the nav holds 14 links since Astrocartography joined it (2026-10-05): a little wider than the page column, tighter on laptops */
 .navin{max-width:1320px}
 @media(min-width:861px) and (max-width:1299px){.navin{gap:8px;padding-left:16px;padding-right:16px}.navlinks{font-size:11.4px;gap:5px 6px}.brand b{font-size:13px}.navcta{padding:8px 11px;font-size:12px}}
+/* Astrology menu (2026-10-05): one "Astrology" entry in the bar opens every chart, calculator and report in sections.
+   Desktop: a full-width panel under the bar, opened by click or hover. Phone: an accordion inside the burger menu. */
+.navdropbtn{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.navdropbtn:hover,.navdropbtn.on,.navdrop.open .navdropbtn{color:var(--text)}
+.navdropbtn svg{transition:transform .2s}
+.navdrop.open .navdropbtn svg{transform:rotate(180deg)}
+.navmenu{display:none}
+.nmsec{display:flex;flex-direction:column;gap:8px}
+.nmsec+.nmsec{margin-top:18px}
+.nmh{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--a3);font-weight:800}
+.navmenu a{color:var(--muted);font-weight:600}
+.navmenu a:hover,.navmenu a.on{color:var(--text)}
+.navmenu a.on{text-decoration:underline;text-decoration-color:var(--a2);text-underline-offset:4px}
+@media(min-width:861px){
+  .navin{position:relative}
+  .navmenu{position:absolute;top:100%;left:16px;right:16px;margin-top:1px;background:var(--ink);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 16px 16px;padding:22px 26px 24px;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;
+    box-shadow:0 22px 50px rgba(0,0,0,.45);z-index:60;font-size:13px}
+  .navmenu::before{content:'';position:absolute;left:0;right:0;top:-14px;height:14px}   /* keeps the hover alive between the button and the panel */
+  .navdrop.open .navmenu{display:grid}
+  @media(hover:hover){.navdrop:hover .navmenu{display:grid}}
+}
+@media(max-width:860px){
+  .navdrop{width:100%;border-bottom:1px solid var(--line)}
+  .navdropbtn{width:100%;justify-content:space-between;padding:11px 0;font-size:15px}
+  .navdrop.open .navmenu{display:block;padding:0 0 12px 12px}
+  .nmsec+.nmsec,.nmcol+.nmcol{margin-top:14px}
+  .navlinks .nmsec{gap:0}
+  .navlinks .navmenu a{padding:7px 0;border-bottom:0;font-size:14px}
+}
+[data-theme="light"] .navmenu{box-shadow:0 22px 50px rgba(40,20,60,.14)}

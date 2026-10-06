@@ -15,7 +15,8 @@
 @media print{
   @page{margin:14mm 14mm 16mm;@bottom-center{content:counter(page);font-size:9px;color:#5e5568}}
   @page :first{@bottom-center{content:none}}
-  .rscreen,#out .rdisc{display:none!important}
+  .rscreen,#out .rdisc,.rlink{display:none!important}   /* .rlink: links to other pages, useless on paper */
+  .wrap.sect{padding-bottom:0!important}   /* a report ending flush with a page bottom must not spill a blank page */
   /* ---- cover ---- */
   .pcover{display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;
     height:238mm;padding:12mm 12mm 10mm;border:1px solid #cfc8d6;border-radius:5mm;position:relative;overflow:hidden;

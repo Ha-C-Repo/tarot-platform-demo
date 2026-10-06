@@ -10,11 +10,12 @@ window.TD = window.TD || {};
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const KEY = 'tarotdemo.natal';
-const TEXT_FILES = ['js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js'];
+const TEXT_FILES = ['js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/data/astro-extra-text.js'];
+const PKEY = 'tarotdemo.partner';      // the second person of the relationship reports
 let textState = null;
 
 function loadTexts(then){
-  if (NS.NATAL_TEXT && NS.VEDIC_TEXT && NS.REPORT_TEXT && NS.TOOLS_TEXT) return true;
+  if (NS.NATAL_TEXT && NS.VEDIC_TEXT && NS.REPORT_TEXT && NS.TOOLS_TEXT && NS.ASTRO_EXTRA) return true;
   if (textState) return false;
   textState = 'loading';
   let i = 0;
@@ -36,7 +37,9 @@ function context(p, mode){
   if (!named) { delete num.expression; delete num.soulUrge; delete num.personality; }
   const karmic = NS.karmicNumbers(named ? p.name : '', iso);
   const v = NS.vedic.chart(c), st = F.strength(c), soj = F.sojourns(c, mode);
-  return { p, c, v, iso, named, num, karmic, st, soj, mode,
+  /* Relationship reports: the partner's chart as ctx.B, their details as ctx.pB. */
+  const B = p.partner ? NS.chart(p.partner.input) : null;
+  return { p, c, v, iso, B, pB: p.partner || null, named, num, karmic, st, soj, mode,
     nodes: F.nodes(c), onNodes: F.onNodes(c), retro: F.retrogrades(c), emphasis: F.emphasis(c), fortune: F.fortune(c),
     chakras: F.chakras(c, st), ak: F.atmakaraka(v), conv: F.convergence(c, v, num, karmic, soj, st),
     T: Object.assign({}, NS.TOOLS_TEXT, NS.NATAL_TEXT, NS.VEDIC_TEXT, NS.REPORT_TEXT) };
@@ -85,6 +88,24 @@ function reportPage(opts){
   $('bu').addEventListener('change', () => { $('bt').disabled = $('bu').checked; go(); });
   ['nm', 'bd', 'bt', 'ayan'].forEach(id => $(id) && $(id).addEventListener('change', go));
   $('go').onclick = go;
+  /* Optional partner block (#pnm, #pbd, #pbt, #pbu, #pp), remembered under its own key. */
+  let psaved = null, partner = null;
+  if ($('pp')) {
+    try { psaved = JSON.parse(localStorage.getItem(PKEY) || 'null'); } catch (e) {}
+    if (psaved) { $('pnm').value = psaved.nm || $('pnm').value; $('pbd').value = psaved.bd || $('pbd').value; $('pbt').value = psaved.bt || '';
+      $('pbu').checked = !!psaved.bu; $('pbt').disabled = !!psaved.bu; }
+    partner = NS.places.picker($('pp'), () => go(), psaved && psaved.place || 'Chicago');
+    $('pbu').addEventListener('change', () => { $('pbt').disabled = $('pbu').checked; go(); });
+    ['pnm', 'pbd', 'pbt'].forEach(id => $(id).addEventListener('change', go));
+  }
+  function readPartner(hsys){
+    const iso = $('pbd').value, pl = partner.get();
+    if (!iso || !pl) return null;
+    const [y, mo, d] = iso.split('-').map(Number), known = !$('pbu').checked && !!$('pbt').value;
+    const [h, mi] = known ? $('pbt').value.split(':').map(Number) : [12, 0];
+    try { localStorage.setItem(PKEY, JSON.stringify({ nm: $('pnm').value, bd: iso, bt: $('pbt').value, bu: $('pbu').checked, place: pl.name })); } catch (e) {}
+    return { name: $('pnm').value || 'Partner', place: pl, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: hsys } };
+  }
 
   function read(){
     const iso = $('bd').value, pl = place.get();
@@ -97,11 +118,13 @@ function reportPage(opts){
     try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, prev, { nm: $('nm').value, bd: iso, bt: $('bt').value, bu: $('bu').checked, hsys, place: pl.name },
       here && here.get() ? { now: here.get().name } : {}, away && away.get() ? { reloc: away.get().name } : {})));
       if ($('ayan')) localStorage.setItem(MKEY, $('ayan').value); } catch (e) {}
-    return { name: $('nm').value || 'You', place: pl, now: here && here.get() || pl, reloc: away && away.get() || null, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: hsys } };
+    const pB = partner ? readPartner(hsys) : null;
+    if (partner && !pB) return null;
+    return { name: $('nm').value || 'You', place: pl, partner: pB, now: here && here.get() || pl, reloc: away && away.get() || null, input: { y, mo, d, h, mi, timeKnown: known, lat: pl.lat, lon: pl.lon, tz: pl.tz, system: hsys } };
   }
   function go(){
     const p = read();
-    if (!p) { $('out').innerHTML = '<div class="res"><p class="note">Pick a birth place from the list to write the report.</p></div>'; return; }
+    if (!p) { $('out').innerHTML = `<div class="res"><p class="note">Pick a birth place from the list${$('pp') ? ' for both people' : ''} to write the report.</p></div>`; return; }
     if (!loadTexts(() => { const y = scrollY; go(); scrollTo({ top: y, behavior: 'instant' }); })) {
       $('out').innerHTML = `<div class="res"><p class="note">${textState === 'failed' ? 'The report text could not be loaded.' : 'Writing your report&hellip;'}</p></div>`;
       if (textState !== 'failed') return;
@@ -124,13 +147,15 @@ function printPages(ctx, body, cover){
   const now = new Date(), made = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   const chapters = [...body.matchAll(/<h2 class="rh2">([\s\S]*?)<\/h2>/g)].map(m => m[1]);
   const method = [...document.querySelectorAll('#form .warn p')].map(x => `<p>${x.innerHTML}</p>`).join('');
-  const who = /^you$/i.test(String(p.name).trim()) ? 'you' : esc(p.name);
+  const who = (/^you$/i.test(String(p.name).trim()) ? 'you' : esc(p.name)) + (ctx.pB ? ' and ' + esc(ctx.pB.name) : '');
+  const born = (q, pl) => { let w = pl && pl.name || ''; try { if (NS.places && NS.places.label && pl.lat != null) w = NS.places.label(pl); } catch (e) {}
+    const j = q.input; return `${ctx.pB ? esc(q.name) + ': born ' : 'Born '}${j.d} ${MONTHS[j.mo - 1]} ${j.y}${j.timeKnown ? `, ${String(j.h).padStart(2, '0')}:${String(j.mi).padStart(2, '0')}` : ', birth time unknown'}<br>${esc(w)}`; };
   const disc = (body.match(/<p class="note rdisc"[^>]*>([\s\S]*?)<\/p>/) || [])[1];
   return `<div class="pcover">
       <div><div class="pc-brand">${esc(brand.name || '')}${brand.role ? ' &middot; ' + esc(brand.role) : ''}</div>
         <div class="pc-kicker">${cover.kicker}</div><h1 class="pc-title">${cover.title}</h1><div class="pc-for">Prepared for ${who}</div></div>
       ${card ? `<figure class="pc-card"><div><img src="${card.img}" alt="${esc(card.name)}" loading="eager"><figcaption>${esc(card.name)}${cover.caption ? ', ' + cover.caption : ''}. Rider-Waite-Smith deck, 1909, Pamela Colman Smith.</figcaption></div></figure>` : ''}
-      <div><div class="pc-birth">Born ${when}<br>${esc(where)}</div>
+      <div><div class="pc-birth">${ctx.pB ? born(p, p.place) + '<br>' + born(ctx.pB, ctx.pB.place) : `Born ${when}<br>${esc(where)}`}</div>
         <div class="pc-foot">Prepared ${made}. For reflection and entertainment.</div></div>
     </div>
     <div class="pabout"><h2>About this report</h2><h3>Contents</h3><ol>${chapters.map(c => `<li>${c}</li>`).join('')}</ol>

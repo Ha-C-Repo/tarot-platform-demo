@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path');
 const load = require('./load');
 const FILES = ['js/vendor/astronomy.browser.min.js', 'js/data/chiron.js', 'js/astro.js', 'js/chart.js', 'js/natal.js', 'js/vedic.js',
   'js/numerology.js', 'js/factors.js', 'js/cards.js', 'js/data/correspondences.js', 'js/data/extra-text.js',
-  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/tools.js'];
+  'js/data/natal-text.js', 'js/data/vedic-text.js', 'js/data/report-text.js', 'js/data/tools-text.js', 'js/tools.js', 'js/transits.js', 'js/data/astro-extra-text.js'];
 const W = load(FILES), TD = W.TD, F = TD.factors;
 const assert = (c, msg) => { if (!c) throw new Error(msg); };
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/fagan-swisseph.json'), 'utf8'));
@@ -109,6 +109,11 @@ module.exports = [
     [13, 14, 16, 19].forEach(n => need('kdebt:' + n));
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => need('klesson:' + n));
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33].forEach(n => { need('numecho:' + n); need('numtension:' + n); });
+    const SEVEN = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'], K3 = ['conjunction', 'easy', 'hard'];
+    SEVEN.forEach((x, i) => { SEVEN.slice(i).forEach(y => K3.forEach(t => need(`syn:${x}|${y}:${t}`))); need(`syn:Asc:${x}:conj`);
+      for (let h = 1; h <= 12; h++) need(`comp-h:${x}:${h}`); });
+    const C4 = ['Sun', 'Moon', 'Venus', 'Mars']; C4.forEach((x, i) => C4.slice(i + 1).forEach(y => K3.forEach(t => need(`comp-asp:${x}|${y}:${t}`))));
+    ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].forEach(m => C4.concat('Asc').forEach(p => K3.forEach(t => need(`cfc:${m}:${p}:${t}`))));
     assert(!miss.length, 'missing: ' + miss.join(', '));
     return Object.keys(TD.REPORT_TEXT).length + ' report texts';
   }],
@@ -134,14 +139,15 @@ module.exports = [
     assert(hr.length === 12 && hr.map(x => x.textKey).join(' ') === 'ruler:1:7 ruler:2:11 ruler:3:4 ruler:4:4 ruler:5:11 ruler:6:7 ruler:7:9 ruler:8:10 ruler:9:2 ruler:10:9 ruler:11:10 ruler:12:9', hr.map(x => x.textKey).join(' '));
     assert(F.houseRulers(TD.chart(CHARTS[1][2])) === null, 'no time, no rulers');
   }],
-  ['report.html: all ten reports render every test chart with all their texts', () => {
+  ['report.html: all thirteen reports render every test chart with all their texts', () => {
     const ctx = load(FILES.concat(['js/reportpage.js', 'js/reports.js']), { document: { getElementById: () => null } });
     const R = ctx.TD.REPORTS, H = ctx.TD.reportHelpers;
-    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras,solarreturn,lunarreturn,progressions,saturn,relocation', Object.keys(R).join());
+    assert(Object.keys(R).join() === 'lifepath,vocation,child,family,chakras,solarreturn,lunarreturn,progressions,saturn,relocation,synastry,composite,couplefc', Object.keys(R).join());
     let n = 0;
     Object.entries(R).forEach(([id, rep]) => CHARTS.forEach(([label, name, input]) => {
       const reloc = { name: 'London', lat: 51.5072, lon: -0.1276, tz: 'Europe/London' };
-      const html = rep.render(ctx.TD.reportContext({ name, place: { name: label }, reloc, input }, 'fagan'), H); n++;
+      const partner = CHARTS[(CHARTS.findIndex(x => x[0] === label) + 1) % CHARTS.length], pB = { name: partner[1], place: { name: partner[0] }, input: partner[2] };
+      const html = rep.render(ctx.TD.reportContext({ name, place: { name: label }, reloc, partner: rep.needs === 'partner' ? pB : null, input }, 'fagan'), H); n++;
       assert(!/undefined|NaN|\[object/.test(html), `${id} ${label}: ${(html.match(/.{60}(undefined|NaN|\[object).{20}/) || [''])[0]}`);
       assert(!/<p class="interp"><\/p>|<p class="affirm"[^>]*><\/p>/.test(html), `${id} ${label}: empty text`);
       assert((html.match(/class="eyebrow rchead"/g) || []).length >= (id === 'relocation' && !input.timeKnown ? 1 : 2), `${id} ${label}: chapters`);

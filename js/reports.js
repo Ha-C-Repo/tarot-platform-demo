@@ -283,7 +283,114 @@ Object.assign(REPORTS, {
       const moved = ['Sun', 'Moon', 'Venus', 'Mars', 'Jupiter', 'Saturn'].map(k => ({ k, from: P(c, k).house, to: P(rc, k).house })).filter(x => x.from !== x.to);
       out.push(H.chapter(3, 'Where your planets land there', 'Planets that change house when you move: the life area they colour shifts.'),
         H.items('Planets in new houses', moved.map(x => `<h4>${H.glyph(x.k)} ${x.k}: from the ${H.ordinal(x.from)} to the ${H.ordinal(x.to)} house</h4>${H.para(T[`house:${x.k}:${x.to}`])}`), '<p class="note">Your main planets stay in the same houses there.</p>'),
-        '<p class="note" style="margin-top:12px">See every planet line on the world map on the <a href="astromap.html">Astrocartography</a> page.</p>', H.disclaimerPlain);
+        '<p class="note rlink" style="margin-top:12px">See every planet line on the world map on the <a href="astromap.html">Astrocartography</a> page.</p>', H.disclaimerPlain);
+      return out.join('');
+    }
+  }
+});
+/* ---------------- W4: relationship reports (two people: ctx.B, ctx.pB from reportpage.js) ---------------- */
+const SEVEN = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+const KIND = { conjunction: 'conjunction', trine: 'easy', sextile: 'easy', square: 'hard', opposition: 'hard' };
+const KIND_WORD = { conjunction: 'conjunct', easy: 'in easy aspect to', hard: 'in hard aspect to' };
+const nm = (H, q) => /^you$/i.test(String(q.name).trim()) ? 'You' : H.esc(q.name);
+const poss2 = n => n === 'You' ? 'your' : n + '&rsquo;s';
+const bothTimes = ctx => ctx.c.timeKnown && ctx.B.timeKnown;
+/* One person's Big Three, with both Moon signs when the Moon changed sign on a day with no birth time. */
+function temperament(H, T, q, ch){
+  const b3 = NS.natal.bigThree(ch);
+  return H.block(nm(H, q), `<h4>${H.glyph('Sun')} Sun in ${b3.sun}</h4>${H.para(T['sign:Sun:' + b3.sun])}`
+    + (b3.moon ? `<h4>${H.glyph('Moon')} Moon in ${b3.moon}</h4>${H.para(T['sign:Moon:' + b3.moon])}`
+      : `<h4>${H.glyph('Moon')} Moon in ${b3.moonRange.join(' or ')}</h4><p class="note">The Moon changed sign that day; the birth time decides.</p>${b3.moonRange.map(s => `<h4>${s}</h4>${H.para(T['sign:Moon:' + s])}`).join('')}`)
+    + (b3.rising ? `<h4>Rising sign ${b3.rising}</h4>${H.para(T['rising:' + b3.rising])}` : '<p class="note">Rising sign: needs a birth time.</p>'));
+}
+/* Synastry contacts between the seven classical planets, closest first, with their order-independent text key. */
+function synContacts(ctx, H){
+  const s = NS.synastry(ctx.c, ctx.B), O = H.ORDER;
+  return { s, list: s.contacts.filter(x => SEVEN.includes(x.a) && SEVEN.includes(x.b)).sort((x, y) => x.orb - y.orb).map(x => {
+    const [p, q] = O.indexOf(x.a) <= O.indexOf(x.b) ? [x.a, x.b] : [x.b, x.a];
+    return Object.assign({ textKey: `syn:${p}|${q}:${KIND[x.type]}` }, x); }) };
+}
+/* A person's planets within 6 degrees of the other's Ascendant (their Moon only with a birth time). */
+function onAsc(holder, chHolder, other, chOther){
+  if (!chOther.angles) return [];
+  return chHolder.planets.filter(p => SEVEN.includes(p.key) && !(p.key === 'Moon' && !chHolder.timeKnown))
+    .map(p => ({ holder, other, key: p.key, orb: NS.separation(p.lon, chOther.angles.asc) })).filter(x => x.orb <= 6);
+}
+const COMP4 = ['Sun', 'Moon', 'Venus', 'Mars'];
+Object.assign(REPORTS, {
+  synastry: {
+    title: 'Synastry', kicker: 'Two birth charts, read together', card: 'major-06', caption: 'the card of choice in love', needs: 'partner', group: 'rel', nameLabel: 'Your name',
+    lede: 'Your chart and your partner’s, read against each other: your two temperaments side by side, every close contact between your planets in words, the Jupiter and Saturn ties, and the compatibility score with its working.',
+    gv: 'Compatibility Report',
+    method: 'Tropical zodiac. Every major aspect between one person&rsquo;s Sun to Saturn and the other&rsquo;s, with orbs of 6&deg; (4&deg; for a sextile, 2&deg; more with the Sun or Moon), plus any planet within 6&deg; of the other person&rsquo;s Ascendant. Each contact is read the same way whichever of you holds which planet. A Moon with no birth time behind it is left out. The score is the Compatibility page&rsquo;s published heuristic.',
+    render(ctx, H){
+      const { c, B, T, p, pB } = ctx, out = [], { s, list } = synContacts(ctx, H), a = nm(H, p), b = nm(H, pB);
+      const line = x => `<h4>${H.poss(p.name)} ${H.glyph(x.a)} ${x.a} ${x.type} ${poss2(b)} ${H.glyph(x.b)} ${x.b} &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[x.textKey])}`;
+      out.push(H.chapter(1, 'Two temperaments side by side', 'Sun, Moon and rising sign for each of you: what each brings into the room before any contact between you. Each reading speaks to its owner as &ldquo;you&rdquo;.'),
+        `<div class="grid g2" style="align-items:start">${temperament(H, T, p, c)}${temperament(H, T, pB, B)}</div>`);
+      const slow = x => /^(Jupiter|Saturn)$/.test(x.a) || /^(Jupiter|Saturn)$/.test(x.b);
+      const asc = [...onAsc(a, c, b, B), ...onAsc(b, B, a, c)].sort((x, y) => x.orb - y.orb);
+      out.push(H.chapter(2, 'The main currents between you', 'Contacts between your Suns, Moons, Mercuries, Venuses and Marses, closest first, and any planet sitting on the other&rsquo;s rising degree.'),
+        H.items('Planet to planet', list.filter(x => !slow(x)).map(line), '<p class="note">No close contacts between these planets: the bond leans on the slower ties in the next chapter and on your sign mix.</p>'),
+        asc.length ? H.items('On the other&rsquo;s rising degree', asc.map(x => `<h4>${x.holder === 'You' ? 'Your' : x.holder + '&rsquo;s'} ${H.glyph(x.key)} ${x.key} on ${poss2(x.other)} Ascendant &middot; ${x.orb.toFixed(1)}&deg;</h4>${H.para(T[`syn:Asc:${x.key}:conj`])}`)) : '');
+      out.push(H.chapter(3, 'Growth and staying power', 'Jupiter (encouragement, generosity) and Saturn (commitment, limits) in contact with the other&rsquo;s planets: the slower ties that shape how a bond grows and lasts.'),
+        H.items('Jupiter and Saturn ties', list.filter(slow).map(line), '<p class="note">No close Jupiter or Saturn contacts between you.</p>'));
+      out.push(H.chapter(4, 'The score and its working', `${s.contacts.length} scored contacts across all ten planets.`),
+        H.block(`Compatibility score: ${s.score} of 100`, `<div class="bar" style="max-width:280px;margin:8px 0"><i style="width:${s.score}%"></i></div><p class="note">Harmony ${s.harmony.toFixed(2)}, tension ${s.tension.toFixed(2)}. Score = 50 + 50 &times; (harmony &minus; tension) &divide; (harmony + tension + 2). Each contact adds its aspect value (trine +1, sextile +0.8, conjunction +0.6, opposition &minus;0.6, square &minus;1) times the two planet weights times its closeness. A rule of thumb with the rules published, not a measurement; tension is also where couples grow.</p>`),
+        '<p class="note rlink" style="margin-top:12px">The full ten-by-ten aspect grid and the Davison chart are on the <a href="compatibility.html">Compatibility</a> page.</p>', H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  composite: {
+    title: 'Composite chart', kicker: 'The relationship as a chart of its own', card: 'major-14', caption: 'the card of blending', needs: 'partner', group: 'rel', nameLabel: 'Your name',
+    lede: 'The two of you as one chart: the midpoint of each pair of planets. Its Sun, Moon, Venus and Mars describe the relationship’s own character, its houses show where the relationship spends its energy, and its aspects are the patterns it keeps returning to.',
+    gv: 'Composite Compatibility, Colloquial Composite',
+    method: 'Composite chart by midpoints: each planet is placed halfway between the two people&rsquo;s positions, the short way round the zodiac. Composite Ascendant = midpoint of the two Ascendants, Whole Sign houses from it, so houses need both birth times. Aspects with the usual natal orbs. Without both birth times the composite Moon is approximate and its aspects are left out.',
+    render(ctx, H){
+      const { c, B, T } = ctx, out = [], cp = NS.composite(c, B), X = (NS.ASTRO_EXTRA || {}).composite || {}, times = bothTimes(ctx);
+      const cpl = k => cp.planets.find(q => q.key === k);
+      out.push(H.chapter(1, 'The character of the relationship', 'The composite Sun, Moon, Venus and Mars by sign.' + (times ? '' : ' Without both birth times the composite Moon&rsquo;s sign is approximate.')),
+        `<div class="grid g2" style="align-items:start">${COMP4.map(k => { const q = cpl(k), sg = S(q.lon);
+          return H.block(`${H.glyph(k)} Composite ${k} in ${sg}${k === 'Moon' && !times ? ' <span class="pill">approximate</span>' : ''}`, H.para(X[k + ':' + sg])); }).join('')}</div>`);
+      out.push(H.chapter(2, 'Where the relationship lives', 'The composite Sun to Saturn by house: the life areas the two of you pour that energy into together.'),
+        cp.asc != null ? H.items(`Composite Ascendant in ${S(cp.asc)}`, SEVEN.map(k => { const q = cpl(k);
+          return `<h4>${H.glyph(k)} Composite ${k} in the ${H.ordinal(q.house)} house</h4>${H.para(T[`comp-h:${k}:${q.house}`])}`; }))
+          : H.block('', '<p class="note">The composite houses come from both birth times. Add a birth time for each of you to read this chapter.</p>'));
+      const asps = [];
+      COMP4.forEach((x, i) => COMP4.slice(i + 1).forEach(y => { if (!times && (x === 'Moon' || y === 'Moon')) return;
+        const a = NS.aspectBetween(cpl(x), cpl(y)); if (a) asps.push(Object.assign({ x, y, textKey: `comp-asp:${x}|${y}:${KIND[a.type]}` }, a)); }));
+      out.push(H.chapter(3, 'Patterns the relationship returns to', 'Aspects between the composite Sun, Moon, Venus and Mars, closest first.'),
+        H.items('Composite aspects', asps.sort((p, q) => p.orb - q.orb).map(a => `<h4>${H.glyph(a.x)} ${a.x} ${a.type} ${H.glyph(a.y)} ${a.y} &middot; ${a.orb.toFixed(1)}&deg;</h4>${H.para(T[a.textKey])}`),
+          '<p class="note">No close aspects between these composite planets: each part of the relationship runs on its own terms.</p>'),
+        '<p class="note rlink" style="margin-top:12px">The composite and Davison positions in full are on the <a href="compatibility.html">Compatibility</a> page.</p>', H.disclaimerPlain);
+      return out.join('');
+    }
+  },
+  couplefc: {
+    title: 'Couple forecast', kicker: 'The year ahead for the two of you', card: 'major-17', caption: 'the card of hope renewed', needs: 'partner', group: 'rel', nameLabel: 'Your name',
+    lede: 'The slow planets crossing your composite chart over the next twelve months: which themes are active for the relationship now, what comes next, and the dates each contact is exact.',
+    gv: 'Compatibility Forecast, Compatibility Transits',
+    method: 'Transits of Jupiter, Saturn, Uranus, Neptune and Pluto to the composite Sun, Moon, Venus, Mars and (with both birth times) Ascendant, from today for twelve months. Exact dates are found to under a minute with the same search as the Horoscope page. A slow planet can cross the same point up to three times as it turns retrograde; every pass is listed. In effect now: within 2&deg; (1.5&deg; for Uranus, Neptune and Pluto). Without both birth times the composite Moon is left out.',
+    render(ctx, H){
+      const { c, B, T } = ctx, out = [], cp = NS.composite(c, B), times = bothTimes(ctx), X = NS.transits;
+      const SLOW = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+      const pts = { planets: cp.planets.filter(q => COMP4.includes(q.key) && (times || q.key !== 'Moon')), angles: times ? { asc: cp.asc, mc: cp.mc } : null };
+      const pk = n => n === 'Ascendant' ? 'Asc' : n, now = new Date(), end = new Date(+now + YEARMS);
+      const useful = h => SLOW.includes(h.mover) && h.natal !== 'Midheaven';
+      const live = X.active(pts, now).filter(useful);
+      const label = t => `Transiting ${H.glyph(t.mover)} ${t.mover} ${KIND_WORD[t.kind]} the composite ${t.natal === 'Ascendant' ? 'Ascendant' : H.glyph(t.natal) + ' ' + t.natal}`;
+      out.push(H.chapter(1, 'Active for the two of you now', `As of ${fmtDate(now)}.`),
+        H.items('In effect now', live.map(t => `<h4>${label(t)} &middot; ${t.orb.toFixed(1)}&deg;, ${t.applying ? 'tightening' : 'separating'}</h4>${H.para(T[`cfc:${t.mover}:${pk(t.natal)}:${t.kind}`])}`),
+          '<p class="note">No slow planet is touching the composite chart closely today: a settled stretch for the relationship.</p>'));
+      const groups = {};
+      X.hits(pts, now, end, { movers: SLOW }).filter(useful).forEach(h => { const k = `${h.mover}:${pk(h.natal)}:${h.kind}`;
+        (groups[k] = groups[k] || { k, h, dates: [] }).dates.push(h.time); });
+      const rows = Object.values(groups).sort((a, b) => a.dates[0] - b.dates[0]);
+      const seen = new Set(live.map(t => `${t.mover}:${pk(t.natal)}:${t.kind}`)), fresh = rows.filter(r => !seen.has(r.k));
+      out.push(H.chapter(2, 'The next twelve months', `Every exact contact from ${fmtDate(now)} to ${fmtDate(end)}, in order of first date.`),
+        rows.length ? H.block('Timeline', `<table class="conv"><tr><th>Contact</th><th>Exact on</th></tr>${rows.map(r => `<tr><td>${label(r.h)}</td><td>${r.dates.map(fmtDate).join(', ')}</td></tr>`).join('')}</table>`) : '',
+        H.items('What each contact brings', fresh.map(r => `<h4>${label(r.h)}</h4>${H.para(T['cfc:' + r.k])}`), rows.length ? '<p class="note">Every contact in the timeline is already in effect and read in the chapter above.</p>' : '<p class="note">No slow planet makes an exact contact to the composite chart in the next twelve months.</p>'),
+        '<p class="note rlink" style="margin-top:12px">For each of you on your own, see the <a href="horoscope.html">Personal horoscope</a>.</p>', H.disclaimerPlain);
       return out.join('');
     }
   }
