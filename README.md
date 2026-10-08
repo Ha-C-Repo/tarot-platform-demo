@@ -16,7 +16,7 @@ so it works at any depth on the published site, and is not meant to be opened fr
 
 | Where | What it does |
 |---|---|
-| **Customise** (bottom right) | Practice name, role, city, reading price, one of four palettes: the whole site rebrands live. |
+| **Customise** (bottom right) | Practice name, role, city, reading price, one of the palettes (Prism, Ember, Sage, Ink, Daylight, and Elisheba's Theme): the whole site rebrands live. |
 | **Viewing as** (in Customise) | *Subscriber* (default): no ads, everything unlocked, unlimited readings. *Free visitor*: ad slots and the members' Vault locked. Card readings are unlimited in both views, so a prospect can try every spread. Flip it in front of a prospect. |
 | **Take the tour** (home page, and in Customise) | 21-step guided tour across the pages (booking, the journal, learning the cards, horoscopes by sign, good days, the I Ching and runes, and the account page included), ending on Customise. A step whose target is hidden (the install panel once installed) is skipped in the direction of travel. Starts by itself on a first visit (remembered in `localStorage`), with Skip, Back and Escape. |
 
@@ -110,7 +110,7 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
 | `og:image` | Absolute URL, plus `og:url` per page. |
 | `404.html` | Absolute paths with the `/tarot-platform-demo/` prefix, so it renders at any missing depth. |
 | Service worker | `sw.js` at the site root (scope = the whole demo). **Bump `VERSION` in sw.js on every publish**; the new worker deletes old caches. Registered over http(s) only, never from a file. |
-| Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), well under the 1 GB limit. |
+| Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), plus 2.1 MB for `assets/elisheba/` (measured 2026-10-08), well under the 1 GB limit. |
 
 This build takes no money. Production client sites that take bookings or subscriptions belong on a host
 that allows commerce (Cloudflare Pages), not here.
@@ -206,3 +206,10 @@ Any card without a file falls back to a drawn design, so a partial or different 
 3. **The Handbook is assembled in the browser.** Its chapters load by script, which suits reading but not search
    engines (and the demo is `noindex` anyway). For a live site that wants search traffic from the books, generate one
    plain HTML page per chapter from the same `js/book/*.js` files at build time and link the reader to them.
+
+
+## Elisheba's Theme (added 2026-10-08)
+
+Palette option `elisheba` for Blanca "Elisheba" (High Priestess Elisheba). Colours and motifs come from the five collages she supplied (`assets/elisheba/her-*.jpg`, her own images, used as supplied). Everything else in `assets/elisheba/*.svg` and `banner-*.jpg`, `divider.jpg` is drawn for this build. CSS: end of `css/base.css` (screen only). Pictures are injected by `eliDecor()` in `js/site.js` while the theme is on and removed when another palette is chosen. Built from her images only: her Patreon and Instagram could not be read (blocked), so copy and offer names are not taken from them.
+
+Two pages sit behind the theme's home tiles: `journal-prompts.html` (30 sample prompts in 6 themes, random draw, copy) and `poetry.html` (six blank poem slots, marked Placeholder, with her line "Even the broken can be beautiful" from her collage). Both are generic and work in every palette; prompts are sample text, poems are placeholders by the demo's own rule.

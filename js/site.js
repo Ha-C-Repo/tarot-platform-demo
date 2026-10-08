@@ -15,7 +15,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(brand)); } catch
 const NAV = [
   ['index.html','Home'], ['pull.html','Pull a card'], ['crystal.html','Crystal ball'], ['lenormand.html','Lenormand'], ['moon.html','The Moon'], ['astro'], ['numerology.html','Numerology'],
   ['handbook.html','Handbook'], ['pricing.html','Pricing'],
-  ['journal.html','Your journal',1], ['learn.html','Learn the cards',1], ['oracle.html','More oracles',1], ['dreams.html','Angel numbers and dreams',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
+  ['journal.html','Your journal',1], ['journal-prompts.html','Journal prompts',1], ['poetry.html','Poetry',1], ['learn.html','Learn the cards',1], ['oracle.html','More oracles',1], ['dreams.html','Angel numbers and dreams',1], ['book.html','Book a session',1], ['live.html','Live reading room',1], ['account.html','Your account',1]
 ];
 /* The Astrology menu (Amanda, 2026-10-05): every astrology page, calculator and report, in sections. Columns on desktop, an accordion on phones. */
 const ASTRO = [
@@ -45,6 +45,7 @@ function astroMenu(current){
 }
 
 function chrome(current){
+  here = current || 'index.html';
   document.documentElement.dataset.theme = brand.theme;
   document.documentElement.dataset.deck = NS.deckId || 'rws';
   document.documentElement.dataset.tier = brand.tier;
@@ -107,7 +108,7 @@ function printable(current){
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function panel(){
-  const themes = [['default','Prism'],['ember','Ember'],['sage','Sage'],['ink','Ink'],['light','Daylight']];
+  const themes = [['default','Prism'],['ember','Ember'],['sage','Sage'],['ink','Ink'],['light','Daylight'],['elisheba',"Elisheba's Theme"]];
   return `<div id="demobar"><div id="demopanel">
     <h4>Make it yours</h4>
     <p class="note">Type a name and pick a palette. The whole site updates. This is what a client sees on day one.</p>
@@ -138,7 +139,33 @@ const swatch = v => ({
   ember:'linear-gradient(100deg,#FF6B35,#E8153F,#FFC857)',
   sage:'linear-gradient(100deg,#7BC47F,#3E8E7E,#D4C2A8)',
   ink:'linear-gradient(100deg,#C9A227,#8B93A7,#D8DCE6)',
-  light:'linear-gradient(100deg,#FBF8F4 0 45%,#D6246E 45% 60%,#7C3AED 60% 80%,#0E7F96 80%)'}[v]);
+  light:'linear-gradient(100deg,#FBF8F4 0 45%,#D6246E 45% 60%,#7C3AED 60% 80%,#0E7F96 80%)',
+  elisheba:'linear-gradient(100deg,#05030B 0 18%,#E040C8 18% 42%,#8B5CF6 42% 62%,#3FF0E0 62% 82%,#F2A93B 82%)'}[v]);
+
+/* Elisheba's Theme: her five collages and the drawn sticker art are added to the top of each page while the theme is on,
+   and removed again when another palette is picked. Pictures live in assets/elisheba/. */
+const ELI = 'assets/elisheba/';
+const ELI_POL = { 'pull.html':'her-tarot', 'crystal.html':'her-tarot', 'lenormand.html':'her-tarot', 'learn.html':'her-tarot', 'oracle.html':'her-tarot', 'horary.html':'her-tarot',
+  'journal.html':'her-journal', 'journal-prompts.html':'her-journal', 'poetry.html':'her-poetry', 'dreams.html':'her-journal', 'handbook.html':'her-poetry',
+  'moon.html':'her-cosmos', 'birthchart.html':'her-cosmos', 'vedic.html':'her-cosmos', 'astromap.html':'her-cosmos', 'horoscope.html':'her-cosmos', 'signs.html':'her-cosmos',
+  'numerology.html':'her-cosmos', 'chinese.html':'her-cosmos', 'maya.html':'her-cosmos', 'compatibility.html':'her-cosmos', 'tools.html':'her-cosmos' };
+let here = 'index.html';
+function eliDecor(){
+  document.querySelectorAll('[data-eli]').forEach(e => e.remove());
+  if (brand.theme !== 'elisheba') return;
+  const nav = document.querySelector('.nav'); if (!nav) return;
+  const home = here === 'index.html';
+  const pol = ELI_POL[here] || 'her-spirit';
+  let h = `<div class="eli-top" data-eli><div class="eli-ban"><img class="bg" src="${ELI}${home ? 'banner-home' : 'banner-sky'}.jpg" alt="" decoding="async">`
+        + `<img class="pol" src="${ELI}${pol}.jpg" alt="" loading="lazy" decoding="async"></div>`;
+  nav.insertAdjacentHTML('afterend', h + '</div>');
+  const first = home && document.querySelector('.wrap');   // home page: her collages sit under the hero, not above it
+  if (first) first.insertAdjacentHTML('afterend', `<div class="eli-top" data-eli><div class="eli-gal">
+      <a href="pull.html"><img src="${ELI}her-tarot.jpg" alt="Tarot Readings" loading="lazy" decoding="async"></a>
+      <a href="journal-prompts.html"><img src="${ELI}her-journal.jpg" alt="Journal Prompts" loading="lazy" decoding="async"></a>
+      <a href="poetry.html"><img src="${ELI}her-poetry.jpg" alt="Poetry" loading="lazy" decoding="async"></a></div>
+    <div class="eli-wide"><img src="${ELI}her-spirit.jpg" alt="Yoga, meditation and spiritual symbols in neon aqua on black" loading="lazy" decoding="async"></div></div>`);
+}
 
 function apply(){
   document.documentElement.dataset.theme = brand.theme;
@@ -148,6 +175,7 @@ function apply(){
   document.querySelectorAll('[data-brand-city]').forEach(e=>e.textContent = brand.city);
   document.querySelectorAll('[data-brand-rate]').forEach(e=>e.textContent = brand.rate);
   document.querySelectorAll('[data-tier-label]').forEach(e=>e.textContent = brand.tier === 'free' ? 'a free visitor' : 'a subscriber');
+  eliDecor();
   save();
 }
 function setTier(t){

@@ -8,9 +8,9 @@
      books, card images) are kept from the first time they are used.
    - Nothing from any other site is touched.
    Bump VERSION whenever the site is published; old caches are deleted when the new worker takes over. */
-const VERSION = 'tarotdemo-2026-10-06b';
+const VERSION = 'tarotdemo-2026-10-08b';
 const PRECACHE = [
-  './', 'index.html', 'pull.html', 'journal.html', 'learn.html', 'oracle.html', 'crystal.html', 'lenormand.html', 'horary.html', 'dreams.html', 'moon.html', 'birthchart.html', 'vedic.html', 'astromap.html', 'pastlife.html', 'karmic.html', 'report.html', 'reports.html',
+  './', 'index.html', 'pull.html', 'journal.html', 'journal-prompts.html', 'poetry.html', 'learn.html', 'oracle.html', 'crystal.html', 'lenormand.html', 'horary.html', 'dreams.html', 'moon.html', 'birthchart.html', 'vedic.html', 'astromap.html', 'pastlife.html', 'karmic.html', 'report.html', 'reports.html',
   'horoscope.html', 'signs.html', 'tools.html', 'compatibility.html', 'numerology.html', 'chinese.html', 'maya.html',
   'handbook.html', 'pricing.html', 'book.html', 'checkout.html', 'live.html', 'account.html', '404.html',
   'css/base.css', 'css/book.css', 'css/report.css',
@@ -23,7 +23,7 @@ const PRECACHE = [
   'js/data/interpretations.js', 'js/data/signs-text.js', 'js/data/transit-text.js', 'js/data/tools-text.js',
   'js/data/vedic-text.js', 'js/data/world.js', 'js/data/chiron.js', 'js/data/extra-text.js', 'js/data/asteroids.js', 'js/data/astro-extra-text.js', 'js/data/iching.js', 'js/data/runes.js', 'js/data/report-text.js', 'js/data/oracle-text.js',
   'assets/fonts/Anton-Regular.ttf', 'assets/fonts/Inter.ttf', 'assets/fonts/CormorantItalic.ttf', 'assets/fonts/Cormorant.ttf',
-  'assets/app/icon-192.png', 'assets/app/icon-512.png', 'manifest.webmanifest'
+  'assets/elisheba/starfield.svg', 'assets/elisheba/sun-face.svg', 'assets/elisheba/banner-home.jpg', 'assets/elisheba/banner-sky.jpg', 'assets/elisheba/divider.jpg', 'assets/app/icon-192.png', 'assets/app/icon-512.png', 'manifest.webmanifest'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));

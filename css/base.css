@@ -772,3 +772,47 @@ textarea{resize:vertical;min-height:84px;line-height:1.5}
 .glines{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:10px}
 .glines .pos{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a3)}
 .gline{display:flex;justify-content:space-between;gap:8px;font-size:12px}.gline span{letter-spacing:2px;color:var(--a2);font-weight:700}.gline em{font-style:normal;color:var(--dim)}
+
+/* ===== Elisheba's Theme (added 2026-10-08) =====
+   Made for Blanca "Elisheba", High Priestess Elisheba. Drawn from the five collages she supplied
+   (assets/elisheba/her-*.jpg): black starfield, neon aqua, hot magenta, violet, sun orange, heart red.
+   Sticker art in assets/elisheba/*.svg is original to this build. Screen only: print keeps the light report sheet. */
+@media screen{
+[data-theme="elisheba"]{--ink:#05030B;--surface:#0E0919;--raised:#181027;--line:#3B2560;
+  --text:#F6F0FF;--muted:#BBAAD6;--dim:#7D6C9C;
+  --a1:#E040C8;--a2:#8B5CF6;--a3:#3FF0E0;--a4:#F2A93B;--a5:#E8742A;--lips:#B3162B;
+  --prism:linear-gradient(100deg,#E040C8 0%,#8B5CF6 34%,#3FF0E0 66%,#F2A93B 100%)}
+[data-theme="elisheba"] body{background:var(--ink) url(../assets/elisheba/starfield.svg) 0 0/600px 600px fixed}
+[data-theme="elisheba"] h1,[data-theme="elisheba"] h2,[data-theme="elisheba"] h3,[data-theme="elisheba"] .dsp{
+  font-family:'CormorantV',Georgia,serif;font-style:italic;font-weight:600;text-transform:none;letter-spacing:0;line-height:1.02;
+  text-shadow:0 0 22px rgba(139,92,246,.45)}
+[data-theme="elisheba"] .brand b{font-family:'CormorantV',Georgia,serif;font-style:italic;font-weight:700;font-size:21px;text-transform:none;letter-spacing:0}
+[data-theme="elisheba"] .mark{background:url(../assets/elisheba/sun-face.svg) center/contain no-repeat;border-radius:0}
+[data-theme="elisheba"] .mark::after{display:none}
+[data-theme="elisheba"] .nav{background:rgba(5,3,11,.84);border-bottom-color:rgba(224,64,200,.35)}
+[data-theme="elisheba"] .aura::before{background:radial-gradient(closest-side,rgba(224,64,200,.22),transparent 70%)}
+[data-theme="elisheba"] .aura::after{background:radial-gradient(closest-side,rgba(63,240,224,.16),transparent 70%)}
+[data-theme="elisheba"] .card{box-shadow:0 0 0 1px rgba(224,64,200,.10),0 16px 44px -22px rgba(139,92,246,.65)}
+[data-theme="elisheba"] .btn.primary,[data-theme="elisheba"] .navcta{background:linear-gradient(100deg,#E040C8,#B06BFF);color:#12060C;
+  box-shadow:0 0 22px -4px rgba(224,64,200,.7)}
+[data-theme="elisheba"] .rule{box-shadow:0 0 14px rgba(63,240,224,.5)}
+[data-theme="elisheba"] .eyebrow{color:var(--a3);text-shadow:0 0 12px rgba(63,240,224,.55)}
+[data-theme="elisheba"] footer::before{content:'';display:block;height:64px;margin-bottom:18px;
+  background:url(../assets/elisheba/divider.jpg) center/cover no-repeat;opacity:.9}
+
+/* the picture blocks that only exist while this theme is on (js/site.js, eliDecor) */
+.eli-top{max-width:var(--wrap);margin:0 auto;padding:18px 22px 0;position:relative;z-index:2}
+.eli-ban{position:relative;border-radius:22px;border:1px solid rgba(224,64,200,.4);
+  box-shadow:0 0 0 1px rgba(63,240,224,.12),0 24px 60px -26px rgba(139,92,246,.8)}
+.eli-ban>img.bg{border-radius:21px;width:100%;height:clamp(150px,26vw,300px);object-fit:cover;display:block}
+.eli-ban .pol{position:absolute;right:clamp(10px,3vw,34px);bottom:-22px;width:clamp(96px,16vw,170px);aspect-ratio:1;
+  border:3px solid #F6F0FF;border-radius:6px;transform:rotate(4deg);object-fit:cover;box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 24px rgba(224,64,200,.5)}
+.eli-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+.eli-gal a{display:block;border-radius:16px;overflow:hidden;border:1px solid var(--line);position:relative;
+  transition:transform .2s,box-shadow .2s}
+.eli-gal a:hover{transform:translateY(-3px) rotate(-.6deg);box-shadow:0 0 28px -4px rgba(63,240,224,.6)}
+.eli-gal img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.eli-wide{margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.eli-wide img{width:100%;height:clamp(150px,30vw,340px);object-fit:cover;object-position:center 30%;display:block}
+@media(max-width:620px){.eli-gal{grid-template-columns:1fr}.eli-ban .pol{bottom:-14px}}
+}
