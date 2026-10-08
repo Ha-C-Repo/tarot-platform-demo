@@ -8,7 +8,7 @@
      books, card images) are kept from the first time they are used.
    - Nothing from any other site is touched.
    Bump VERSION whenever the site is published; old caches are deleted when the new worker takes over. */
-const VERSION = 'tarotdemo-2026-10-08b';
+const VERSION = 'tarotdemo-2026-10-08c';
 const PRECACHE = [
   './', 'index.html', 'pull.html', 'journal.html', 'journal-prompts.html', 'poetry.html', 'learn.html', 'oracle.html', 'crystal.html', 'lenormand.html', 'horary.html', 'dreams.html', 'moon.html', 'birthchart.html', 'vedic.html', 'astromap.html', 'pastlife.html', 'karmic.html', 'report.html', 'reports.html',
   'horoscope.html', 'signs.html', 'tools.html', 'compatibility.html', 'numerology.html', 'chinese.html', 'maya.html',

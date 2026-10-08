@@ -110,7 +110,7 @@ Planet positions come from **Astronomy Engine** by Don Cross (MIT), vendored at
 | `og:image` | Absolute URL, plus `og:url` per page. |
 | `404.html` | Absolute paths with the `/tarot-platform-demo/` prefix, so it renders at any missing depth. |
 | Service worker | `sw.js` at the site root (scope = the whole demo). **Bump `VERSION` in sw.js on every publish**; the new worker deletes old caches. Registered over http(s) only, never from a file. |
-| Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), plus 2.1 MB for `assets/elisheba/` (measured 2026-10-08), well under the 1 GB limit. |
+| Size | The published site is about 12 MB (Pages artifact 11.6 MB, measured 2026-09-28), plus 1.1 MB for `assets/elisheba/` (progressive JPEGs) (measured 2026-10-08), well under the 1 GB limit. |
 
 This build takes no money. Production client sites that take bookings or subscriptions belong on a host
 that allows commerce (Cloudflare Pages), not here.
